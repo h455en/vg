@@ -1,0 +1,545 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vide Grenier (Generated at : )</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <style>
+        body { margin: 2rem; }
+        .container { max-width: 1200px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">Liste des expo</h1>
+        <button id="sortExposantsBtn" class="btn btn-primary mb-3">Sort by Exposants (asc)</button>
+
+        <table id="manifTable" class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Titre</th>
+                    <th>Exposants</th>
+                    <th>Ville</th>
+                    <th>Adresse</th>
+                    <th>Date</th>
+                    <th>Lien</th>
+                </tr>
+            </thead>
+            <tbody>                <tr>
+                    <td>Brocante d'Automne</td>
+                    <td>500</td>
+                    <td>Châtillon</td>
+                    <td>Avenue Clément Perriere - Hauts-de-Seine, Châtillon</td>
+                    <td>Samedi 27 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/453637/20250927" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide grenier Le Parc - Ferry Buffalo</td>
+                    <td>425</td>
+                    <td>Montrouge</td>
+                    <td>Avenue du Fort - Hauts-de-Seine, Montrouge</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/922834/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide greniers de levallois - quartier front-de-seine</td>
+                    <td>400</td>
+                    <td>Levallois-Perret</td>
+                    <td>Place Georges Pompidou - Hauts-de-Seine, Levallois-Perret</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/920481/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>vide grenier place Barcelone</td>
+                    <td>400</td>
+                    <td>16</td>
+                    <td>4, Place de Barcelone Paris 16</td>
+                    <td>Samedi 20 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/917597/20250920" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide grenier et brocante Lecourbe</td>
+                    <td>350</td>
+                    <td>15</td>
+                    <td>Rue Copreaux, Quartier Necker Paris 15</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/917614/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>vide grenier Courcelles</td>
+                    <td>350</td>
+                    <td>17</td>
+                    <td>Avenue de Wagram, Quartier de la Plaine-de-Monceau Paris 17</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/917612/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide grenier et brocante Lecourbe</td>
+                    <td>350</td>
+                    <td>15</td>
+                    <td>Rue Copreaux, Quartier Necker Paris 15</td>
+                    <td>Samedi 27 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/917614/20250927" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide-grenier des allées Jean Jaurès à Montrouge</td>
+                    <td>315</td>
+                    <td>Montrouge</td>
+                    <td>Avenue Jean Jaurès - Hauts-de-Seine, Montrouge</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/883221/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide-greniers du Lions Club Buttes-Chaumont</td>
+                    <td>300</td>
+                    <td>19</td>
+                    <td>Rue Laumière, 75019 Paris Paris 19</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/727241/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>vide grenier d'automne</td>
+                    <td>300</td>
+                    <td>13</td>
+                    <td>Rue de la Fontaine à Mulard, Quartier de la Maison-Blanche Paris 13</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/538703/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide-grenier Couleurs pays - 27 septembre - Paris 20</td>
+                    <td>300</td>
+                    <td>20</td>
+                    <td>Place du Guignier Paris 20</td>
+                    <td>Samedi 27 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/808797/20250927" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide-greniers du quartier de la Bourse</td>
+                    <td>286</td>
+                    <td>2</td>
+                    <td>Rue de la Banque Paris 2</td>
+                    <td>Samedi 20 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/738390/20250920" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide-greniers du quartier de la Bourse</td>
+                    <td>286</td>
+                    <td>2</td>
+                    <td>Rue de la Banque Paris 2</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/738390/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>brocante, vide-grenier</td>
+                    <td>250</td>
+                    <td>Saint-Cloud</td>
+                    <td>Rues et places autour de le mairie de Saint-Cloud - Hauts-de-Seine, Saint-Cloud</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/597479/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Fête de quartier coteau Malassis ,vide -grenier</td>
+                    <td>240</td>
+                    <td>Vitry-sur-Seine</td>
+                    <td>rue Lamartine - Val-de-Marne, Vitry-sur-Seine</td>
+                    <td>Samedi 27 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/921096/20250927" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Brocante de l'OTSI</td>
+                    <td>209</td>
+                    <td>Gennevilliers</td>
+                    <td>Parc des Sévines - Hauts-de-Seine, Gennevilliers</td>
+                    <td>Samedi 27 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/691675/20250927" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide-greniers annuel de l'association Les Buttes à Morel</td>
+                    <td>200</td>
+                    <td>Montreuil</td>
+                    <td>Rue Mainguet - Seine-Saint-Denis, Montreuil</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/918623/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide Grenier solidaire et Fête de quartier</td>
+                    <td>200</td>
+                    <td>19</td>
+                    <td>Rue Petit, Quartier d'Amérique Paris 19</td>
+                    <td>Samedi 27 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/918769/20250927" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide-Greniers festif des Batignolles</td>
+                    <td>200</td>
+                    <td>17</td>
+                    <td>Terre-Plein Central la Place de Clichy à métro Rome Paris 17</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/585504/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide grenier organisé par les commerçants de la rue Sorbier</td>
+                    <td>200</td>
+                    <td>20</td>
+                    <td>Rue Sorbier, Quartier du Père-Lachaise Paris 20</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/917921/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide-greniers d'Aubervilliers</td>
+                    <td>200</td>
+                    <td>Aubervilliers</td>
+                    <td>Place Rosa Parks - Seine-Saint-Denis, Aubervilliers</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/747212/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Brocante solidaire</td>
+                    <td>200</td>
+                    <td>Bobigny</td>
+                    <td>Promenade Jean Rostand - Seine-Saint-Denis, Bobigny</td>
+                    <td>Samedi 20 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/637921/20250920" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Brocante solidaire</td>
+                    <td>200</td>
+                    <td>Bobigny</td>
+                    <td>Promenade Jean Rostand - Seine-Saint-Denis, Bobigny</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/637921/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide greniers d'automne des riverains du 7ème</td>
+                    <td>165</td>
+                    <td>7</td>
+                    <td>rue de Varenne, boulevard Raspail et boulevard Saint-Germain Paris 7</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/920302/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>vide grenier 49 avenue de l'Observatoire à la rue Cassini</td>
+                    <td>150</td>
+                    <td>14</td>
+                    <td>49 Avenue de l'Observatoire à la Cassini Paris 14</td>
+                    <td>Samedi 27 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/512674/20250927" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Broc'O Val</td>
+                    <td>150</td>
+                    <td>Garenne-Colombes</td>
+                    <td>Rue du 8 Mai 1945 - Hauts-de-Seine, La Garenne-Colombes</td>
+                    <td>Samedi 27 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/921779/20250927" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>VIDE-GRENIERS - Rues Popincourt, Sedaine et Chemin Vert</td>
+                    <td>150</td>
+                    <td>11</td>
+                    <td>Boulevard Voltaire, Quartier de la Roquette Paris 11</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/560453/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide grenier brocante Decros Dubois</td>
+                    <td>150</td>
+                    <td>Lilas</td>
+                    <td>Boulevard Eugène Decros - Seine-Saint-Denis, Les Lilas</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/922340/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide greniers de la Garenne Colombes</td>
+                    <td>150</td>
+                    <td>Garenne-Colombes</td>
+                    <td>Rue des Champs-Philippe - Hauts-de-Seine, La Garenne-Colombes</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/922863/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Nouveau - rue de vaugirard et place henri rollet</td>
+                    <td>150</td>
+                    <td>15</td>
+                    <td>Place Henri Rollet, Quartier Saint-Lambert Paris 15</td>
+                    <td>Samedi 20 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/511854/20250920" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide grenier</td>
+                    <td>150</td>
+                    <td>19</td>
+                    <td>Parvis Rosa Parks, Quartier du Pont-de-Flandre Paris 19</td>
+                    <td>Samedi 20 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/920312/20250920" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide grenier de l'association vivons notre quartier</td>
+                    <td>140</td>
+                    <td>Montreuil</td>
+                    <td>Rue de Stalingrad - Seine-Saint-Denis, Montreuil</td>
+                    <td>Samedi 20 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/667021/20250920" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide-greniers rues oberkampf-folie mericourt-gambey-nemours</td>
+                    <td>120</td>
+                    <td>11</td>
+                    <td>Rue Oberkampf, Quartier Saint-Ambroise Paris 11</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/347882/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide grenier</td>
+                    <td>110</td>
+                    <td>Villeneuve-la-Garenne</td>
+                    <td>Avenue du Maréchal Leclerc - Hauts-de-Seine, Villeneuve-la-Garenne</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/728041/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Brocante des enfants</td>
+                    <td>100</td>
+                    <td>Fontenay-aux-Roses</td>
+                    <td>Passage Pierre Letourneau - Hauts-de-Seine, Fontenay-aux-Roses</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/858277/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide grenier</td>
+                    <td>100</td>
+                    <td>Drancy</td>
+                    <td>Rue Voltaire - Seine-Saint-Denis, Drancy</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/623378/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>vide grenier annuel</td>
+                    <td>100</td>
+                    <td>Noisy-le-Sec</td>
+                    <td>place des provinces - Seine-Saint-Denis, Noisy-le-Sec</td>
+                    <td>Samedi 27 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/489891/20250927" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide Grenier</td>
+                    <td>100</td>
+                    <td>L'Île-Saint-Denis</td>
+                    <td>Quai du Saule Fleuri - Seine-Saint-Denis, L'Île-Saint-Denis</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/922470/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide grenier - Paris 14ème rue Friant</td>
+                    <td>100</td>
+                    <td>14</td>
+                    <td>Rue Friant Paris 14</td>
+                    <td>Samedi 27 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/445262/20250927" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide grenier</td>
+                    <td>100</td>
+                    <td>20</td>
+                    <td>Rue Duris, Quartier du Père-Lachaise Paris 20</td>
+                    <td>Samedi 27 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/377477/20250927" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>brocante quartier des bruyères les lilas</td>
+                    <td>90</td>
+                    <td>Lilas</td>
+                    <td>Rue de Paris - Seine-Saint-Denis, Les Lilas</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/520130/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide Grenier des Epinettes</td>
+                    <td>80</td>
+                    <td>17</td>
+                    <td>Rue du Capitaine Lagache, Quartier des Épinettes Paris 17</td>
+                    <td>Samedi 27 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/797952/20250927" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Paris 5ème- Avenue des Gobelins</td>
+                    <td>80</td>
+                    <td>5</td>
+                    <td>Avenue des Gobelins angle Boulevard Saint Marcel Paris 5</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/520785/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>vide grenier av Niel 75017</td>
+                    <td>80</td>
+                    <td>17</td>
+                    <td>Rue Bayen, Quartier des Ternes Paris 17</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/568314/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide grenier rue monge 75005</td>
+                    <td>80</td>
+                    <td>5</td>
+                    <td>Rue Monge, Quartier Saint-Victor Paris 5</td>
+                    <td>Samedi 27 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/638293/20250927" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>vide grenier place levis 75017</td>
+                    <td>80</td>
+                    <td>17</td>
+                    <td>Place de Lévis, Quartier de la Plaine-de-Monceau Paris 17</td>
+                    <td>Samedi 20 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/451779/20250920" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide grenier rue vavin et rue brea 75006</td>
+                    <td>80</td>
+                    <td>6</td>
+                    <td>Rue Notre-Dame-des-Champs, Quartier Notre-Dame-des-Champs Paris 6</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/590000/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Paris 5ème : Rue SOUFFLOT- Face le PANTHÉON.</td>
+                    <td>80</td>
+                    <td>5</td>
+                    <td>Rue Soufflot -Quartier de la Sorbonne- PANTHÉON. Paris 5</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/922275/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide-grenier Porte de Vanves</td>
+                    <td>79</td>
+                    <td>14</td>
+                    <td>Avenue Marc Sangnier, Quartier de Plaisance Paris 14</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/869302/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide-greniers 10 euro le métre</td>
+                    <td>50</td>
+                    <td>5</td>
+                    <td>Place LAVERAN Paris 5</td>
+                    <td>Samedi 20 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/434837/20250920" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide Grenier Bagneux (Rue Marc Sangnier, Rue des Olivettes)</td>
+                    <td>50</td>
+                    <td>Bagneux</td>
+                    <td>Résidence Pablo Picasso - Hauts-de-Seine, Bagneux</td>
+                    <td>Samedi 20 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/919052/20250920" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide-Grenier de la villa de l’Ermitage</td>
+                    <td>40</td>
+                    <td>20</td>
+                    <td>1, Villa de l'Ermitage Paris 20</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/920658/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide Grenier de la Rue des Lampes à Meudon</td>
+                    <td>-1</td>
+                    <td>Meudon</td>
+                    <td>Rue des Lampes - Hauts-de-Seine, Meudon</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/610896/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide grenier de Château Gaillard à Maisons Alfort</td>
+                    <td>-1</td>
+                    <td>Maisons-Alfort</td>
+                    <td>Avenue Foch - Val-de-Marne, Maisons-Alfort</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/920232/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>VG, Broc, place et bd ST Michel, bd ST Germain, Paris 6ème</td>
+                    <td>-1</td>
+                    <td>6</td>
+                    <td>Place Saint-Michel, Paris 6</td>
+                    <td>Samedi 20 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/333737/20250920" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide-greniers du Petit Robinson</td>
+                    <td>-1</td>
+                    <td>L'Haÿ-les-Roses</td>
+                    <td>Castelneau et Guynemer - Val-de-Marne, L'Haÿ-les-Roses</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/718906/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Brocante des enfants de St Jo</td>
+                    <td>-1</td>
+                    <td>Asnières-sur-Seine</td>
+                    <td>1 rue du bac - Hauts-de-Seine, Asnières-sur-Seine</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/851589/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide-grenier de la Place Jeanne d’Arc 13eme</td>
+                    <td>-1</td>
+                    <td>13</td>
+                    <td>Quartier de la Gare, 13th Arrondissement Paris 13</td>
+                    <td>Samedi 20 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/917732/20250920" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>VG, BROC, bd de Clichy, en face du moulin rouge Paris 9 et18</td>
+                    <td>-1</td>
+                    <td>9</td>
+                    <td>Blanche, Boulevard de Clichy Paris 9</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/863603/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>VG, Broc, rue de la chaussée d'Antin, Paris 9ème</td>
+                    <td>-1</td>
+                    <td>9</td>
+                    <td>Rue de la Chaussée-d'Antin, Paris 9</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/406748/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide grenier de la Bidassoa</td>
+                    <td>-1</td>
+                    <td>20</td>
+                    <td>Rue de la Bidassoa, Quartier du Père-Lachaise Paris 20</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/920369/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide-greniers de la petite enfance Mairie du 13eme</td>
+                    <td>-1</td>
+                    <td>13</td>
+                    <td>Place d'Italie, Quartier de Croulebarbe Paris 13</td>
+                    <td>Samedi 20 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/921542/20250920" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide-greniers de l'Ecuyer à la Tulipe</td>
+                    <td>-1</td>
+                    <td>18</td>
+                    <td>Villa des Tulipes, Quartier des Grandes-Carrières Paris 18</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/428535/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide grenier de rentrée</td>
+                    <td>-1</td>
+                    <td>Asnières-sur-Seine</td>
+                    <td>Avenue Flammarion - Hauts-de-Seine, Asnières-sur-Seine</td>
+                    <td>Samedi 20 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/919703/20250920" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide grenier</td>
+                    <td>-1</td>
+                    <td>12</td>
+                    <td>La Coulée Verte, Quartier du Bel-Air Paris 12</td>
+                    <td>Dimanche 28 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/468365/20250928" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>vide greniers</td>
+                    <td>-1</td>
+                    <td>Bagneux</td>
+                    <td>rues des olivettes et marc sagnier - Hauts-de-Seine, Bagneux</td>
+                    <td>Samedi 20 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/921574/20250920" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide-Grenier-Guinguette</td>
+                    <td>-1</td>
+                    <td>15</td>
+                    <td>Rue des Volontaires, Quartier Necker Paris 15</td>
+                    <td>Samedi 20 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/918641/20250920" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide grenier de Château Gaillard à Maisons Alfort</td>
+                    <td>-1</td>
+                    <td>Maisons-Alfort</td>
+                    <td>Avenue Foch - Val-de-Marne, Maisons-Alfort</td>
+                    <td>Dimanche 21 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/920232/20250921" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>                <tr>
+                    <td>Vide-greniers 'Jeunesse, Enfance, Petite enfance' du CENTRE</td>
+                    <td>-1</td>
+                    <td>L'Haÿ-les-Roses</td>
+                    <td>Esplanade de la Halle de marché et parking Henri Thirard - Val-de-Marne, L'Haÿ-les-Roses</td>
+                    <td>Samedi 27 Septembre 2025</td>
+                    <td><a href="https://vide-greniers.org/evenement/540953/20250927" target="_blank" rel="noopener noreferrer">Lien</a></td>
+                </tr>            </tbody>
+        </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        .ready(function() {
+            var table = #manifTable.DataTable({
+                columnDefs: [
+                    { targets: 1, type: 'num' }
+                ]
+            });
+
+            // Get a reference to the button
+            var sortBtn = #sortExposantsBtn;
+            var isAscending = true;
+
+            // Add a click event listener to the button
+            sortBtn.on('click', function() {
+                // Sort the table using the DataTables API
+                table.order([ 1, isAscending ? 'asc' : 'desc' ]).draw();
+                isAscending = !isAscending;
+
+                // Update the button text to show the next sort order
+                sortBtn.text('Sort by Exposants (' + (isAscending ? 'asc' : 'desc') + ')');
+            });
+        });
+    </script>
+</body>
+</html>
