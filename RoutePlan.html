@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,26 +17,21 @@
             justify-content: center;
             color: #444;
         }
-
         .container {
             max-width: 700px;
             width: 100%;
         }
-
         .card {
             background-color: #fff;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             padding: 2rem;
         }
-
-        h1,
-        h2 {
+        h1, h2 {
             text-align: center;
             margin-bottom: 1rem;
             color: #333;
         }
-
         header {
             display: flex;
             justify-content: space-between;
@@ -47,41 +41,42 @@
             background-color: #e9ecef;
             border-radius: 12px;
         }
-
         header div {
             display: flex;
             align-items: center;
             font-size: 0.9rem;
         }
-
         header div svg {
             margin-right: 0.5rem;
             width: 20px;
             height: 20px;
         }
-
         .form-group {
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-
         .form-group svg {
             width: 20px;
             height: 20px;
             color: #888;
         }
-
+        .form-group-textarea {
+            margin-bottom: 1.5rem;
+        }
+        .form-group-textarea label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
         .input-container {
             display: flex;
             align-items: center;
             width: 100%;
             position: relative;
         }
-
         .form-group input,
-        .form-group textarea {
+        .form-group-textarea textarea {
             width: 100%;
             padding: 0.75rem;
             border: 1px solid #ccc;
@@ -89,7 +84,6 @@
             box-sizing: border-box;
             font-family: 'Roboto', sans-serif;
         }
-
         .copy-btn {
             background: none;
             border: none;
@@ -100,22 +94,18 @@
             border-radius: 5px;
             transition: background-color 0.2s ease;
         }
-
         .copy-btn:hover {
             background-color: #e9ecef;
         }
-
         .copy-btn svg {
             width: 20px;
             height: 20px;
             color: #555;
         }
-
         textarea {
             resize: vertical;
-            min-height: 120px;
+            min-height: 200px;
         }
-
         .btn-generate {
             display: block;
             width: 100%;
@@ -129,29 +119,23 @@
             font-size: 1rem;
             margin-top: 1rem;
         }
-
         .btn-generate:hover {
             background-color: #0056b3;
         }
-
         .route-plan {
             margin-top: 2rem;
             padding: 1.5rem;
             border-radius: 12px;
             background-color: #f8f9fa;
         }
-
         .route-plan ol {
             padding-left: 20px;
             list-style-type: none;
         }
-
         .route-plan li {
             margin-bottom: 1rem;
-            font-size: 0.85rem;
-            /* Font size made smaller */
+            font-size: 0.85rem; /* Font size made smaller */
         }
-
         .route-link {
             display: block;
             text-decoration: none;
@@ -161,22 +145,18 @@
             border-radius: 8px;
             transition: background-color 0.3s ease;
         }
-
         .route-link:hover {
             background-color: #dfe3e7;
         }
-
         .route-link strong {
             display: block;
             color: #333;
         }
-
         .route-link span {
             display: block;
             color: #555;
             margin-top: 5px;
         }
-
         .message-box {
             position: fixed;
             top: 20px;
@@ -191,11 +171,9 @@
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
         }
-
         .message-box.show {
             opacity: 1;
         }
-
         footer {
             margin-top: 2rem;
             padding: 1rem 0;
@@ -207,13 +185,11 @@
             align-items: center;
             gap: 5px;
         }
-
         footer svg {
             width: 16px;
             height: 16px;
             vertical-align: middle;
         }
-
         #minDuration {
             width: 40px;
             text-align: right;
@@ -223,7 +199,6 @@
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <!-- Header with Meteo and Date Info -->
@@ -231,16 +206,14 @@
             <div id="weatherInfo">
                 <!-- Weather Icon (Cloud) -->
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path
-                        d="M19.35 10.04C18.91 7.21 16.59 5 13.75 5c-2.4 0-4.44 1.72-4.91 4.02C5.9 9.69 4 11.81 4 14c0 3.31 2.69 6 6 6h8c2.21 0 4-1.79 4-4 0-2.09-1.54-3.8-3.65-3.96zM18 18h-8c-2.21 0-4-1.79-4-4s1.79-4 4-4 4-1.79 4-4V6h2c1.1 0 2 .9 2 2h0c0 1.1-.9 2-2 2h-1c-1.1 0-2 .9-2 2z" />
+                    <path d="M19.35 10.04C18.91 7.21 16.59 5 13.75 5c-2.4 0-4.44 1.72-4.91 4.02C5.9 9.69 4 11.81 4 14c0 3.31 2.69 6 6 6h8c2.21 0 4-1.79 4-4 0-2.09-1.54-3.8-3.65-3.96zM18 18h-8c-2.21 0-4-1.79-4-4s1.79-4 4-4 4-1.79 4-4V6h2c1.1 0 2 .9 2 2h0c0 1.1-.9 2-2 2h-1c-1.1 0-2 .9-2 2z"/>
                 </svg>
                 <span>Chargement météo...</span>
             </div>
             <div id="dateInfo">
                 <!-- Calendar Icon -->
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path
-                        d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7zm-2-5v11h14V5H5z" />
+                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7zm-2-5v11h14V5H5z"/>
                 </svg>
                 <span>Chargement date...</span>
             </div>
@@ -250,16 +223,13 @@
             <div class="form-group">
                 <!-- Icon for Start Address -->
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path
-                        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
                 <div class="input-container">
-                    <input type="text" id="startAddress" placeholder="Adresse de départ (p. ex., Paris, France)"
-                        value="5 rue victor considérant 75014 paris">
+                    <input type="text" id="startAddress" placeholder="Adresse de départ (p. ex., Paris, France)" value="5 rue victor considérant 75014 paris">
                     <button class="copy-btn" data-target-id="startAddress">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path
-                                d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
                         </svg>
                     </button>
                 </div>
@@ -268,29 +238,24 @@
             <div class="form-group">
                 <!-- Icon for Destination Address -->
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path
-                        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
                 <div class="input-container">
-                    <input type="text" id="destinationAddress"
-                        placeholder="Adresse de destination (p. ex., Rome, Italie)"
-                        value="16, Avenue des Gobelins, Quartier du Jardin des Plantes - Paris , Paris 5">
+                    <input type="text" id="destinationAddress" placeholder="Adresse de destination (p. ex., Rome, Italie)" value="16, Avenue des Gobelins, Quartier du Jardin des Plantes - Paris , Paris 5">
                     <button class="copy-btn" data-target-id="destinationAddress">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path
-                                d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
                         </svg>
                     </button>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="otherStops" style="display:block; width:100%; margin-bottom: 5px;">Stops</label>
-                <textarea id="otherStops" placeholder="p. ex.,&#10;Lyon, France&#10;Genève, Suisse&#10;Milan, Italie"
-                    style="width: 100%;"></textarea>
+            <div class="form-group-textarea">
+                <label for="otherStops">Stops</label>
+                <textarea id="otherStops" placeholder="p. ex.,&#10;Lyon, France&#10;Genève, Suisse&#10;Milan, Italie"></textarea>
             </div>
 
-            <button class="btn-generate" id="generateBtn">Generate Route</button>
+            <button class="btn-generate" id="generateBtn">Make Roadmap</button>
         </div>
 
         <div class="route-plan" id="routePlan" style="display:none;">
@@ -299,12 +264,11 @@
                 <!-- Route items will be inserted here -->
             </ol>
         </div>
-
+        
         <footer>
             <!-- Clock Icon -->
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.8 14.2L11 11.4V7h2v5.19L14.7 14.7l-1.9 1.5z" />
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.8 14.2L11 11.4V7h2v5.19L14.7 14.7l-1.9 1.5z"/>
             </svg>
             <span>Durée d'arrêt min. :</span>
             <input type="number" id="minDuration" value="30">
@@ -314,7 +278,7 @@
 
     <!-- Custom Message Box for validation errors -->
     <div class="message-box" id="messageBox"></div>
-
+    
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const generateBtn = document.getElementById('generateBtn');
@@ -327,7 +291,7 @@
             const dateInfo = document.getElementById('dateInfo');
             const weatherInfo = document.getElementById('weatherInfo');
             const copyButtons = document.querySelectorAll('.copy-btn');
-            const months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+            const monthsAbbr = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
             const showMessage = (message, type = 'warning') => {
                 messageBox.textContent = message;
@@ -354,7 +318,7 @@
 
                 const sanitizedOrigin = encodeURIComponent(origin.trim());
                 const sanitizedDestination = encodeURIComponent(destination.trim());
-
+                
                 return `https://www.google.com/maps/dir/?api=1&origin=${sanitizedOrigin}&destination=${sanitizedDestination}&travelmode=transit&departure_time=${departureTimeInSeconds}`;
             };
 
@@ -364,20 +328,20 @@
                 const daysUntilSaturday = dayOfWeek === 6 ? 0 : 6 - dayOfWeek;
                 const saturday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + daysUntilSaturday);
                 const sunday = new Date(saturday.getFullYear(), saturday.getMonth(), saturday.getDate() + 1);
-
+                
                 const satDate = saturday.getDate();
-                const satMonth = months[saturday.getMonth()];
                 const sunDate = sunday.getDate();
-                const sunMonth = months[sunday.getMonth()];
+                const monthAbbr = monthsAbbr[saturday.getMonth()];
+                const year = saturday.getFullYear();
 
                 dateInfo.innerHTML = `
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7zm-2-5v11h14V5H5z"/>
                     </svg>
-                    <span>Fin de semaine du ${satDate} ${satMonth} - ${sunDate} ${sunMonth}</span>
+                    <span>WE ${satDate}/${sunDate} ${monthAbbr} ${year}</span>
                 `;
             };
-
+            
             const fetchWeather = async () => {
                 const prompt = "What is the current weather summary for Paris, France?";
                 const systemPrompt = "Provide a concise, single-paragraph summary of the current weather, including temperature and precipitation. Ex: 'The weather is 22°C with a 20% chance of rain.'";
@@ -388,11 +352,13 @@
                         parts: [{ text: systemPrompt }]
                     },
                 };
-
+                
                 let retries = 0;
                 const maxRetries = 3;
                 while (retries < maxRetries) {
                     try {
+                        // REMPLACEZ VOTRE CLÉ API ICI pour résoudre les erreurs 401/403.
+                        // Laissez la variable vide si vous utilisez le mode démo.
                         const apiKey = "";
                         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
                         const response = await fetch(apiUrl, {
@@ -402,6 +368,9 @@
                         });
 
                         if (!response.ok) {
+                            if (response.status === 401 || response.status === 403) {
+                                throw new Error('API key missing or invalid');
+                            }
                             throw new Error(`API call failed with status: ${response.status}`);
                         }
 
@@ -415,16 +384,21 @@
                                 </svg>
                                 <span>${text}</span>
                             `;
-                            return; // Exit on success
+                            return;
                         }
                     } catch (error) {
                         console.error('Error fetching weather:', error);
+                        if (error.message.includes('API key')) {
+                             showMessage("Erreur de l'API : Clé d'API manquante ou invalide. Veuillez l'ajouter dans le code.", 'warning');
+                        } else {
+                             showMessage("Erreur lors du chargement de la météo.", 'warning');
+                        }
                     }
                     retries++;
                     await new Promise(res => setTimeout(res, Math.pow(2, retries) * 1000));
                 }
-
-                // Fallback message after retries fail
+                
+                // Fallback message after all retries fail
                 weatherInfo.innerHTML = `
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19.35 10.04C18.91 7.21 16.59 5 13.75 5c-2.4 0-4.44 1.72-4.91 4.02C5.9 9.69 4 11.81 4 14c0 3.31 2.69 6 6 6h8c2.21 0 4-1.79 4-4 0-2.09-1.54-3.8-3.65-3.96zM18 18h-8c-2.21 0-4-1.79-4-4s1.79-4 4-4 4-1.79 4-4V6h2c1.1 0 2 .9 2 2h0c0 1.1-.9 2-2 2h-1c-1.1 0-2 .9-2 2z"/>
@@ -442,7 +416,7 @@
 
             setWeekendDate();
             fetchWeather();
-
+            
             copyButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     const targetId = button.getAttribute('data-target-id');
@@ -462,17 +436,17 @@
 
                 // Clear previous list
                 routeList.innerHTML = '';
-
+                
                 // Build the full route
                 const fullRoute = [start, ...stops, destination];
 
                 // Populate the ordered list
                 for (let i = 0; i < fullRoute.length - 1; i++) {
                     const legStart = fullRoute[i];
-                    const legEnd = fullRoute[i + 1];
-
+                    const legEnd = fullRoute[i+1];
+                    
                     const li = document.createElement('li');
-
+                    
                     // Create the clickable anchor tag for the route
                     const link = document.createElement('a');
                     link.className = 'route-link';
@@ -493,5 +467,4 @@
         });
     </script>
 </body>
-
 </html>
