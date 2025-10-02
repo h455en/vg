@@ -18,9 +18,39 @@
             color: #444;
         }
         .container {
-            max-width: 700px;
+            max-width: 700px; /* Default max width for mobile/tablet */
             width: 100%;
         }
+        
+        /* New main layout container */
+        .main-layout {
+            display: flex;
+            flex-direction: column; /* Stacked on mobile by default */
+            gap: 2rem;
+        }
+
+        /* Desktop/Wide Screen Layout */
+        @media (min-width: 900px) {
+            .container {
+                max-width: 1200px; /* Wider container for side-by-side view */
+            }
+            .main-layout {
+                flex-direction: row; /* Side-by-side on desktop */
+                align-items: flex-start; /* Align items to the top */
+            }
+            .card {
+                flex: 1; /* Take up space */
+                min-width: 400px;
+            }
+            .route-plan {
+                flex: 1; /* Take up remaining space */
+                min-width: 400px;
+                /* Optional: Sticky position for results when form is long */
+                position: sticky;
+                top: 2rem; 
+            }
+        }
+        
         .card {
             background-color: #fff;
             border-radius: 12px;
@@ -32,25 +62,29 @@
             margin-bottom: 1rem;
             color: #333;
         }
+        
+        /* MINIMAL HEADER STYLES */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 2rem;
-            margin-bottom: 2rem;
+            padding: 0.5rem 1rem; /* Reduced padding */
+            margin-bottom: 1rem; /* Reduced margin */
             background-color: #e9ecef;
-            border-radius: 12px;
+            border-radius: 8px; /* Reduced radius */
         }
         header div {
             display: flex;
             align-items: center;
-            font-size: 0.9rem;
+            font-size: 0.8rem; /* Smaller font */
         }
         header div svg {
-            margin-right: 0.5rem;
-            width: 20px;
-            height: 20px;
+            margin-right: 0.3rem; /* Reduced margin */
+            width: 16px; /* Smaller icon */
+            height: 16px; /* Smaller icon */
         }
+        /* END MINIMAL HEADER STYLES */
+
         .form-group {
             margin-bottom: 1.5rem;
             display: flex;
@@ -150,13 +184,13 @@
             background-color: #0056b3;
         }
         .route-plan {
-            margin-top: 2rem;
+            /* Remove margin-top here as gap in .main-layout handles spacing */
             padding: 1.5rem;
             border-radius: 12px;
             background-color: #f8f9fa;
         }
         .route-plan ol {
-            padding-left: 20px;
+            padding-left: 0; /* Remove default list padding */
             list-style-type: none;
         }
         .route-plan li {
@@ -166,24 +200,20 @@
         .route-link {
             display: block;
             text-decoration: none;
-            color: inherit;
+            color: #333; /* Darker text for legibility */
             background-color: #e9ecef;
             padding: 1rem;
             border-radius: 8px;
             transition: background-color 0.3s ease;
+            font-weight: 500; /* Slightly bolder text */
         }
         .route-link:hover {
             background-color: #dfe3e7;
         }
-        .route-link strong {
-            display: block;
-            color: #333;
-        }
-        .route-link span {
-            display: block;
-            color: #555;
-            margin-top: 5px;
-        }
+        
+        /* REMOVING UNUSED/INTERFERING CSS FOR OLD ROUTE FORMAT */
+        /* .route-link strong, .route-link span were removed as content is now inline */
+        
         .message-box {
             position: fixed;
             top: 20px;
@@ -201,29 +231,34 @@
         .message-box.show {
             opacity: 1;
         }
+
+        /* MINIMAL FOOTER STYLES */
         footer {
-            margin-top: 2rem;
-            padding: 1rem 0;
+            margin-top: 1rem; /* Reduced margin */
+            padding: 0.5rem 0; /* Reduced padding */
             text-align: center;
             color: #888;
-            font-size: 0.85rem;
+            font-size: 0.75rem; /* Smaller font */
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 5px;
+            gap: 3px; /* Reduced gap */
+            width: 100%;
         }
         footer svg {
-            width: 16px;
-            height: 16px;
+            width: 14px; /* Smaller icon */
+            height: 14px; /* Smaller icon */
             vertical-align: middle;
         }
         #minDuration {
-            width: 40px;
+            width: 35px; /* Smaller input */
             text-align: right;
-            padding: 2px 5px;
+            padding: 1px 4px; /* Reduced padding */
+            font-size: 0.75rem; /* Smaller font */
             border-radius: 4px;
             border: 1px solid #ccc;
         }
+        /* END MINIMAL FOOTER STYLES */
     </style>
 </head>
 <body>
@@ -245,75 +280,83 @@
                 <span>Chargement date...</span>
             </div>
         </header>
-
-        <div class="card">
-            <div class="form-group">
-                <!-- Icon for Start Address -->
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                </svg>
-                <div class="input-container">
-                    <input type="text" id="startAddress" placeholder="Adresse de départ (p. ex., Paris, France)" value="5 rue victor considérant 75014 paris">
-                    <button class="input-action-btn clear-btn" data-target-id="startAddress">
-                        <!-- Clear Icon (X/Close) -->
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                        </svg>
-                    </button>
-                    <button class="input-action-btn copy-btn" data-target-id="startAddress">
-                        <!-- Copy Icon -->
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <!-- Icon for Destination Address -->
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                </svg>
-                <div class="input-container">
-                    <input type="text" id="destinationAddress" placeholder="Adresse de destination (p. ex., Rome, Italie)" value="2 place d'aligre 75011 paris">
-                    <button class="input-action-btn clear-btn" data-target-id="destinationAddress">
-                        <!-- Clear Icon (X/Close) -->
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                        </svg>
-                    </button>
-                    <button class="input-action-btn copy-btn" data-target-id="destinationAddress">
-                        <!-- Copy Icon -->
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <div class="form-group-textarea">
-                <label for="otherStops">Stops</label>
-                <div class="input-container">
-                    <textarea id="otherStops" placeholder="p. ex.,&#10;Lyon, France&#10;Genève, Suisse&#10;Milan, Italie"></textarea>
-                    <button class="input-action-btn clear-btn" data-target-id="otherStops">
-                        <!-- Clear Icon (X/Close) -->
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <button class="btn-generate" id="generateBtn">Make Roadmap</button>
-        </div>
-
-        <div class="route-plan" id="routePlan" style="display:none;">
-            <h2>Votre feuille de route</h2>
-            <ol id="routeList">
-                <!-- Route items will be inserted here -->
-            </ol>
-        </div>
         
+        <!-- START: Main Content Layout (Form + Plan) -->
+        <div class="main-layout">
+
+            <!-- Card: Form Input (Left/Top) -->
+            <div class="card">
+                <div class="form-group">
+                    <!-- Icon for Start Address -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                    <div class="input-container">
+                        <input type="text" id="startAddress" placeholder="Adresse de départ (p. ex., Paris, France)" value="5 rue victor considérant 75014 paris">
+                        <button class="input-action-btn clear-btn" data-target-id="startAddress">
+                            <!-- Clear Icon (X/Close) -->
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                            </svg>
+                        </button>
+                        <button class="input-action-btn copy-btn" data-target-id="startAddress">
+                            <!-- Copy Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <!-- Icon for Destination Address -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                    <div class="input-container">
+                        <input type="text" id="destinationAddress" placeholder="Adresse de destination (p. ex., Rome, Italie)" value="2 place d'aligre 75011 paris">
+                        <button class="input-action-btn clear-btn" data-target-id="destinationAddress">
+                            <!-- Clear Icon (X/Close) -->
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                            </svg>
+                        </button>
+                        <button class="input-action-btn copy-btn" data-target-id="destinationAddress">
+                            <!-- Copy Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group-textarea">
+                    <label for="otherStops">Stops</label>
+                    <div class="input-container">
+                        <textarea id="otherStops" placeholder="p. ex.,&#10;Lyon, France&#10;Genève, Suisse&#10;Milan, Italie"></textarea>
+                        <button class="input-action-btn clear-btn" data-target-id="otherStops">
+                            <!-- Clear Icon (X/Close) -->
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button class="btn-generate" id="generateBtn">Make Roadmap</button>
+            </div>
+
+            <!-- Route Plan: Results Output (Right/Bottom) -->
+            <div class="route-plan" id="routePlan" style="display:none;">
+                <h2>Votre feuille de route</h2>
+                <ol id="routeList">
+                    <!-- Route items will be inserted here -->
+                </ol>
+            </div>
+            
+        </div>
+        <!-- END: Main Content Layout -->
+
         <footer>
             <!-- Clock Icon -->
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -340,7 +383,7 @@
             const dateInfo = document.getElementById('dateInfo');
             const weatherInfo = document.getElementById('weatherInfo');
             const copyButtons = document.querySelectorAll('.copy-btn');
-            const clearButtons = document.querySelectorAll('.clear-btn'); // Sélectionner les nouveaux boutons
+            const clearButtons = document.querySelectorAll('.clear-btn'); 
             const monthsAbbr = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
             const showMessage = (message, type = 'warning') => {
@@ -369,6 +412,9 @@
                 const sanitizedOrigin = encodeURIComponent(origin.trim());
                 const sanitizedDestination = encodeURIComponent(destination.trim());
                 
+                // Note: travelmode=transit is kept as it was in the original code, 
+                // but for road trip planning, 'driving' might be more appropriate. 
+                // I am preserving the existing functionality based on the file provided.
                 return `https://www.google.com/maps/dir/?api=1&origin=${sanitizedOrigin}&destination=${sanitizedDestination}&travelmode=transit&departure_time=${departureTimeInSeconds}`;
             };
 
@@ -429,7 +475,6 @@
                             if (retries === 0 && (response.status === 401 || response.status === 403)) {
                                 showMessage("Erreur de l'API : Clé d'API manquante ou invalide. Veuillez l'ajouter dans le code.", 'warning');
                             }
-                            // Pas de "throw" pour ne pas spammer la console avec des erreurs non-fatales.
                             return; 
                         }
 
@@ -523,8 +568,8 @@
                     link.href = generateMapsLink(legStart, legEnd);
                     link.target = "_blank"; // Open in a new tab
 
-                    // Create the new "From" and "To" elements
-                    link.innerHTML = `<strong>De :</strong> <span>${legStart}</span><br><span>--> ${legEnd}</span>`;
+                    // UPDATED: Use simplified format with real arrow entity
+                    link.innerHTML = `${legStart} &rarr; ${legEnd}`;
 
                     li.appendChild(link);
                     routeList.appendChild(li);

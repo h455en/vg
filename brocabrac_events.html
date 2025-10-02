@@ -1,0 +1,758 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brocabrac Événements Île-de-France</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .event-card {
+            border-bottom: 1px dotted #e0e0e0;
+            padding: 10px 0;
+        }
+        .event-card:last-child {
+            border-bottom: none;
+        }
+        .event-title-link { 
+            font-weight: bold; 
+            font-size: 1.1em; 
+            color: #0d6efd; 
+            text-decoration: none; 
+            flex-grow: 1; 
+            /* Push the title link to take the remaining space */
+            white-space: normal; 
+            word-break: break-word;
+        }
+        .exposants-data { 
+            display: inline-block; 
+            min-width: 30px; 
+            text-align: right; 
+            font-weight: bold;
+        }
+        .exposants-high { 
+            color: #d9534f; 
+        }
+        .address-line {
+            color: #555;
+            font-size: 0.95em;
+        }
+        .copy-btn {
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #0d6efd; 
+            padding: 0 5px;
+            font-size: 1.1em;
+            transition: color 0.2s;
+            margin-right: 5px; /* Space between icon and text */
+        }
+        .copy-btn:hover {
+            color: #0a58ca;
+        }
+        .accordion-button {
+            font-weight: bold;
+        }
+        /* Updated display format styles */
+        .event-line {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap; 
+        }
+        .event-details-prefix {
+            display: flex; /* To align icon and text */
+            align-items: center;
+            font-size: 0.95em;
+            color: #333;
+            white-space: nowrap;
+            margin-right: 10px;
+        }
+        .address-and-exposant-text {
+            white-space: normal; /* Allow address to wrap if necessary */
+        }
+        .event-main-content {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            min-width: 250px; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="mb-3">Vide-Greniers & Brocantes Île-de-France</h1>
+        <p class="text-muted">Last Update: 01.10.2025 22:29:21</p>
+        
+        <ul class="nav nav-tabs" id="monthTabs" role="tablist">
+
+            <li class="nav-item" role="presentation">
+                <button class="nav-link " id="oct-2025-tab" data-bs-toggle="tab" data-bs-target="#oct-2025" type="button" role="tab" aria-controls="oct-2025" aria-selected="false">OCT 2025</button>
+            </li>
+        
+        </ul>
+        
+        <div class="tab-content border border-top-0 p-3" id="monthTabsContent">
+
+            <div class="tab-pane fade " id="oct-2025" role="tabpanel" aria-labelledby="oct-2025-tab" tabindex="0">
+                <div class="accordion" id="accordionoct-2025">
+        
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading-oct-2025-1">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-oct-2025-1" aria-expanded="false" aria-controls="collapse-oct-2025-1">
+                                VEN 03 OCT 2025 (2 events)
+                            </button>
+                        </h2>
+                        <div id="collapse-oct-2025-1" class="accordion-collapse collapse " aria-labelledby="heading-oct-2025-1" data-bs-parent="#accordionoct-2025">
+                            <div class="accordion-body p-3">
+            
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('Et rue Chanzy Rue Paul Bert 75011 Paris', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">-1</span>
+                                                <span class="address-line">| Et rue Chanzy Rue Paul Bert 75011 Paris</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/75/paris/1313034-vide-grenier-rue-paul-bert-et-rue-chanzy" target="_blank" class="event-title-link">
+                                                Vg - rue paul bert et rue chanzy
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('Et rue Chanzy Rue Paul Bert 75011 Paris', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">-1</span>
+                                                <span class="address-line">| Et rue Chanzy Rue Paul Bert 75011 Paris</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/75/paris/1313034-vide-grenier-rue-paul-bert-et-rue-chanzy" target="_blank" class="event-title-link">
+                                                Vg - rue paul bert et rue chanzy
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading-oct-2025-2">
+                            <button class="accordion-button " type="button" data-bs-toggle="collapse" data-bs-target="#collapse-oct-2025-2" aria-expanded="true" aria-controls="collapse-oct-2025-2">
+                                SAM 04 OCT 2025 (20 events)
+                            </button>
+                        </h2>
+                        <div id="collapse-oct-2025-2" class="accordion-collapse collapse show" aria-labelledby="heading-oct-2025-2" data-bs-parent="#accordionoct-2025">
+                            <div class="accordion-body p-3">
+            
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('Avenue des Gobelins 75005 Paris', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">250</span>
+                                                <span class="address-line">| Avenue des Gobelins 75005 Paris</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/75/paris/1320829-vide-grenier-gobelins" target="_blank" class="event-title-link">
+                                                Vg gobelins
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('200-204 rue de la Convention 75015 Paris', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">250</span>
+                                                <span class="address-line">| 200-204 rue de la Convention 75015 Paris</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/75/paris/1290069-vide-greniers-rue-de-la-convention" target="_blank" class="event-title-link">
+                                                Vide greniers - rue de la convention
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('Base de Loisirs 91880 Bouville', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">250</span>
+                                                <span class="address-line">| Base de Loisirs 91880 Bouville</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/91/bouville/1318986-brocante-de-la-base-de-loisirs" target="_blank" class="event-title-link">
+                                                Brocante de la base de loisirs
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('rue Avenue Henri Dalsème 92360 Meudon', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">250</span>
+                                                <span class="address-line">| rue Avenue Henri Dalsème 92360 Meudon</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/92/meudon/1322810-foirefouille" target="_blank" class="event-title-link">
+                                                Foirefouille
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('Place du marché 4 place du Maréchal Foch 92000 Nanterre', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">250</span>
+                                                <span class="address-line">| Place du marché 4 place du Maréchal Foch 92000 Nanterre</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/92/nanterre/1322668-vide-grenier" target="_blank" class="event-title-link">
+                                                Vg
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('Luth Place du Président Salvador Allende 92230 Gennevilliers', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">150</span>
+                                                <span class="address-line">| Luth Place du Président Salvador Allende 92230 Gennevilliers</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/92/gennevilliers/1317573-vide-grenier-du-luth" target="_blank" class="event-title-link">
+                                                Vg du luth
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('12 place de la résidence 92160 Antony', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">150</span>
+                                                <span class="address-line">| 12 place de la résidence 92160 Antony</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/92/antony/1320337-vide-greniers-st-ex" target="_blank" class="event-title-link">
+                                                Vg - st ex
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('Collège Jean Jacques Rousseau 13 rue Jean-Jacques Rousseau 95100 Argenteuil', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">150</span>
+                                                <span class="address-line">| Collège Jean Jacques Rousseau 13 rue Jean-Jacques Rousseau 95100 Argenteuil</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/95/argenteuil/1322769-vide-grenier-jj-rousseau" target="_blank" class="event-title-link">
+                                                Vg jj rousseau
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('1 place de l\'Amitié 93700 Drancy', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">150</span>
+                                                <span class="address-line">| 1 place de l'Amitié 93700 Drancy</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/93/drancy/1314198-vide-grenier-d-automne" target="_blank" class="event-title-link">
+                                                Vg d'automne
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('Place de Stalingrad 91430 Igny', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">150</span>
+                                                <span class="address-line">| Place de Stalingrad 91430 Igny</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/91/igny/1325420-brocante-d-automne" target="_blank" class="event-title-link">
+                                                Brocante d'automne
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('167 boulevard Lefebvre 75015 Paris', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">75</span>
+                                                <span class="address-line">| 167 boulevard Lefebvre 75015 Paris</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/75/paris/1322047-vide-grenier-paris-plaine" target="_blank" class="event-title-link">
+                                                Vg plaine
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('Terre Terre - Ferme Urbaine 223 bd felix faure 93300 Aubervilliers', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">75</span>
+                                                <span class="address-line">| Terre Terre - Ferme Urbaine 223 bd felix faure 93300 Aubervilliers</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/93/aubervilliers/1327050-vide-grenier-marche-de-producteurs" target="_blank" class="event-title-link">
+                                                Vg - marché de producteurs
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('Salle Polyvalente Marcel Cerdan Route du Bouchet 91760 Itteville', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">75</span>
+                                                <span class="address-line">| Salle Polyvalente Marcel Cerdan Route du Bouchet 91760 Itteville</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/91/itteville/1306430-17eme-vide-greniers-du-comite-de-jumelage-d-ittevi" target="_blank" class="event-title-link">
+                                                17ème Vg du comité de jumelage d'itteville
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('Rue de la Dhuys 93100 Montreuil', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">75</span>
+                                                <span class="address-line">| Rue de la Dhuys 93100 Montreuil</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/93/montreuil/1325946-vide-grenier-fete-du-quartier-ramenas-leo-lagrange" target="_blank" class="event-title-link">
+                                                Vg - fête du quartier ramenas – léo lagrange
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('Place du marché rue hoche/rue Auger Place Olympe de Gouges 93500 Pantin', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">75</span>
+                                                <span class="address-line">| Place du marché rue hoche/rue Auger Place Olympe de Gouges 93500 Pantin</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/93/pantin/1323814-vide-grenier-de-l-automne" target="_blank" class="event-title-link">
+                                                Vg de l’automne
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('En extérieur Place Ginette Hamelin 75012 Paris', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">75</span>
+                                                <span class="address-line">| En extérieur Place Ginette Hamelin 75012 Paris</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/75/paris/1325171-vide-grenier" target="_blank" class="event-title-link">
+                                                Vg
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('48 avenue du Président Roosevelt 93300 Aubervilliers', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">50</span>
+                                                <span class="address-line">| 48 avenue du Président Roosevelt 93300 Aubervilliers</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/93/aubervilliers/1323079-vide-grenier" target="_blank" class="event-title-link">
+                                                Vg
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('impasse des hirondelles 258 boulevard Saint-Denis 92400 Courbevoie', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">50</span>
+                                                <span class="address-line">| impasse des hirondelles 258 boulevard Saint-Denis 92400 Courbevoie</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/92/courbevoie/1327602-vide-maisons-des-hirondelles" target="_blank" class="event-title-link">
+                                                Vide maisons des hirondelles
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('La Peintinoire 90 parvis de la Préfecture 95000 Cergy', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">-1</span>
+                                                <span class="address-line">| La Peintinoire 90 parvis de la Préfecture 95000 Cergy</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/95/cergy/1323533-gratiferia-du-grand-centre" target="_blank" class="event-title-link">
+                                                Gratiféria du grand centre
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('Côté 9ème Avenue Trudaine 75009 Paris', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">-1</span>
+                                                <span class="address-line">| Côté 9ème Avenue Trudaine 75009 Paris</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/75/paris/1323257-vide-greniers-brocante-avenue-trudaine" target="_blank" class="event-title-link">
+                                                Vide greniers - brocante - avenue trudaine
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading-oct-2025-3">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-oct-2025-3" aria-expanded="false" aria-controls="collapse-oct-2025-3">
+                                DIM 05 OCT 2025 (6 events)
+                            </button>
+                        </h2>
+                        <div id="collapse-oct-2025-3" class="accordion-collapse collapse " aria-labelledby="heading-oct-2025-3" data-bs-parent="#accordionoct-2025">
+                            <div class="accordion-body p-3">
+            
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('34 boulevard du Port 95000 Cergy', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data"><span class="exposants-high">300</span></span>
+                                                <span class="address-line">| 34 boulevard du Port 95000 Cergy</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/95/cergy/1318337-brocante-d-automne" target="_blank" class="event-title-link">
+                                                Brocante d'automne
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('Rue des Fossés Saint Bernard (vers Institut du Monde Arabe) Rue des Fossés Saint-Bernard & place Jussieu 75005 Paris', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">150</span>
+                                                <span class="address-line">| Rue des Fossés Saint Bernard (vers Institut du Monde Arabe) Rue des Fossés Saint-Bernard & place Jussieu 75005 Paris</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/75/paris/1325957-vide-grenier-rue-des-fosses-saint-bernard-et-place" target="_blank" class="event-title-link">
+                                                Vg - rue des fossés saint bernard et place jussieu
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('Place du général Leclerc Avenue Rablais 92160 Antony', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">150</span>
+                                                <span class="address-line">| Place du général Leclerc Avenue Rablais 92160 Antony</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/92/antony/1327181-brocante-d-automne" target="_blank" class="event-title-link">
+                                                Brocante d’automne
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('Terrain integraterre Allée du Pivert 78260 Achères', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">75</span>
+                                                <span class="address-line">| Terrain integraterre Allée du Pivert 78260 Achères</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/78/acheres/1326480-vide-grenier-fete-du-celeri" target="_blank" class="event-title-link">
+                                                Vg - fête du céleri
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('Quartier Paradis rue de la tour d\'argent (et allées adjacentes) 92160 Antony', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">75</span>
+                                                <span class="address-line">| Quartier Paradis rue de la tour d'argent (et allées adjacentes) 92160 Antony</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/92/antony/1310767-7eme-vide-greniers-du-paradis" target="_blank" class="event-title-link">
+                                                7ème Vg du paradis
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="event-card">
+                                    <div class="event-line">
+                                        <div class="event-details-prefix">
+                                            <button class="copy-btn" onclick="copyAddress('Résidence Nouveau village Rue de Montdauphin 77240 Cesson', this)" title="Copier l'adresse">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                            
+                                            <span class="address-and-exposant-text">
+                                                <span class="exposants-data">75</span>
+                                                <span class="address-line">| Résidence Nouveau village Rue de Montdauphin 77240 Cesson</span>
+                                                <span class="address-line">|</span> 
+                                            </span>
+                                        </div>
+                                        <div class="event-main-content">
+                                            <a href="https://brocabrac.fr/77/cesson/1324551-vide-garage-de-nouveau-village" target="_blank" class="event-title-link">
+                                                Vide garage de nouveau village
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                            </div>
+                        </div>
+                    </div>
+            
+                </div>
+            </div>
+        
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <script>
+        function copyAddress(address, button) {
+            if (!navigator.clipboard) {
+                alert("La copie dans le presse-papiers n'est pas supportée par votre navigateur.");
+                return;
+            }
+            
+            navigator.clipboard.writeText(address).then(() => {
+                const originalIcon = button.innerHTML;
+                
+                // Show success feedback
+                button.innerHTML = '<i class="bi bi-check2-circle" style="color:#28a745;"></i>';
+                
+                setTimeout(() => {
+                    button.innerHTML = originalIcon;
+                }, 1000);
+            }).catch(err => {
+                console.error('Erreur lors de la copie: ', err);
+                alert('Erreur lors de la copie : ' + err);
+            });
+        }
+    </script>
+</body>
+</html>
