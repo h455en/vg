@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planificateur de voyage</title>
+    <title>Route Planner</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <script>
@@ -17,113 +17,173 @@
                     colors: {
                         'primary-blue': '#4F46E5',
                         'secondary-gray': '#F9FAFB',
+                        'rain-red': '#DC2626', // Rouge pour > 50%
+                        'rain-green': '#10B981', // Vert pour 0-40%
                     }
                 }
             }
         }
     </script>
     <style>
-        /* Custom styles for positioning action buttons */
+        /* Styles pour rendre la police encore plus petite et compacte */
+        body {
+            font-size: 0.75rem;
+            /* Base: text-xs */
+        }
+
+        /* Ajustements spécifiques */
+        .text-lg {
+            font-size: 1rem;
+        }
+
+        /* H1 ajusté */
+        .text-xl {
+            font-size: 1.25rem;
+        }
+
+        /* Taille des champs de formulaire */
+        .input-container input,
+        .input-container textarea {
+            font-size: 0.75rem !important;
+            /* text-xs */
+            padding: 4px;
+            /* Plus compact */
+        }
+
+        /* HEADER - Rendu plus petit */
+        header span,
+        header strong {
+            font-size: 0.75rem !important;
+            /* text-xs */
+        }
+
+        .w-3 {
+            width: 0.75rem;
+        }
+
+        /* Icônes plus petites */
+        .h-3 {
+            height: 0.75rem;
+        }
+
+        /* Custom styles for positioning action buttons in main inputs */
         .input-action-btn {
             background: none;
             border: none;
             cursor: pointer;
             position: absolute;
-            padding: 5px;
-            border-radius: 5px;
+            padding: 2px;
+            border-radius: 4px;
             transition: background-color 0.2s ease;
             top: 50%;
             transform: translateY(-50%);
         }
 
         .copy-btn {
-            right: 5px;
+            right: 4px;
         }
 
         .clear-btn {
-            right: 35px;
+            right: 25px;
             z-index: 10;
         }
 
         /* Style adjustments for the textarea clear button */
         .form-group-textarea .clear-btn {
-            right: 5px;
-            top: 15px;
-            /* Adjusting position from the top */
+            right: 4px;
+            top: 6px;
             transform: translateY(0);
         }
 
         /* Ensure the input has padding for the buttons */
         #startAddress,
         #destinationAddress {
-            padding-right: 75px;
-            /* Space for both clear (35px) and copy (35px) + margin */
+            padding-right: 55px;
         }
 
         #otherStops {
-            padding-right: 35px;
-            /* Space for clear button */
-            min-height: 200px;
+            padding-right: 30px;
+            min-height: 120px;
             resize: vertical;
         }
 
-        /* New style for favorite locations to accommodate the copy button */
+        /* FAVORITES: Style for the new layout (Icons in front) */
         .favorite-location-item {
             position: relative;
-            padding-right: 40px;
-            /* Space for the copy button */
+            padding: 2px 6px;
+            display: flex;
+            align-items: center;
+            /* Alignement vertical */
+        }
+
+        .favorite-location-item span,
+        .route-link {
+            font-size: 0.75rem;
+            /* text-xs */
+        }
+
+        /* Positionnement des icônes de favoris */
+        .fav-icon-container {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            margin-right: 6px;
+            /* Espacement entre les icônes et le texte */
+        }
+
+        .fav-icon-container button {
+            position: static;
+            /* Retire le positionnement absolu */
+            transform: none;
+            /* Retire la transformation */
+            padding: 2px;
+            margin-right: 4px;
+            /* Espacement entre les boutons */
+        }
+
+        /* Assurez-vous que l'adresse occupe l'espace restant */
+        .favorite-location-item .address-text {
+            flex-grow: 1;
+            word-break: break-word;
         }
     </style>
 </head>
 
-<body class="bg-gray-50 p-4 sm:p-8 flex justify-center text-gray-700 font-sans min-h-screen">
+<body class="bg-gray-50 p-2 sm:p-4 flex justify-center text-gray-700 font-sans min-h-screen">
     <div class="w-full max-w-7xl">
-        <header class="flex justify-between items-center p-3 mb-4 bg-white rounded-xl shadow-md border border-gray-200">
-            <div id="weatherInfo" class="flex items-center text-sm font-medium text-gray-600">
-                <svg class="w-4 h-4 mr-2 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                    fill="currentColor">
-                    <path
-                        d="M19.35 10.04C18.91 7.21 16.59 5 13.75 5c-2.4 0-4.44 1.72-4.91 4.02C5.9 9.69 4 11.81 4 14c0 3.31 2.69 6 6 6h8c2.21 0 4-1.79 4-4 0-2.09-1.54-3.8-3.65-3.96zM17 14c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3zm-3 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z" />
-                    <circle cx="14" cy="14" r="3" opacity=".3" />
-                    <path d="M16 14c0-2.21-1.79-4-4-4s-4 1.79-4 4 1.79 4 4 4 4-1.79 4-4z" opacity=".3" />
-                </svg>
-                <span class="mr-3">Pluie 40%</span>
-                <svg class="w-4 h-4 mr-2 text-indigo-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                    fill="currentColor">
-                    <path
-                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.8 14.2L11 11.4V7h2v5.19L14.7 14.7l-1.9 1.5z" />
-                </svg>
-                <span class="mr-3">Dhuhr 12:35</span>
+        <header
+            class="flex justify-between items-center p-1.5 mb-2 bg-white rounded-lg shadow-sm border border-gray-200">
+            <div id="weatherInfo" class="flex items-center text-xs font-medium text-gray-600 space-x-1.5">
+                <span>Chargement météo...</span>
             </div>
 
-            <div id="dateInfo" class="flex items-center text-sm font-medium text-gray-600">
-                <svg class="w-4 h-4 mr-2 text-indigo-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+            <div id="dateInfo" class="flex items-center text-xs font-medium text-gray-600">
+                <svg class="w-3 h-3 mr-1 text-indigo-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                     fill="currentColor">
                     <path
                         d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7zm-2-5v11h14V5H5z" />
                 </svg>
-                <span>WE 1/2 Nov 2025</span>
+                <span>Chargement date...</span>
             </div>
         </header>
 
-        <div class="flex flex-col gap-8 lg:flex-row lg:items-start max-w-6xl mx-auto">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start max-w-6xl mx-auto">
 
-            <div class="bg-white rounded-xl shadow-2xl p-6 lg:p-8 flex-1">
-                <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Planificateur d'itinéraire</h1>
+            <div class="bg-white rounded-lg shadow-lg p-4 lg:p-5 flex-1">
+                <h1 class="text-xl font-bold text-center text-gray-800 mb-3">Route Planner</h1>
 
-                <div class="form-group flex items-center gap-3 mb-5">
-                    <svg class="w-5 h-5 text-green-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg"
+                <div class="form-group flex items-center gap-2 mb-3">
+                    <svg class="w-3.5 h-3.5 text-green-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24" fill="currentColor">
                         <path
                             d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                     </svg>
                     <div class="input-container w-full relative">
                         <input type="text" id="startAddress" placeholder="Adresse de départ (p. ex., Paris, France)"
-                            value="5 rue victor considérant 75014 paris"
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 transition duration-150">
+                            class="w-full border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 transition duration-150">
                         <button class="input-action-btn clear-btn text-gray-500 hover:bg-gray-100"
                             data-target-id="startAddress">
-                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                            <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                 fill="currentColor">
                                 <path
                                     d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
@@ -131,7 +191,7 @@
                         </button>
                         <button class="input-action-btn copy-btn text-gray-500 hover:bg-gray-100"
                             data-target-id="startAddress">
-                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                            <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                 fill="currentColor">
                                 <path
                                     d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
@@ -140,8 +200,8 @@
                     </div>
                 </div>
 
-                <div class="form-group flex items-center gap-3 mb-5">
-                    <svg class="w-5 h-5 text-red-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg"
+                <div class="form-group flex items-center gap-2 mb-3">
+                    <svg class="w-3.5 h-3.5 text-red-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24" fill="currentColor">
                         <path
                             d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
@@ -149,11 +209,10 @@
                     <div class="input-container w-full relative">
                         <input type="text" id="destinationAddress"
                             placeholder="Adresse de destination (p. ex., Rome, Italie)"
-                            value="2 place d'aligre 75011 paris"
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 transition duration-150">
+                            class="w-full border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500 transition duration-150">
                         <button class="input-action-btn clear-btn text-gray-500 hover:bg-gray-100"
                             data-target-id="destinationAddress">
-                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                            <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                 fill="currentColor">
                                 <path
                                     d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
@@ -161,7 +220,7 @@
                         </button>
                         <button class="input-action-btn copy-btn text-gray-500 hover:bg-gray-100"
                             data-target-id="destinationAddress">
-                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                            <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                 fill="currentColor">
                                 <path
                                     d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
@@ -170,17 +229,17 @@
                     </div>
                 </div>
 
-                <div class="form-group-textarea mb-6">
-                    <label for="otherStops" class="block mb-2 text-gray-800 font-medium">Arrêts Intermédiaires (un par
+                <div class="form-group-textarea mb-4">
+                    <label for="otherStops" class="block mb-1 text-gray-800 font-medium">Stops (un par
                         ligne)</label>
                     <div class="input-container relative">
                         <textarea id="otherStops" placeholder="p. ex.,
 Lyon, France
 Genève, Suisse
-Milan, Italie" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"></textarea>
+Milan, Italie" class="w-full border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"></textarea>
                         <button class="input-action-btn clear-btn text-gray-500 hover:bg-gray-100"
                             data-target-id="otherStops">
-                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                            <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                 fill="currentColor">
                                 <path
                                     d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
@@ -190,73 +249,86 @@ Milan, Italie" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-in
                 </div>
 
                 <button
-                    class="btn-generate w-full py-3 bg-indigo-600 text-white font-bold rounded-lg shadow-xl hover:bg-indigo-700 transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50"
+                    class="btn-generate w-full py-2 bg-indigo-600 text-white font-bold rounded-md shadow-xl hover:bg-indigo-700 transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50"
                     id="generateBtn">
                     <span id="buttonText">Générer la feuille de route</span>
                 </button>
 
-                <div class="mt-8 pt-4 border-t border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-3">Emplacements Favoris</h2>
-                    <p class="text-xs text-gray-500 mb-3">Cliquez sur le bouton de copie pour utiliser l'adresse dans un
-                        champ ci-dessus.</p>
-                    <div class="space-y-3">
-                        <div class="relative bg-secondary-gray p-3 rounded-lg favorite-location-item flex items-center">
-                            <span class="text-sm font-medium text-gray-700 break-words pr-2" id="favAddress1">3 rue
-                                bordier 93300 aubervilliers</span>
-                            <button class="input-action-btn copy-btn text-gray-500 hover:bg-gray-300"
-                                data-target-id="favAddress1">
-                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                    fill="currentColor">
-                                    <path
-                                        d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="relative bg-secondary-gray p-3 rounded-lg favorite-location-item flex items-center">
-                            <span class="text-sm font-medium text-gray-700 break-words pr-2" id="favAddress2">12 rue
-                                godefroy cavaignac 75011 paris</span>
-                            <button class="input-action-btn copy-btn text-gray-500 hover:bg-gray-300"
-                                data-target-id="favAddress2">
-                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                    fill="currentColor">
-                                    <path
-                                        d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
-                                </svg>
-                            </button>
-                        </div>
+                <div class="mt-5 pt-3 border-t border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-2">Favorites</h2>
+                    <div class="space-y-2" id="favoritesList">
                     </div>
                 </div>
             </div>
 
-            <div class="bg-secondary-gray rounded-xl shadow-inner p-6 flex-1 lg:sticky lg:top-8 max-h-[85vh] overflow-y-auto"
+            <div class="bg-secondary-gray rounded-lg shadow-inner p-3 flex-1 lg:sticky lg:top-3 max-h-[85vh] overflow-y-auto"
                 id="routePlan" style="display:none;">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">Votre feuille de route</h2>
-                <ol id="routeList" class="space-y-4 list-none pl-0">
+                <h2 class="text-lg font-semibold text-gray-800 mb-3 text-center">Votre feuille de route</h2>
+                <ol id="routeList" class="space-y-3 list-none pl-0">
                 </ol>
-                <div id="noRouteMessage" class="text-center text-gray-500 mt-4" style="display:none;">
+                <div id="noRouteMessage" class="text-center text-gray-500 mt-3" style="display:none;">
                     L'itinéraire s'affichera ici.
                 </div>
             </div>
 
         </div>
-        <footer class="mt-4 p-2 text-center text-gray-500 text-xs flex justify-center items-center gap-2 w-full">
-            <svg class="w-4 h-4 text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+        <footer class="mt-3 p-1 text-center text-gray-500 text-xs flex justify-center items-center gap-1 w-full">
+            <svg class="w-3 h-3 text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                 fill="currentColor">
                 <path
                     d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.8 14.2L11 11.4V7h2v5.19L14.7 14.7l-1.9 1.5z" />
             </svg>
             <span>Durée d'arrêt min. :</span>
             <input type="number" id="minDuration" value="30"
-                class="w-12 text-right p-1 text-sm border border-gray-300 rounded-md">
+                class="w-10 text-right p-0.5 text-xs border border-gray-300 rounded-md">
             <span>min</span>
         </footer>
     </div>
 
-    <div class="message-box fixed top-4 left-1/2 -translate-x-1/2 bg-yellow-300 text-gray-900 px-6 py-3 rounded-lg shadow-xl opacity-0 transition-opacity duration-500 z-50"
+    <div class="message-box fixed top-3 left-1/2 -translate-x-1/2 bg-yellow-300 text-gray-900 px-3 py-1.5 rounded-lg shadow-xl text-xs opacity-0 transition-opacity duration-500 z-50"
         id="messageBox"></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+
+            // =========================================================================
+            // 1. CONFIGURATION CENTRALISÉE (FACILE À MODIFIER)
+            // =========================================================================
+            const addressConfig = {
+                start: "5 Rue Victor Considérant, 75014 Paris", // Adresse de DÉPART
+                destination: "2 Pl. d'Aligre, 75012 Paris",  // Adresse de DESTINATION
+                initialStops: [ // Arrêts initiaux pour la démo
+                    "3 Rue Bordier, 93300 Aubervilliers",
+                    "Place de la Bastille, Paris"
+                ],
+                favorites: [
+                    "3 rue bordier 93300 aubervilliers",
+                    "12 rue godefroy cavaignac 75011 paris",
+                    "8 boulevard de Belleville 75020 Paris",
+                    "10 rue des Pyrénées 75020 Paris"
+                ]
+            };
+
+            const dhuhrTimes = {
+                "November_2025": {
+                    "2": "12:34",
+                    "9": "12:34",
+                    "16": "12:35",
+                    "23": "12:37",
+                    "30": "12:39"
+                },
+                "December_2025": {
+                    "7": "12:42",
+                    "14": "12:45",
+                    "21": "12:49",
+                    "28": "12:52"
+                }
+            };
+            // =========================================================================
+            // FIN DE LA CONFIGURATION
+            // =========================================================================
+
+
             const generateBtn = document.getElementById('generateBtn');
             const buttonText = document.getElementById('buttonText');
             const startAddress = document.getElementById('startAddress');
@@ -267,18 +339,86 @@ Milan, Italie" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-in
             const messageBox = document.getElementById('messageBox');
             const dateInfo = document.getElementById('dateInfo');
             const weatherInfo = document.getElementById('weatherInfo');
-            const allCopyButtons = document.querySelectorAll('.copy-btn');
-            const clearButtons = document.querySelectorAll('.clear-btn');
-            const monthsAbbr = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const favoritesList = document.getElementById('favoritesList');
+            const monthsAbbr = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
 
-            // Nouvelles références pour les adresses favorites
-            const favAddress1 = document.getElementById('favAddress1');
-            const favAddress2 = document.getElementById('favAddress2');
+            // Coordonnées de Paris (pour l'API météo)
+            const PARIS_LAT = 48.8566;
+            const PARIS_LON = 2.3522;
 
+            // Les numéros cerclés pour les étapes (jusqu'à 10)
+            const CIRCLE_NUMBERS = ['⓪', '①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'];
+
+            // Fonction pour ajouter un favori aux stops (non modifiée)
+            const addFavoriteToStops = (address) => {
+                const textarea = otherStops;
+                const currentValue = textarea.value;
+                const cursorPosition = textarea.selectionStart;
+
+                let newValue = currentValue;
+                const newLine = (currentValue.length > 0 && currentValue[currentValue.length - 1] !== '\n') ? '\n' : '';
+
+                if (cursorPosition >= currentValue.length) {
+                    newValue += newLine + address;
+                } else if (cursorPosition === 0) {
+                    newValue = address + '\n' + currentValue;
+                } else {
+                    const before = currentValue.substring(0, cursorPosition);
+                    const after = currentValue.substring(cursorPosition);
+                    const prefix = (before.length > 0 && !before.endsWith('\n')) ? '\n' : '';
+                    const suffix = (after.length > 0 && !after.startsWith('\n')) ? '\n' : '';
+                    newValue = before + prefix + address + suffix + after;
+                }
+
+                newValue = newValue.replace(/\n{3,}/g, '\n\n').trim();
+
+                textarea.value = newValue;
+                showMessage(`"${address}" ajouté aux stops!`, 'success');
+
+                textarea.focus();
+                const newCursorPosition = (newValue.lastIndexOf(address) + address.length);
+                textarea.setSelectionRange(newCursorPosition, newCursorPosition);
+            };
+
+            // Fonction pour initialiser les champs du formulaire avec la config
+            const initializeAddresses = () => {
+                startAddress.value = addressConfig.start;
+                destinationAddress.value = addressConfig.destination;
+                otherStops.value = addressConfig.initialStops.join('\n'); // Initialisation des stops
+
+                // Création dynamique de la liste des favoris (non modifiée)
+                favoritesList.innerHTML = '';
+                addressConfig.favorites.forEach((address, index) => {
+                    const favId = `favAddress_${index}`;
+                    const favItem = document.createElement('div');
+                    favItem.className = 'relative bg-secondary-gray rounded-md favorite-location-item';
+
+                    favItem.innerHTML = `
+                        <div class="fav-icon-container">
+                            <button class="input-action-btn copy-btn text-gray-500 hover:bg-gray-300"
+                                data-target-id="${favId}">
+                                <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                    fill="currentColor">
+                                    <path
+                                        d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                                </svg>
+                            </button>
+
+                            <button class="input-action-btn add-to-stops-btn text-indigo-500 hover:bg-gray-300" 
+                                    data-address="${address}">
+                                <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <span class="font-medium text-gray-700 address-text" id="${favId}">${address}</span>
+                    `;
+                    favoritesList.appendChild(favItem);
+                });
+            };
 
             const showMessage = (message, type = 'warning') => {
                 messageBox.textContent = message;
-                messageBox.classList.add('show');
 
                 let bgColor = '';
                 let textColor = 'text-gray-900';
@@ -293,7 +433,7 @@ Milan, Italie" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-in
                     textColor = 'text-white';
                 }
 
-                messageBox.className = `message-box fixed top-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-xl opacity-100 transition-opacity duration-500 z-50 ${bgColor} ${textColor}`;
+                messageBox.className = `message-box fixed top-3 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-lg shadow-xl text-xs opacity-100 transition-opacity duration-500 z-50 ${bgColor} ${textColor}`;
 
                 setTimeout(() => {
                     messageBox.classList.remove('opacity-100');
@@ -301,77 +441,150 @@ Milan, Italie" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-in
                 }, 3000);
             };
 
-            const generateMapsLink = (origin, destination) => {
-                const today = new Date();
-                const dayOfWeek = today.getDay(); // 0 is Sunday, 6 is Saturday
-                const daysUntilSaturday = dayOfWeek === 6 ? 0 : 6 - dayOfWeek;
-                const saturday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + daysUntilSaturday);
-                saturday.setHours(10, 0, 0, 0); // 10:00 AM
-                const departureTimeInSeconds = Math.floor(saturday.getTime() / 1000);
-
+            // =========================================================================
+            // FONCTION CORRIGÉE POUR LE LIEN COMPLET (Maps Dir Format)
+            // =========================================================================
+            const generateFullMapsLink = (origin, destination, stops, mode = 'driving') => {
+                // 1. Assainir et encoder toutes les adresses
                 const sanitizedOrigin = encodeURIComponent(origin.trim());
                 const sanitizedDestination = encodeURIComponent(destination.trim());
 
-                // IMPORTANT UPDATE: Changed travelmode=transit to travelmode=driving for road trip planning.
-                return `https://www.google.com/maps/dir/${sanitizedOrigin}/${sanitizedDestination}?travelmode=driving&departure_time=${departureTimeInSeconds}`;
+                // 2. Créer la chaîne d'adresses (Départ/Stop1/Stop2/.../Arrivée)
+                const fullRouteParts = [origin.trim(), ...stops.map(stop => stop.trim()), destination.trim()]
+                    .map(encodeURIComponent);
+
+                const routePath = fullRouteParts.join('/');
+
+                // 3. Construction de l'URL Google Maps au format /dir/
+                // Le format est: https://www.google.com/maps/dir/PointA/PointB/PointC?travelmode=...
+                const travelModeQuery = `?travelmode=${mode}`;
+
+                return `https://www.google.com/maps/dir/${routePath}${travelModeQuery}`;
             };
 
-            // Fonction de mise à jour de l'en-tête (mise à jour pour correspondre au format demandé)
-            const updateHeaderInfo = () => {
-                // Météo et Dhuhr (Simulé)
-                const weatherText = "Pluie 40% | Dhuhr 12:35";
-                const weatherIconSvg = `
-                    <svg class="w-4 h-4 mr-2 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19.35 10.04C18.91 7.21 16.59 5 13.75 5c-2.4 0-4.44 1.72-4.91 4.02C5.9 9.69 4 11.81 4 14c0 3.31 2.69 6 6 6h8c2.21 0 4-1.79 4-4 0-2.09-1.54-3.8-3.65-3.96zM17 14c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3zm-3 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z" />
-                        <circle cx="14" cy="14" r="3" opacity=".3" />
-                        <path d="M16 14c0-2.21-1.79-4-4-4s-4 1.79-4 4 1.79 4 4 4 4-1.79 4-4z" opacity=".3" />
-                    </svg>
-                    <span class="mr-3">Pluie 40%</span>
-                    <svg class="w-4 h-4 mr-2 text-indigo-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.8 14.2L11 11.4V7h2v5.19L14.7 14.7l-1.9 1.5z" />
-                    </svg>
-                    <span>Dhuhr 12:35</span>
-                `;
-                weatherInfo.innerHTML = weatherIconSvg;
+            // --- Fonctions Météo et Dhuhr (non modifiées) ---
+            const getWeekendDates = () => {
+                const today = new Date();
+                const dayOfWeek = today.getDay();
+                let daysUntilSaturday = dayOfWeek === 6 ? 0 : 6 - dayOfWeek;
+                let daysUntilSunday = daysUntilSaturday + 1;
+                if (dayOfWeek === 0 && today.getHours() >= 14) {
+                    daysUntilSaturday += 7;
+                    daysUntilSunday += 7;
+                }
+                const saturday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + daysUntilSaturday);
+                const sunday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + daysUntilSunday);
+                return { saturday, sunday };
+            };
 
-                // Date du week-end (Simulé pour correspondre à la demande spécifique)
-                const dateIconSvg = `
-                    <svg class="w-4 h-4 mr-2 text-indigo-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            const getDhuhrTime = (sundayDate) => {
+                const year = sundayDate.getFullYear();
+                const monthIndex = sundayDate.getMonth();
+                const day = sundayDate.getDate();
+                const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                const monthKey = `${monthNames[monthIndex]}_${year}`;
+                if (dhuhrTimes[monthKey] && dhuhrTimes[monthKey][day]) {
+                    return dhuhrTimes[monthKey][day];
+                }
+                return "N/A";
+            };
+
+            const fetchWeatherAndDhuhr = async () => {
+                const { saturday, sunday } = getWeekendDates();
+                const satDate = saturday.getDate();
+                const sunDate = sunday.getDate();
+                const monthAbbr = monthsAbbr[saturday.getMonth()];
+                const year = saturday.getFullYear();
+
+                dateInfo.innerHTML = `
+                    <svg class="w-3 h-3 mr-1 text-indigo-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7zm-2-5v11h14V5H5z"/>
                     </svg>
+                    <span>WE ${satDate}/${sunDate} ${monthAbbr} ${year}</span>
                 `;
-                dateInfo.innerHTML = `${dateIconSvg}<span>WE 1/2 Nov 2025</span>`;
+
+                const dhuhrTime = getDhuhrTime(sunday);
+                const startDay = saturday.toISOString().split('T')[0];
+                const endDay = sunday.toISOString().split('T')[0];
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${PARIS_LAT}&longitude=${PARIS_LON}&hourly=precipitation_probability&start_date=${startDay}&end_date=${endDay}&timezone=Europe%2FParis`;
+
+                let rainProbSat = 'N/A';
+                let rainProbSun = 'N/A';
+
+                try {
+                    const response = await fetch(weatherUrl);
+                    if (!response.ok) throw new Error('API Météo non disponible');
+                    const data = await response.json();
+
+                    const hourlyData = data.hourly.precipitation_probability;
+                    const hourlyTime = data.hourly.time;
+
+                    const maxProbForDay = (date, data, time) => {
+                        let maxP = -1;
+                        for (let h = 9; h <= 14; h++) {
+                            const targetTime = new Date(date);
+                            targetTime.setHours(h, 0, 0, 0);
+                            const targetTimeString = targetTime.toISOString().slice(0, 13) + ":00";
+                            const index = time.indexOf(targetTimeString);
+                            if (index !== -1 && hourlyData[index] !== undefined) {
+                                if (hourlyData[index] > maxP) {
+                                    maxP = hourlyData[index];
+                                }
+                            }
+                        }
+                        return maxP > -1 ? maxP : 0;
+                    };
+
+                    rainProbSat = maxProbForDay(saturday, hourlyData, hourlyTime);
+                    rainProbSun = maxProbForDay(sunday, hourlyData, hourlyTime);
+
+                } catch (error) {
+                    console.error("Erreur de récupération météo :", error);
+                }
+
+                const getRainColor = (prob) => {
+                    if (prob === 'N/A') return 'text-gray-600';
+                    if (prob > 50) return 'text-rain-red';
+                    if (prob >= 0 && prob <= 40) return 'text-rain-green';
+                    return 'text-yellow-600';
+                };
+
+                const satColor = getRainColor(rainProbSat);
+                const sunColor = getRainColor(rainProbSun);
+
+                const rainIconSvg = `
+                    <svg class="w-3 h-3 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19.35 10.04C18.91 7.21 16.59 5 13.75 5c-2.4 0-4.44 1.72-4.91 4.02C5.9 9.69 4 11.81 4 14c0 3.31 2.69 6 6 6h8c2.21 0 4-1.79 4-4 0-2.09-1.54-3.8-3.65-3.96zM17 14c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3z"/>
+                    </svg>
+                `;
+                const dhuhrIconSvg = `
+                    <svg class="w-3 h-3 text-indigo-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.8 14.2L11 11.4V7h2v5.19L14.7 14.7l-1.9 1.5z" />
+                    </svg>
+                `;
+
+                weatherInfo.innerHTML = `
+                    ${rainIconSvg}
+                    <span>Sam: <strong class="${satColor}">${rainProbSat}${rainProbSat !== 'N/A' ? '%' : ''}</strong></span>
+                    <span>Dim: <strong class="${sunColor}">${rainProbSun}${rainProbSun !== 'N/A' ? '%' : ''}</strong></span>
+                    <span class="text-gray-300">|</span>
+                    ${dhuhrIconSvg}
+                    <span>Dhuhr (Dim): <strong class="text-indigo-600">${dhuhrTime}</strong></span>
+                `;
             };
 
-            // La fonction fetchWeather est conservée mais n'est pas appelée ici pour utiliser la simulation
-            const fetchWeather = async () => { /* ... (Logique fetchWeather non modifiée mais non appelée pour l'exemple) ... */ };
-
-
-            // Mise à jour de la fonction copyText pour gérer à la fois les inputs (avec .value) et les spans (avec .textContent)
+            // --- Fonctions de Copie et Effacement (non modifiées) ---
             const copyText = (elementId) => {
                 const element = document.getElementById(elementId);
                 let textToCopy;
-
                 if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-                    // Pour les champs de formulaire (Start, Destination)
                     textToCopy = element.value;
                     element.select();
+                    document.execCommand('copy');
                 } else {
-                    // Pour les emplacements favoris (Span)
-                    textToCopy = element.textContent;
-                    // Utiliser l'API Navigator Clipboard pour le contenu non-input
-                    navigator.clipboard.writeText(textToCopy).then(() => {
-                        showMessage('Adresse copiée!', 'success');
-                    }).catch(err => {
-                        // Fallback pour les anciens navigateurs
-                        console.error('Erreur de copie:', err);
-                        showMessage('Erreur de copie. Veuillez copier manuellement.', 'error');
-                    });
-                    return; // Sortir après la copie avec l'API Clipboard
+                    textToCopy = element.textContent.trim();
+                    navigator.clipboard.writeText(textToCopy);
                 }
-
-                // Fallback pour les inputs (utilisé pour Start/Destination)
-                document.execCommand('copy');
                 showMessage('Adresse copiée!', 'success');
             };
 
@@ -381,29 +594,45 @@ Milan, Italie" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-in
                 showMessage('Champ effacé!', 'success');
             };
 
-            // Appel de la fonction de mise à jour de l'en-tête (simulée)
-            updateHeaderInfo();
-            // fetchWeather(); // Désactivé pour utiliser les données simulées d'en-tête
+            // =========================================================================
+            // Initialisation et Event Listeners
+            // =========================================================================
 
-            // Event listener pour tous les boutons de copie
-            allCopyButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const targetId = button.getAttribute('data-target-id');
-                    copyText(targetId);
+            const attachDynamicListeners = () => {
+                // Copie et Effacement (Clear)
+                document.querySelectorAll('.copy-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        copyText(button.getAttribute('data-target-id'));
+                    });
                 });
-            });
+                document.querySelectorAll('.clear-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        clearText(button.getAttribute('data-target-id'));
+                    });
+                });
 
-            // Event listener pour tous les boutons d'effacement
-            clearButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const targetId = button.getAttribute('data-target-id');
-                    clearText(targetId);
+                // Ajout aux Stops (Nouveau)
+                document.querySelectorAll('.add-to-stops-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const address = button.getAttribute('data-address');
+                        addFavoriteToStops(address);
+                    });
                 });
-            });
+            };
+
+            // 1. Initialiser les adresses à partir de la config
+            initializeAddresses();
+
+            // 2. Initialisation de l'en-tête (Dhuhr et Météo)
+            fetchWeatherAndDhuhr();
+
+            // 3. Attacher les listeners après la création des favoris
+            attachDynamicListeners();
 
             generateBtn.addEventListener('click', () => {
                 const start = startAddress.value.trim();
                 const destination = destinationAddress.value.trim();
+                // Assurez-vous que les stops sont bien nettoyés et mis dans un tableau
                 const stops = otherStops.value.split('\n').map(stop => stop.trim()).filter(stop => stop !== '');
 
                 if (!start || !destination) {
@@ -416,50 +645,83 @@ Milan, Italie" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-in
                 generateBtn.classList.add('opacity-75', 'cursor-not-allowed');
                 generateBtn.disabled = true;
 
-
                 // Clear previous list
                 routeList.innerHTML = '';
 
-                // Build the full route
+                // Build the full route array for iteration
                 const fullRoute = [start, ...stops, destination];
 
-                // Populate the ordered list
-                for (let i = 0; i < fullRoute.length - 1; i++) {
-                    const legStart = fullRoute[i];
-                    const legEnd = fullRoute[i + 1];
 
-                    const li = document.createElement('li');
-                    li.className = 'text-sm text-gray-800';
+                // =========================================================================
+                // 1. LIEN GLOBAL (MODE VOITURE - DRIVING)
+                // Utilise la fonction corrigée pour générer l'URL au format /dir/A/B/C
+                // =========================================================================
+                const fullRouteLink = generateFullMapsLink(start, destination, stops, 'driving');
 
-                    // Create the clickable anchor tag for the route
-                    const link = document.createElement('a');
-                    link.className = 'route-link block p-3 bg-white rounded-lg hover:bg-gray-100 transition-colors shadow-md';
-                    link.href = generateMapsLink(legStart, legEnd);
-                    link.target = "_blank"; // Open in a new tab
+                const liGlobal = document.createElement('li');
+                liGlobal.className = 'text-sm text-gray-800 font-semibold mb-3 border-b border-indigo-200 pb-3';
 
-                    // Use flex for better alignment, icon, and text
-                    let legContent = '';
-                    if (i === 0) {
-                        // Première étape (Départ -> 1er arrêt/Destination)
-                        legContent += '<span class="font-bold text-green-600">DÉPART: </span>';
-                    } else {
-                        // Étapes intermédiaires
-                        legContent += `<span class="font-medium text-indigo-600">ÉTAPE ${i}: </span>`;
+                const linkGlobal = document.createElement('a');
+                linkGlobal.className = 'route-link block p-3 bg-red-600 text-white font-bold rounded-md hover:bg-red-700 transition-colors shadow-lg text-center flex items-center justify-center space-x-2';
+                linkGlobal.href = fullRouteLink;
+                linkGlobal.target = "_blank";
+                linkGlobal.innerHTML = `
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm.2-7H5.3l1.45-4.38c.18-.54.67-.92 1.25-.92h7.6c.58 0 1.07.38 1.25.92L18.7 9z"/>
+                    </svg>
+                    <span>Itinéraire COMPLET (Voiture)</span>
+                `;
+
+                liGlobal.appendChild(linkGlobal);
+                routeList.appendChild(liGlobal);
+
+                // =========================================================================
+                // 2. ÉTAPES DÉTAILLÉES (TRANSIT / COPIE) - Non modifié
+                // =========================================================================
+                if (fullRoute.length > 2) {
+                    const liDivider = document.createElement('li');
+                    liDivider.className = 'text-center text-gray-500 text-xs my-3 uppercase tracking-wider';
+                    liDivider.textContent = '--- Étapes détaillées (pour copie/Transit) ---';
+                    routeList.appendChild(liDivider);
+
+                    for (let i = 0; i < fullRoute.length - 1; i++) {
+                        const legStart = fullRoute[i];
+                        const legEnd = fullRoute[i + 1];
+
+                        const li = document.createElement('li');
+                        li.className = 'text-xs text-gray-800';
+
+                        const link = document.createElement('a');
+                        link.className = 'route-link block p-2 bg-white rounded-md hover:bg-gray-100 transition-colors shadow-sm';
+                        // Étapes individuelles en mode transit par défaut
+                        link.href = generateFullMapsLink(legStart, legEnd, [], 'transit');
+                        link.target = "_blank";
+
+                        let legContent = '';
+                        let stepNumberText = '';
+
+                        if (i === 0) {
+                            stepNumberText = '<span class="font-bold text-green-600">DÉPART: </span>';
+                            legContent += stepNumberText;
+                        } else {
+                            // Utilisation des icônes numérotées cerclées
+                            const circleNumber = CIRCLE_NUMBERS[i] || `[${i}]`;
+                            stepNumberText = `<span class="font-bold text-indigo-600">${circleNumber} ÉTAPE : </span>`;
+                            legContent += stepNumberText;
+                        }
+
+                        const destinationText = (i === fullRoute.length - 2) ?
+                            `<span class="font-bold text-red-600">${legEnd}</span>` :
+                            legEnd;
+
+                        legContent += `${legStart} <span class="text-gray-400 font-normal mx-0.5">→</span> ${destinationText}`;
+
+
+                        link.innerHTML = legContent;
+
+                        li.appendChild(link);
+                        routeList.appendChild(li);
                     }
-
-                    // Ajoute l'adresse de fin si c'est la dernière étape
-                    const destinationText = (i === fullRoute.length - 2) ?
-                        `<span class="font-bold text-red-600">${legEnd}</span>` :
-                        legEnd;
-
-
-                    legContent += `${legStart} <span class="text-gray-400 font-normal mx-1">→</span> ${destinationText}`;
-
-
-                    link.innerHTML = legContent;
-
-                    li.appendChild(link);
-                    routeList.appendChild(li);
                 }
 
                 // Reset button state
