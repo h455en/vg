@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Events Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+        }
+
+        .tab-active {
+            font-weight: 600;
+            border-bottom: 3px solid #4f46e5;
+        }
+
+        .tab-inactive {
+            color: #6b7280;
+        }
+
+        .sat-bg {
+            background-color: #eff6ff;
+        }
+
+        /* Light blue */
+        .sun-bg {
+            background-color: #fff7ed;
+        }
+
+        /* Light amber */
+        .event-box:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .copy-btn {
+            cursor: pointer;
+        }
+
+        #map {
+            height: 70vh;
+            width: 100%;
+            border-radius: 0.5rem;
+        }
+
+        .month-tab {
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .month-tab:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white shadow sticky top-0 z-20">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <h1 class="text-base font-semibold text-gray-900">Events</h1>
+                <nav class="flex gap-3">
+                    <button id="nav-events" class="tab-active" onclick="showSection('events')">Events</button>
+                    <button id="nav-map" class="tab-inactive" onclick="showSection('map')">Map</button>
+                    <a id="nav-planner" href="planner.html" class="tab-inactive">Planner</a>
+                </nav>
+            </div>
+            <div class="flex items-center gap-4">
+                <input id="json-file-input" type="file" multiple accept=".json"
+                    class="text-xs file:py-1 file:px-2 file:rounded-full file:border-0 file:bg-indigo-600 file:text-white">
+                <p id="file-status" class="text-xs text-gray-500">Aucun fichier chargé.</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-grow space-y-6">
+        <!-- Events -->
+        <section id="section-events" class="bg-white p-5 rounded-xl shadow">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-base font-semibold text-gray-900">Événements par mois</h2>
+                <input id="filter-input" type="search" placeholder="Rechercher titre, adresse ou ville..."
+                    class="px-3 py-2 border rounded text-sm" oninput="applyFilter()">
+            </div>
+
+            <div id="month-tabs" class="flex gap-3 overflow-x-auto pb-3 mb-4"></div>
+            <div id="month-content"></div>
+            <p id="no-events" class="text-gray-500 text-sm hidden mt-4">Aucun événement trouvé. Chargez un fichier JSON.
+            </p>
+        </section>
+
+        <!-- Map -->
+        <section id="section-map" class="hidden bg-white p-5 rounded-xl shadow">
+            <h2 class="text-base font-semibold text-gray-900 mb-3">Carte des événements</h2>
+            <div id="map"></div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-900 text-white text-xs py-2 text-center">
+        Dernière mise à jour : <span id="last-update">N/A</span>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
+        const MONTH_ABBR = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        const MONTHS_FR = {
+            janvier: 0, février: 1, mars: 2, avril: 3, mai: 4, juin: 5,
+            juillet: 6, août: 7, septembre: 8, octobre: 9, novembre: 10, décembre: 11
+        };
+        const TAB_COLORS = ['bg-indigo-600', 'bg-blue-500', 'bg-green-500', 'bg-teal-500', 'bg-cyan-500', 'bg-pink-500', 'bg-amber-600', 'bg-rose-600', 'bg-purple-600', 'bg-emerald-600', 'bg-orange-600', 'bg-lime-600'];
+
+        let rawEvents = [], filteredEvents = [], grouped = {}, mapInstance = null, markers = [], circleLayer = null;
+
+        function parseFrenchDate(str) {
+            const m = str.match(/(\d{1,2})\s+([a-zéû]+)\s+(\d{4})/i);
+            if (!m) return null;
+            const d = +m[1], mon = MONTHS_FR[m[2].toLowerCase()], y = +m[3];
+            if (mon === undefined) return null;
+            return new Date(y, mon, d);
+        }
+        function formatMonthKey(d) { return `${MONTH_ABBR[d.getMonth()]} ${d.getFullYear()}`; }
+        function groupEvents(evts) {
+            const g = {};
+            for (const e of evts) {
+                const d = parseFrenchDate(e.ManifDate); if (!d) continue;
+                const monthKey = formatMonthKey(d);
+                if (!g[monthKey]) g[monthKey] = {};
+                const dk = e.ManifDate;
+                if (!g[monthKey][dk]) g[monthKey][dk] = [];
+                g[monthKey][dk].push(e);
+            }
+            return g;
+        }
+
+        function sortGrouped(g) {
+            const sorted = {};
+            Object.keys(g).sort((a, b) => {
+                const [ma, ya] = a.split(' '), [mb, yb] = b.split(' ');
+                const ia = MONTH_ABBR.indexOf(ma), ib = MONTH_ABBR.indexOf(mb);
+                return parseInt(ya) - parseInt(yb) || ia - ib; // chronological
+            }).forEach(m => {
+                sorted[m] = {};
+                Object.keys(g[m]).sort((a, b) => parseFrenchDate(b) - parseFrenchDate(a)).forEach(d => {
+                    sorted[m][d] = [...g[m][d]].sort((x, y) => (y.Exposants || 0) - (x.Exposants || 0));
+                });
+            });
+            return sorted;
+        }
+
+        function renderTabs() {
+            const tabs = document.getElementById('month-tabs');
+            const content = document.getElementById('month-content');
+            tabs.innerHTML = ''; content.innerHTML = '';
+            const months = Object.keys(grouped);
+            if (!months.length) { document.getElementById('no-events').classList.remove('hidden'); return; }
+            document.getElementById('no-events').classList.add('hidden');
+
+            months.forEach((m, i) => {
+                const tab = document.createElement('div');
+                tab.textContent = m;
+                tab.className = `month-tab ${TAB_COLORS[i % TAB_COLORS.length]} ${i === 0 ? 'tab-active' : ''}`;
+                tab.onclick = () => openMonth(m);
+                tabs.appendChild(tab);
+
+                const panel = document.createElement('div');
+                panel.id = `month-${m}`;
+                panel.className = i === 0 ? '' : 'hidden';
+                panel.innerHTML = renderMonth(grouped[m]);
+                content.appendChild(panel);
+            });
+        }
+
+        function renderMonth(daysObj) {
+            let html = '';
+            for (const [day, events] of Object.entries(daysObj)) {
+                const d = parseFrenchDate(day);
+                const isSat = d?.getDay() === 6, isSun = d?.getDay() === 0;
+                const bg = isSun ? 'sun-bg' : (isSat ? 'sat-bg' : '');
+                const safe = day.replace(/\s+/g, '_');
+                html += `
+        <div class="mb-3 border rounded">
+          <div class="flex justify-between items-center p-2 ${bg} cursor-pointer" onclick="toggleDay('${safe}')">
+            <span class="font-medium">${day} (${events.length})</span>
+            <svg id="icon-${safe}" class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </div>
+          <div id="content-${safe}" class="hidden p-2 space-y-2">
+            ${events.map(e => {
+                    const expo = e.Exposants ?? 'N/A';
+                    const addr = `${e.Adresse || ''}${e.Adresse ? ' - ' : ''}${e.Ville || ''}`;
+                    const expoCls = expo >= 300 ? 'text-red-600 font-semibold' : '';
+                    return `<div class="p-2 bg-white border rounded event-box flex items-start gap-2">
+                        <button class="copy-btn" onclick="copyToClipboard('${addr.replace(/'/g, "\\'")}')">
+                          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h8a2 2 0 012 2v8a2 2 0 01-2 2H8a2 2 0 01-2-2V9a2 2 0 012-2z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 3H8a2 2 0 00-2 2v0a2 2 0 002 2h8a2 2 0 002-2v0a2 2 0 00-2-2z"/>
+                          </svg>
+                        </button>
+                        <div>
+                          <a href="${e.ManifLink || '#'}" target="_blank" class="font-semibold hover:text-indigo-600">${e.Titre || 'Sans titre'}</a><br>
+                          <span class="${expoCls}">${expo}</span> | <span>${addr}</span>
+                        </div>
+                      </div>`;
+                }).join('')}
+          </div>
+        </div>`;
+            }
+            return html;
+        }
+
+        function toggleDay(id) {
+            const c = document.getElementById('content-' + id);
+            const i = document.getElementById('icon-' + id);
+            if (c) { c.classList.toggle('hidden'); if (i) i.classList.toggle('rotate-180'); }
+        }
+
+        function openMonth(m) {
+            document.querySelectorAll('#month-tabs div').forEach(x => x.classList.remove('tab-active'));
+            document.querySelectorAll('[id^="month-"]').forEach(x => x.classList.add('hidden'));
+            const t = [...document.querySelectorAll('#month-tabs div')].find(x => x.textContent === m);
+            if (t) t.classList.add('tab-active');
+            document.getElementById(`month-${m}`).classList.remove('hidden');
+        }
+
+        function copyToClipboard(t) {
+            navigator.clipboard?.writeText(t).then(() => showToast('Copié !'));
+        }
+        function showToast(m) {
+            const t = document.createElement('div');
+            t.textContent = m;
+            t.className = 'fixed bottom-6 right-6 bg-gray-800 text-white px-3 py-1 rounded text-xs';
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 1500);
+        }
+
+        // --- Map ---
+        async function renderMap() {
+            if (!mapInstance) {
+                mapInstance = L.map('map').setView([48.8566, 2.3522], 11);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(mapInstance);
+            }
+            markers.forEach(m => mapInstance.removeLayer(m)); markers = [];
+            const list = filteredEvents.length ? filteredEvents : rawEvents;
+            if (!list.length) return;
+            const coords = [];
+            for (const e of list) {
+                const addr = `${e.Adresse || ''}${e.Ville ? ' - ' + e.Ville : ''}`;
+                const loc = await geocode(addr);
+                if (loc) coords.push({ e, loc });
+            }
+            let lat = 0, lon = 0;
+            coords.forEach(c => {
+                lat += c.loc.lat; lon += c.loc.lon;
+                const expo = c.e.Exposants ?? 'N/A';
+                const color = expo >= 300 ? '#b91c1c' : 'black';
+                const html = `<b><a href="${c.e.ManifLink || '#'}" target="_blank">${c.e.Titre || 'Sans titre'}</a></b><br>
+                    <small><span style="color:${color}">${expo}</span> | ${c.e.Adresse || ''}${c.e.Ville ? ' - ' + c.e.Ville : ''}</small>`;
+                L.marker([c.loc.lat, c.loc.lon]).addTo(mapInstance).bindPopup(html);
+            });
+            const clat = lat / coords.length, clon = lon / coords.length;
+            mapInstance.setView([clat, clon], 11);
+            drawCircle(clat, clon, 20);
+        }
+
+        async function geocode(addr) {
+            if (!addr.trim()) return null;
+            const r = await fetch(`${NOMINATIM_URL}?q=${encodeURIComponent(addr)}&format=json&limit=1`);
+            const d = await r.json(); if (!d.length) return null;
+            return { lat: +d[0].lat, lon: +d[0].lon };
+        }
+
+        function drawCircle(lat, lon, km) {
+            if (circleLayer) mapInstance.removeLayer(circleLayer);
+            circleLayer = L.circle([lat, lon], { radius: km * 1000, color: 'red', fillOpacity: 0.03 }).addTo(mapInstance);
+        }
+
+        // --- File Load ---
+        document.getElementById('json-file-input').addEventListener('change', evt => {
+            const files = evt.target.files; if (!files.length) return;
+            rawEvents = []; let processed = 0;
+            Array.from(files).forEach(f => {
+                const r = new FileReader();
+                r.onload = e => {
+                    try { const d = JSON.parse(e.target.result); extractEvents(d, rawEvents); } catch { }
+                    processed++;
+                    if (processed === files.length) {
+                        grouped = sortGrouped(groupEvents(rawEvents));
+                        renderTabs();
+                        renderMap();
+                        document.getElementById('file-status').textContent = `${rawEvents.length} événements chargés.`;
+                        document.getElementById('last-update').textContent = new Date().toLocaleString('fr-FR');
+                    }
+                }; r.readAsText(f);
+            });
+        });
+        function extractEvents(d, a) { if (Array.isArray(d)) a.push(...d); else if (typeof d === 'object' && d) Object.values(d).forEach(v => extractEvents(v, a)); }
+        function applyFilter() {
+            const q = document.getElementById('filter-input').value.toLowerCase();
+            filteredEvents = rawEvents.filter(e => (e.Titre || '').toLowerCase().includes(q) || (e.Adresse || '').toLowerCase().includes(q) || (e.Ville || '').toLowerCase().includes(q));
+            grouped = sortGrouped(groupEvents(filteredEvents.length ? filteredEvents : rawEvents));
+            renderTabs();
+            renderMap();
+        }
+        function showSection(n) {
+            document.getElementById('section-events').classList.toggle('hidden', n !== 'events');
+            document.getElementById('section-map').classList.toggle('hidden', n !== 'map');
+            document.getElementById('nav-events').classList.toggle('tab-active', n === 'events');
+            document.getElementById('nav-map').classList.toggle('tab-active', n === 'map');
+            if (n === 'map') renderMap();
+        }
+    </script>
+</body>
+
+</html>
