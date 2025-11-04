@@ -100,7 +100,7 @@
 
         <!-- Map -->
         <section id="section-map" class="hidden bg-white p-5 rounded-xl shadow">
-            <h2 class="text-base font-semibold text-gray-900 mb-3">Carte des événements</h2>
+            <h2 class="text-base font-semibold text-gray-900 mb-3">Carte des événements du week-end</h2>
             <div id="map"></div>
         </section>
     </main>
@@ -147,10 +147,11 @@
             Object.keys(g).sort((a, b) => {
                 const [ma, ya] = a.split(' '), [mb, yb] = b.split(' ');
                 const ia = MONTH_ABBR.indexOf(ma), ib = MONTH_ABBR.indexOf(mb);
-                return parseInt(ya) - parseInt(yb) || ia - ib; // chronological
+                return parseInt(ya) - parseInt(yb) || ia - ib;
             }).forEach(m => {
                 sorted[m] = {};
-                Object.keys(g[m]).sort((a, b) => parseFrenchDate(b) - parseFrenchDate(a)).forEach(d => {
+                // 👇 FIXED: chronological order (oldest first)
+                Object.keys(g[m]).sort((a, b) => parseFrenchDate(a) - parseFrenchDate(b)).forEach(d => {
                     sorted[m][d] = [...g[m][d]].sort((x, y) => (y.Exposants || 0) - (x.Exposants || 0));
                 });
             });
@@ -182,7 +183,9 @@
 
         function renderMonth(daysObj) {
             let html = '';
-            for (const [day, events] of Object.entries(daysObj)) {
+            const days = Object.keys(daysObj).sort((a, b) => parseFrenchDate(a) - parseFrenchDate(b)); // chronological order
+            for (const day of days) {
+                const events = daysObj[day];
                 const d = parseFrenchDate(day);
                 const isSat = d?.getDay() === 6, isSun = d?.getDay() === 0;
                 const bg = isSun ? 'sun-bg' : (isSat ? 'sat-bg' : '');
@@ -199,12 +202,7 @@
                     const addr = `${e.Adresse || ''}${e.Adresse ? ' - ' : ''}${e.Ville || ''}`;
                     const expoCls = expo >= 300 ? 'text-red-600 font-semibold' : '';
                     return `<div class="p-2 bg-white border rounded event-box flex items-start gap-2">
-                        <button class="copy-btn" onclick="copyToClipboard('${addr.replace(/'/g, "\\'")}')">
-                          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h8a2 2 0 012 2v8a2 2 0 01-2 2H8a2 2 0 01-2-2V9a2 2 0 012-2z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 3H8a2 2 0 00-2 2v0a2 2 0 002 2h8a2 2 0 002-2v0a2 2 0 00-2-2z"/>
-                          </svg>
-                        </button>
+                        <button class="copy-btn" onclick="copyToClipboard('${addr.replace(/'/g, "\\'")}')">📋</button>
                         <div>
                           <a href="${e.ManifLink || '#'}" target="_blank" class="font-semibold hover:text-indigo-600">${e.Titre || 'Sans titre'}</a><br>
                           <span class="${expoCls}">${expo}</span> | <span>${addr}</span>
@@ -249,10 +247,12 @@
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(mapInstance);
             }
             markers.forEach(m => mapInstance.removeLayer(m)); markers = [];
-            const list = filteredEvents.length ? filteredEvents : rawEvents;
-            if (!list.length) return;
+
+            const weekendEvents = getCurrentWeekendEvents();
+            if (!weekendEvents.length) return;
+
             const coords = [];
-            for (const e of list) {
+            for (const e of weekendEvents) {
                 const addr = `${e.Adresse || ''}${e.Ville ? ' - ' + e.Ville : ''}`;
                 const loc = await geocode(addr);
                 if (loc) coords.push({ e, loc });
@@ -269,6 +269,17 @@
             const clat = lat / coords.length, clon = lon / coords.length;
             mapInstance.setView([clat, clon], 11);
             drawCircle(clat, clon, 20);
+        }
+
+        function getCurrentWeekendEvents() {
+            if (!rawEvents.length) return [];
+            const dates = rawEvents.map(e => parseFrenchDate(e.ManifDate)).filter(Boolean).sort((a, b) => b - a);
+            const latest = dates[0];
+            const weekend = new Set(dates.filter(d => d.getFullYear() === latest.getFullYear() && d.getMonth() === latest.getMonth() && (d.getDay() === 6 || d.getDay() === 0)).map(d => d.toDateString()));
+            return rawEvents.filter(e => {
+                const d = parseFrenchDate(e.ManifDate);
+                return d && weekend.has(d.toDateString());
+            });
         }
 
         async function geocode(addr) {
