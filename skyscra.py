@@ -15,7 +15,7 @@ from playwright.sync_api import sync_playwright
 # like an environment variable, not hardcoded.
 GIST_ID = "1fc699b89c342bacdd3cfdb28aeed2dd"
 GIST_FILENAME = "vg_events_nov_2025.json"
-GITHUB_TOKEN = "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" 
+GITHUB_TOKEN = "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" 
 
 # --- SCRAPING CONFIG ---
 # The target period for vide-greniers.org
@@ -344,3 +344,4 @@ def main():
 if __name__ == "__main__":
 
     main()
+
