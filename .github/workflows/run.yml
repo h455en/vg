@@ -1,19 +1,4 @@
-name: Run Python Script and Update Gist
-
-on:
-
-Triggers: scheduled + manual
-
-schedule:
-# Runs every day at 08:00 UTC
-- cron: "0 8 * * *"
-workflow_dispatch:      # Allows manual run
-
-jobs:
-run:
-runs-on: ubuntu-latest
-
-# Set the GITHUB_TOKEN environment variable from the repository secret.
+name: Run Python Script and Update Giston:Triggers: scheduled + manualschedule:# Runs every day at 08:00 UTC- cron: "0 8 * * *"workflow_dispatch:      # Allows manual runjobs:run:runs-on: ubuntu-latest# Set the GITHUB_TOKEN environment variable from the repository secret.
 # This is required for the 'gist_scraper.py' script to authenticate with GitHub's Gist API.
 env:
   GITHUB_TOKEN: ${{ secrets.SKY_GIST_SEC }}
