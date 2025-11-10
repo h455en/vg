@@ -1,7 +1,7 @@
 ---
-name: Run Sky Scrap
+name: Run Sky Scapy
 env:
-  GITHUB_TOKEN: ${{ secrets.GH_PAT_GIST }}
+  GITHUB_TOKEN: ${{ secrets.SKY_GIST_SEC}}
 steps:
   - name: Checkout Repository
     uses: actions/checkout@v4
@@ -16,5 +16,5 @@ steps:
       pip install requests beautifulsoup4 playwright
   - name: Install Playwright browsers
     run: playwright install chromium
-  - name: Run Gist Scraper Script
-    run: python gist_scraper.py
+  - name: Run Sky Scapy
+    run: python skyscra.py
