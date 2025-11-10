@@ -18,4 +18,4 @@ jobs:
         run: |
           pip install -r requirements.txt || true
       - name: Run script
-        run: python main.py
+        run: python scra.py
