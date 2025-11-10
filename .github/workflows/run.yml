@@ -1,32 +1,20 @@
-name: Run Python Script and Update Giston:Triggers: scheduled + manualschedule:# Runs every day at 08:00 UTC- cron: "0 8 * * *"workflow_dispatch:      # Allows manual runjobs:run:runs-on: ubuntu-latest# Set the GITHUB_TOKEN environment variable from the repository secret.
-# This is required for the 'gist_scraper.py' script to authenticate with GitHub's Gist API.
+---
+name: Run Sky Scrap
 env:
-  GITHUB_TOKEN: ${{ secrets.SKY_GIST_SEC }}
-
+  GITHUB_TOKEN: ${{ secrets.GH_PAT_GIST }}
 steps:
-  # Step 1: Checkout repository
   - name: Checkout Repository
     uses: actions/checkout@v4
-
-  # Step 2: Set up Python
   - name: Set up Python
     uses: actions/setup-python@v5
     with:
-      python-version: "3.11" # Using a specific, recent version
-      
-  # Step 3: Install Python dependencies
+      python-version: "3.11"
   - name: Install Dependencies
     run: |
       python -m pip install --upgrade pip
       # Installing required libraries: requests, beautifulsoup4, and playwright
       pip install requests beautifulsoup4 playwright
-
-  # Step 4: Install Playwright browsers
   - name: Install Playwright browsers
-    # Install the Chromium browser binary required by the script
     run: playwright install chromium
-
-  # Step 5: Run the script
   - name: Run Gist Scraper Script
-    # CRITICAL: Using the correct script name (gist_scraper.py)
-    run: python skyscra.py
+    run: python gist_scraper.py
