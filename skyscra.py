@@ -12,7 +12,7 @@ from playwright.sync_api import sync_playwright
 # =================================================================
 
 # --- GIST CONFIG ---
-GIST_ID = "1fc699b89c342bacdd3cfdb28aeed2dd"
+GIST_ID = "83713f92de2607fa11a5cf8276639afd"
 GIST_FILENAME = "vg_events_nov_2025.json"
 
 # --- SCRAPING CONFIG ---
@@ -342,3 +342,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
