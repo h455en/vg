@@ -30,4 +30,4 @@ jobs:
 
       # Step 5: Run the script
       - name: Run script
-        run: python scra.py
+        run: python skyscra.py
