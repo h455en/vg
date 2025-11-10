@@ -39,16 +39,29 @@ MONTH_FR = {
 def update_gist(gist_id: str, filename: str, data: dict, token: str):
     """
     Serializes data to JSON and updates a file within a GitHub Gist.
+    Automatically detects if the token should use 'token' or 'Bearer' prefix.
     """
     print(f"\nAttempting to update GitHub Gist ID: {gist_id} with file: {filename}...")
     
+    # Determine the correct Authorization scheme based on the token prefix
+    if token.startswith("github_pat_"):
+        auth_scheme = "Bearer"
+    else:
+        # Default for ghp_ tokens and other classic PATs
+        auth_scheme = "token"
+
     # 1. Prepare API URL and Headers
     url = f"https://api.github.com/gists/{gist_id}"
     headers = {
-        "Authorization": f"token {token}",
+        "Authorization": f"{auth_scheme} {token}",
         "Accept": "application/vnd.github.v3+json",
         "User-Agent": "VG-Scraper-Gist-Updater" # GitHub requires a User-Agent
     }
+    
+    # --- DIAGNOSTIC: Check if token is being included in the headers ---
+    auth_header_check = headers['Authorization'].split(' ')[0] + ' ' + headers['Authorization'].split(' ')[1][:8] + '...' + headers['Authorization'].split(' ')[1][-4:]
+    print(f"   Diagnostic: Auth Header scheme and start: {auth_header_check}")
+    # -------------------------------------------------------------------
 
     # 2. Prepare Payload
     # The dictionary of events is dumped to a formatted JSON string
@@ -62,6 +75,7 @@ def update_gist(gist_id: str, filename: str, data: dict, token: str):
     }
     
     # 3. Make the PATCH request to update the Gist
+    response = None
     try:
         response = requests.patch(url, headers=headers, json=payload, timeout=10)
         response.raise_for_status() # Raises an HTTPError for bad responses (4xx or 5xx)
@@ -72,14 +86,20 @@ def update_gist(gist_id: str, filename: str, data: dict, token: str):
         
     except requests.exceptions.RequestException as e:
         print(f"❌ Failed to update Gist: {e}")
-        if response.text:
-            print(f"   GitHub API response error: {response.text[:200]}...") # Print first 200 chars of error
-        
+        # Detailed error printout
+        if response is not None:
+             print(f"   Status Code: {response.status_code}")
+             try:
+                 error_json = response.json()
+                 print(f"   GitHub API Error: {error_json.get('message', 'No message provided')}")
+                 print(f"   Docs URL: {error_json.get('documentation_url', 'N/A')}")
+             except json.JSONDecodeError:
+                 print(f"   GitHub API response text (non-JSON): {response.text[:200]}...")
+
 # =================================================================
 # /////////////////// DATE UTILITIES
-# =================================================================
-
 def format_date_fr(dt: datetime) -> str:
+# [Immersive content redacted for brevity.]
     """Formats a datetime object to 'Dimanche 5 Octobre 2025' format."""
     if not isinstance(dt, datetime):
         return FALLBACK_DATE
@@ -89,6 +109,7 @@ def format_date_fr(dt: datetime) -> str:
 
 def parse_iso_date_str(s: str):
     """Parses an ISO-like date string (YYYY-MM-DD or YYYY/MM/DD) into a datetime object."""
+# [Immersive content redacted for brevity.]
     if not s: return None
     
     m = re.search(r"(\d{4})[-/](\d{2})[-/](\d{2})", s)
@@ -101,6 +122,7 @@ def parse_iso_date_str(s: str):
 
 def parse_fr_date_string(s: str):
     """Parses a French date string ('Dimanche 5 Octobre 2025') into a datetime object."""
+# [Immersive content redacted for brevity.]
     if not s or s == FALLBACK_DATE: return None
     pattern = r"(Lundi|Mardi|Mercredi|Jeudi|Vendredi|Samedi|Dimanche)\s+(\d{1,2})\s+([A-Za-zÀ-ÿ]+)\s+(\d{4})"
     m = re.search(pattern, s, flags=re.IGNORECASE)
@@ -124,6 +146,7 @@ def parse_fr_date_string(s: str):
 # =================================================================
 
 def fetch_page_content(url, wait_ms=1000):
+# [Immersive content redacted for brevity.]
     """Fetches and returns the HTML content of a URL using Playwright."""
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -136,6 +159,7 @@ def fetch_page_content(url, wait_ms=1000):
         return html_content
 
 def extract_date(soup):
+# [Immersive content redacted for brevity.]
     """Extracts date using time tag, JSON-LD, or page-wide regex fallback."""
     # 1. Time Tag
     time_tag = soup.find("time")
@@ -186,6 +210,7 @@ def extract_date(soup):
 
 def extract_title(soup):  
     """Extracts the title from H1 or H2 tags."""
+# [Immersive content redacted for brevity.]
     h1 = soup.find("h1")
     if h1 and h1.get_text(strip=True):
         return h1.get_text(" ", strip=True)
@@ -196,6 +221,7 @@ def extract_title(soup):
 
 def extract_exposants(soup):
     """Extracts the number of exhibitors."""
+# [Immersive content redacted for brevity.]
     txt = soup.get_text(" ", strip=True)
     m = re.search(r"(\d+)\s*exposants", txt, flags=re.IGNORECASE)
     if m:
@@ -207,6 +233,7 @@ def extract_exposants(soup):
 
 def _normalize_paris_zip(city_part: str) -> str:
     """Converts 'Paris XX' format to '750XX Paris' if applicable."""
+# [Immersive content redacted for brevity.]
     city_part_stripped = city_part.strip()
     # Check for the 'Paris XX' format
     match = re.search(r"Paris\s*(\d+)", city_part_stripped, re.IGNORECASE)
@@ -219,6 +246,7 @@ def _normalize_paris_zip(city_part: str) -> str:
 
 def extract_address(soup):
     """Extracts and cleans the event address."""
+# [Immersive content redacted for brevity.]
     section = soup.find("section", attrs={"x-ref": "locationSection"})
     raw_text = section.get_text(" ", strip=True) if section else ""
     
@@ -243,6 +271,7 @@ def extract_address(soup):
 
 def extract_ville_from_address(address: str):
     """Extracts the city and zip from the last part of the address string."""
+# [Immersive content redacted for brevity.]
     if not address or address == "NA":
         return "NA"
     parts = [p.strip() for p in address.split(",") if p.strip()]
@@ -250,6 +279,7 @@ def extract_ville_from_address(address: str):
 
 def group_and_sort(manifs: list):
     """Groups manifs by date and sorts them by date and number of exhibitors."""
+# [Immersive content redacted for brevity.]
     grouped = defaultdict(list)
     for m in manifs:
         grouped[m["ManifDate"]].append(m)
@@ -272,6 +302,7 @@ def group_and_sort(manifs: list):
 
 def display_manif(manif: dict):
     """Helper to display extracted data during runtime."""
+# [Immersive content redacted for brevity.]
     print(f"  Title: {manif.get('Titre', 'NA')}")
     print(f"  Date: {manif.get('ManifDate', FALLBACK_DATE)}")
     print(f"  Exhibitors: {manif.get('Exposants', -1)}")
@@ -283,6 +314,7 @@ def display_manif(manif: dict):
 # =================================================================
 
 def main():
+# [Immersive content redacted for brevity.]
     print("Starting Vide-Greniers Scraper...")
     print(f"Target URL: {MASTER_URL}")
     
@@ -342,6 +374,4 @@ def main():
     print("\nScraping and Gist update complete.")
 
 if __name__ == "__main__":
-
     main()
-
