@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Get repo code
+      # Step 1: Checkout repository
       - uses: actions/checkout@v4
 
       # Step 2: Set up Python
@@ -20,11 +20,14 @@ jobs:
         with:
           python-version: "3.x"
 
-      # Step 3: Install dependencies
+      # Step 3: Install Python dependencies
       - name: Install dependencies
-        run: |
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; else pip install beautifulsoup4 requests; fi
+        run: pip install -r requirements.txt
 
-      # Step 4: Run the script
+      # Step 4: Install Playwright browsers
+      - name: Install Playwright browsers
+        run: playwright install
+
+      # Step 5: Run the script
       - name: Run script
         run: python scra.py
