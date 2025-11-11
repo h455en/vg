@@ -1,4 +1,4 @@
-name: Run Skyscraper
+name: Run SkyScrap
 
 on:
   push:
@@ -25,5 +25,4 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Run skyscrap.py
-        working-directory: ./vg
         run: python skyscrap.py
