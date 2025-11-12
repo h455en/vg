@@ -18,7 +18,7 @@ from playwright.sync_api import sync_playwright
 
 # --- JSONHOSTING CONFIG ---
 JSON_URL = "https://jsonhosting.com/api/json/40984401"   # replace with your own JSONHosting API URL
-EDIT_KEY = os.getenv("JSONHOST_EDIT_KEY")                # stored as GitHub secret
+EDIT_KEY = os.getenv("EDIT_KEY")                # stored as GitHub secret
 
 # --- SCRAPING CONFIG ---
 YEAR = "2025"
