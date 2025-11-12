@@ -1,4 +1,4 @@
-name: Run Skyscraper v1.3
+name: Run Skyscraper Script with Debug
 
 on:
   push:
@@ -32,18 +32,43 @@ jobs:
           echo "Files here:"
           ls -R
 
-      - name: Check EDIT_KEY
+      # Step 1: Check secret presence in shell
+      - name: Check EDIT_KEY in shell
         env:
           EDIT_KEY: ${{ secrets.JSONHOST_EDIT_KEY }}
         run: |
+          echo "Step 1: Shell check for EDIT_KEY"
           if [ -z "$EDIT_KEY" ]; then
-            echo "❌ EDIT_KEY is missing or empty"
+            echo "❌ EDIT_KEY is missing or empty in shell"
             exit 1
           else
-            echo "✅ EDIT_KEY is present"
+            echo "✅ EDIT_KEY is present in shell"
           fi
 
-      - name: Run skyscra.py
+      # Step 2: Run Python script with environment variable
+      - name: Run skyscra.py with debug
+        env:
+          EDIT_KEY: ${{ secrets.JSONHOST_EDIT_KEY }}
+        run: |
+          echo "Step 2: Python sees the EDIT_KEY variable"
+          python - << 'EOF'
+import os
+
+# Check EDIT_KEY
+key = os.getenv("EDIT_KEY")
+if not key:
+    print("❌ EDIT_KEY is missing in Python environment")
+else:
+    print("✅ EDIT_KEY is present in Python environment (hidden)")
+
+# Optional: check all env vars for debugging (mask secrets)
+import re
+for k, v in os.environ.items():
+    if re.search(r"EDIT_KEY", k):
+        print(f"{k}=***HIDDEN***")
+EOF
+
+      - name: Run skyscra.py fully
         env:
           EDIT_KEY: ${{ secrets.JSONHOST_EDIT_KEY }}
         run: python skyscra.py
