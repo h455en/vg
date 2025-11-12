@@ -1,4 +1,4 @@
-name: Run Skyscraper Script with Debug
+name: Run Skyscraper Script
 
 on:
   push:
@@ -11,64 +11,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Step 2: Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: '3.10'
 
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           python -m playwright install --with-deps
 
-      - name: Debug workspace
+      # Step 4: Confirm files
+      - name: List repository files
         run: |
           echo "Current directory:"
           pwd
           echo "Files here:"
           ls -R
 
-      # Step 1: Check secret presence in shell
-      - name: Check EDIT_KEY in shell
+      # Step 5: Debug EDIT_KEY presence
+      - name: Check EDIT_KEY
         env:
           EDIT_KEY: ${{ secrets.JSONHOST_EDIT_KEY }}
         run: |
-          echo "Step 1: Shell check for EDIT_KEY"
+          echo "Checking EDIT_KEY environment variable..."
           if [ -z "$EDIT_KEY" ]; then
-            echo "❌ EDIT_KEY is missing or empty in shell"
+            echo "❌ EDIT_KEY is missing or empty"
             exit 1
           else
-            echo "✅ EDIT_KEY is present in shell"
+            echo "✅ EDIT_KEY is present"
           fi
 
-      # Step 2: Run Python debug inline
-      - name: Check EDIT_KEY in Python
-        env:
-          EDIT_KEY: ${{ secrets.JSONHOST_EDIT_KEY }}
-        run: |
-          echo "Step 2: Python sees the EDIT_KEY variable"
-          python - <<EOF
-
-import os
-import re
-key = os.getenv("EDIT_KEY")
-if not key:
-    print("❌ EDIT_KEY is missing in Python environment")
-else:
-    print("✅ EDIT_KEY is present in Python environment (hidden)")
-
-# Optional: print all env vars with EDIT_KEY masked
-for k, v in os.environ.items():
-    if re.search(r"EDIT_KEY", k):
-        print(f"{k}=***HIDDEN***")
-EOF
-
-      # Step 3: Run the scraper
-      - name: Run skyscra.py fully
+      # Step 6: Run scraper
+      - name: Run skyscra.py
         env:
           EDIT_KEY: ${{ secrets.JSONHOST_EDIT_KEY }}
         run: python skyscra.py
