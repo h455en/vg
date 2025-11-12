@@ -45,29 +45,29 @@ jobs:
             echo "✅ EDIT_KEY is present in shell"
           fi
 
-      # Step 2: Run Python script with environment variable
-      - name: Run skyscra.py with debug
+      # Step 2: Run Python debug inline
+      - name: Check EDIT_KEY in Python
         env:
           EDIT_KEY: ${{ secrets.JSONHOST_EDIT_KEY }}
         run: |
           echo "Step 2: Python sees the EDIT_KEY variable"
-          python - << 'EOF'
-import os
+          python - <<EOF
 
-# Check EDIT_KEY
+import os
+import re
 key = os.getenv("EDIT_KEY")
 if not key:
     print("❌ EDIT_KEY is missing in Python environment")
 else:
     print("✅ EDIT_KEY is present in Python environment (hidden)")
 
-# Optional: check all env vars for debugging (mask secrets)
-import re
+# Optional: print all env vars with EDIT_KEY masked
 for k, v in os.environ.items():
     if re.search(r"EDIT_KEY", k):
         print(f"{k}=***HIDDEN***")
 EOF
 
+      # Step 3: Run the scraper
       - name: Run skyscra.py fully
         env:
           EDIT_KEY: ${{ secrets.JSONHOST_EDIT_KEY }}
