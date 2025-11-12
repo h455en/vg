@@ -42,6 +42,10 @@ MONTH_FR = {
 def update_jsonhosting(json_url: str, edit_key: str, data: dict):
     """Uploads JSON data to jsonhosting.com using the Edit-Key header."""
     print(f"\nAttempting to update JSONHosting at: {json_url}")
+    if not edit_key:
+    print("⚠️  EDIT_KEY environment variable not found or empty")
+    else:
+    print("✅ EDIT_KEY loaded (hidden for security)")
 
     headers = {
         "X-Edit-Key": edit_key,
@@ -222,4 +226,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
