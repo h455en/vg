@@ -39,26 +39,48 @@ MONTH_FR = {
 # JSONHOSTING API HANDLER 
 # =================================================================
 
-def update_jsonhosting(json_url: str, edit_key: str, data: dict):
-    """Uploads JSON data to jsonhosting.com using the Edit-Key header."""
-    print(f"\nAttempting to update JSONHosting at: {json_url}")
+
+import requests
+import json
+import time
+
+def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 3, delay: int = 5):
+    """
+    Safely uploads JSON data to jsonhosting.com using the Edit-Key header.
+      
+    """
+    # Safety check
     if not edit_key:
-        print("⚠️  EDIT_KEY environment variable not found or empty")
-    else:
-        print("✅ EDIT_KEY loaded (hidden for security)")
+        raise ValueError("❌ EDIT_KEY is missing or empty. Please set it as an environment variable.")
 
     headers = {
         "X-Edit-Key": edit_key,
         "Content-Type": "application/json",
     }
-    try:
-        response = requests.put(json_url, headers=headers, json=data, timeout=15)
-        response.raise_for_status()
-        print("✅ Successfully updated JSON on jsonhosting.com")
-    except requests.exceptions.RequestException as e:
-        print(f"❌ Update failed: {e}")
-        if hasattr(response, "text"):
-            print(f"Response: {response.text[:200]}")
+
+    json_payload = json.dumps(data, ensure_ascii=False)
+    
+    attempt = 0
+    while attempt < retries:
+        attempt += 1
+        try:
+            print(f"\nAttempting to update JSONHosting at: {json_url} (Attempt {attempt}/{retries})")
+            response = requests.put(json_url, headers=headers, data=json_payload, timeout=15)
+            response.raise_for_status()
+            
+            print("✅ Successfully updated JSON on jsonhosting.com")
+            return True
+        except requests.exceptions.RequestException as e:
+            print(f"❌ Update failed on attempt {attempt}: {e}")
+            if hasattr(response, "text") and response.text:
+                print(f"Response: {response.text[:300]}")
+            if attempt < retries:
+                print(f"Retrying in {delay} seconds...")
+                time.sleep(delay)
+            else:
+                print("❌ All attempts failed.")
+                return False
+
 
 # =================================================================
 #  DATE UTILITIES
