@@ -17,7 +17,7 @@ from playwright.sync_api import sync_playwright
 # =================================================================
 
 # --- JSONHOSTING CONFIG ---
-JSON_URL = "https://jsonhosting.com/api/json/40984401"   # replace with your own JSONHosting API URL
+JSON_URL = "https://jsonhosting.com/api/json/c4b35902"   # replace with your own JSONHosting API URL
 EDIT_KEY = os.getenv("EDIT_KEY")                # stored as GitHub secret
 
 # --- SCRAPING CONFIG ---
@@ -44,7 +44,7 @@ import requests
 import json
 import time
 
-def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 3, delay: int = 5):
+def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 2, delay: int = 5):
     """
     Safely uploads JSON data to jsonhosting.com using the Edit-Key header.
       
