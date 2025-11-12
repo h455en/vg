@@ -36,16 +36,16 @@ MONTH_FR = {
 }
 
 # =================================================================
-# /////////////////// JSONHOSTING API HANDLER
+# JSONHOSTING API HANDLER 
 # =================================================================
 
 def update_jsonhosting(json_url: str, edit_key: str, data: dict):
     """Uploads JSON data to jsonhosting.com using the Edit-Key header."""
     print(f"\nAttempting to update JSONHosting at: {json_url}")
     if not edit_key:
-    print("⚠️  EDIT_KEY environment variable not found or empty")
+        print("⚠️  EDIT_KEY environment variable not found or empty")
     else:
-    print("✅ EDIT_KEY loaded (hidden for security)")
+        print("✅ EDIT_KEY loaded (hidden for security)")
 
     headers = {
         "X-Edit-Key": edit_key,
@@ -61,7 +61,7 @@ def update_jsonhosting(json_url: str, edit_key: str, data: dict):
             print(f"Response: {response.text[:200]}")
 
 # =================================================================
-# /////////////////// DATE UTILITIES
+#  DATE UTILITIES
 # =================================================================
 
 def format_date_fr(dt: datetime) -> str:
@@ -101,7 +101,7 @@ def parse_fr_date_string(s: str):
         return None
 
 # =================================================================
-# /////////////////// SCRAPING LOGIC
+#  SCRAPING LOGIC
 # =================================================================
 
 def fetch_page_content(url, wait_ms=1000):
@@ -189,7 +189,7 @@ def group_and_sort(manifs):
     return grouped_sorted
 
 # =================================================================
-# /////////////////// MAIN EXECUTION
+# /////////////////// RUN IT ////////////////////////////////////
 # =================================================================
 
 def main():
