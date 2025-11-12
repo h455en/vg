@@ -1,4 +1,4 @@
-name: Run SkyScrap v1.2
+name: Run Skyscraper v1.3
 
 on:
   push:
@@ -24,6 +24,24 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           python -m playwright install --with-deps
+
+      - name: Debug workspace
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Files here:"
+          ls -R
+
+      - name: Check EDIT_KEY
+        env:
+          EDIT_KEY: ${{ secrets.JSONHOST_EDIT_KEY }}
+        run: |
+          if [ -z "$EDIT_KEY" ]; then
+            echo "❌ EDIT_KEY is missing or empty"
+            exit 1
+          else
+            echo "✅ EDIT_KEY is present"
+          fi
 
       - name: Run skyscra.py
         env:
