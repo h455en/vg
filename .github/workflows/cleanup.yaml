@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 name: Cleanup Old Workflow Runs
+=======
+name: Cleanup Old Workdlow Runs
+>>>>>>> bd5c49cf9f1181e3238dc9ae41be4386dbd12ad6
 
 on:
   workflow_dispatch:
