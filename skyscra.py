@@ -42,12 +42,8 @@ MONTH_FR = {
 # =================================================================
 
 
+
 def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 2, delay: int = 5):
-    """
-    Safely uploads JSON data to jsonhosting.com using the Edit-Key header.
-      
-    """
-    # Safety check
     if not edit_key:
         raise ValueError("❌ EDIT_KEY is missing or empty. Please set it as an environment variable.")
 
@@ -58,20 +54,19 @@ def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 
 
     json_payload = json.dumps(data, ensure_ascii=False)
     
-    attempt = 0
-    while attempt < retries:
-        attempt += 1
+    for attempt in range(1, retries + 1):
         try:
             print(f"\nAttempting to update JSONHosting at: {json_url} (Attempt {attempt}/{retries})")
-            response = requests.put(json_url, headers=headers, data=json_payload, timeout=15)
+            response = requests.patch(json_url, headers=headers, data=json_payload, timeout=15)
             response.raise_for_status()
             
             print("✅ Successfully updated JSON on jsonhosting.com")
             return True
+
         except requests.exceptions.RequestException as e:
             print(f"❌ Update failed on attempt {attempt}: {e}")
             if hasattr(response, "text") and response.text:
-                print(f"Response: {response.text[:300]}")
+                print(f"Response (truncated): {response.text[:300]}")
             if attempt < retries:
                 print(f"Retrying in {delay} seconds...")
                 time.sleep(delay)
