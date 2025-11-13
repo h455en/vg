@@ -18,7 +18,7 @@ EDIT_KEY = "7d4982b93df21c740681018af810d5faeda577b5031d33dbb39825ca596635db"  #
 # ------------------------------------
 
 # --- CONFIGURATION & CONSTANTS ---
-MASTER_URL = "https://brocabrac.fr/ile-de-france/vide-grenier/?d=2025-11-10,2026-12-31"
+MASTER_URL = "https://brocabrac.fr/ile-de-france/vide-grenier/?d=2025-11-15,2025-11-23"
 REQUEST_HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
 DEFAULT_DATE = datetime(1, 1, 1)
 
