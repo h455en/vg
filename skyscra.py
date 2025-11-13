@@ -26,8 +26,8 @@ EDIT_KEY = "01d3d54c95b3039f1758f48e7473dae365f00b03be449da84bd5d0fc237e894e" #o
 YEAR = "2025"
 MIN_DATE = f"{YEAR}-11-10"
 MAX_DATE = f"{YEAR}-12-31"
-#MASTER_URL = f"https://vide-greniers.org/evenements/Ile-de-France?min={MIN_DATE}&max={MAX_DATE}&tags%5B0%5D=1"
-MASTER_URL = f"https://vide-greniers.org/evenements/Paris-75?distance=0&min=2025-11-15&max=2025-11-23&tags%5B0%5D=1"
+MASTER_URL = f"https://vide-greniers.org/evenements/Ile-de-France?min=2025-11-13&max=2025-12-28&tags%5B0%5D=1"
+#MASTER_URL = f"https://vide-greniers.org/evenements/Paris-75?distance=0&min=2025-11-15&max=2025-11-23&tags%5B0%5D=1"
 
 # --- LOCALE ---
 FALLBACK_DATE = "01.01.0001"
@@ -40,8 +40,6 @@ MONTH_FR = {
 # =================================================================
 # JSONHOSTING API HANDLER 
 # =================================================================
-
-
 
 def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 2, delay: int = 5):
     if not edit_key:
@@ -59,7 +57,7 @@ def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 
             print(f"\nAttempting to update JSONHosting at: {json_url} (Attempt {attempt}/{retries})")
             response = requests.patch(json_url, headers=headers, data=json_payload, timeout=15)
             response.raise_for_status()
-            
+            print(f"\JsonHosting [{json_url}]")
             print("✅ Successfully updated JSON on jsonhosting.com")
             return True
 
@@ -73,7 +71,6 @@ def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 
             else:
                 print("❌ All attempts failed.")
                 return False
-
 
 # =================================================================
 #  DATE UTILITIES
