@@ -200,8 +200,6 @@ def group_and_sort(manifs):
     grouped_sorted = {d: sorted(grouped[d], key=lambda x: x.get("Exposants", -1), reverse=True) for d in sorted_dates}
     return grouped_sorted
 
-
-
 # =================================================================
 # /////////////////// RUN IT ////////////////////////////////////
 # =================================================================

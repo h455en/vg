@@ -11,22 +11,14 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 
-#----------- CONFIGURATION & CONSTANTS --------
-# python script1.py ; python script2.py ; python script3.py
+# --- CONSTANTS FOR ONLINE HOSTING ---
+JSON_HOSTING_URL = "https://jsonhosting.com/api/json/2ea29f9a"
+# The EDIT_KEY will be read from the environment variable in the GitHub Action
+EDIT_KEY = "7d4982b93df21c740681018af810d5faeda577b5031d33dbb39825ca596635db"  # os.environ.get("JSONHOSTING_EDIT_KEY") 
+# ------------------------------------
 
-year="2025"
-min_date = f"{year}-11-01"
-max_date = f"{year}-11-30"
-page="1"
-#MASTER_URL = f"https://brocabrac.fr/ile-de-france/vide-grenier/?d={min_date},{max_date}" # &p={page}"
+# --- CONFIGURATION & CONSTANTS ---
 MASTER_URL = "https://brocabrac.fr/ile-de-france/vide-grenier/?d=2025-11-10,2026-12-31"
-
-
-BASE_PATH = r"D:\HASSEN\WORK\PROJ\VG\Data"
-PDF_FOLDER = r"brocabrac_events.json"
-JSON_FILE_NAME = os.path.join(BASE_PATH, PDF_FOLDER)
-#-------------------------------------------------------
-
 REQUEST_HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
 DEFAULT_DATE = datetime(1, 1, 1)
 
@@ -41,6 +33,41 @@ FRENCH_WEEKDAYS = {
     'vendredi': '', 'samedi': '', 'dimanche': ''
 }
 
+# --- 0. JSON Hosting Update Function ---
+# This function is used to update the online JSON file.
+def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 2, delay: int = 5):
+    if not edit_key:
+        raise ValueError("❌ EDIT_KEY is missing or empty. Please set it as an environment variable.")
+
+    headers = {
+        "X-Edit-Key": edit_key,
+        "Content-Type": "application/json",
+    }
+
+    # Ensure the data is JSON-formatted string
+    json_payload = json.dumps(data, ensure_ascii=False)
+    
+    for attempt in range(1, retries + 1):
+        try:
+            print(f"\nAttempting to update JSONHosting at: {json_url} (Attempt {attempt}/{retries})")
+            response = requests.patch(json_url, headers=headers, data=json_payload, timeout=15)
+            response.raise_for_status()
+            print(f"\JsonHosting [{json_url}]")
+            print("✅ Successfully updated JSON on jsonhosting.com")
+            return True
+
+        except requests.exceptions.RequestException as e:
+            print(f"❌ Update failed on attempt {attempt}: {e}")
+            if 'response' in locals() and hasattr(response, "text") and response.text:
+                print(f"Response (truncated): {response.text[:300]}")
+            if attempt < retries:
+                print(f"Retrying in {delay} seconds...")
+                time.sleep(delay)
+            else:
+                print("❌ All attempts failed.")
+                return False
+
+
 # --- 1. Data Structure (Manif Object) ---
 @dataclass
 class Manif:
@@ -52,7 +79,8 @@ class Manif:
     ManifDate: datetime = DEFAULT_DATE  # Used internally for sorting/grouping
     ManifLink: str = "NA"
 
-# --- 2. Utility Methods for Extraction and Formatting
+# --- 2. Utility Methods for Extraction and Formatting ---
+# (normalize_french_date, parse_french_date, extract_manif_date, extract_titre, extract_exposants, extract_adresse, extract_ville_and_arrondissement remain unchanged)
 def normalize_french_date(date_str: str) -> str:
     """Replaces French month and weekday names with English equivalents for parsing."""
     normalized_str = date_str.lower()
@@ -111,7 +139,7 @@ def extract_titre(event_soup: BeautifulSoup) -> str:
             title = title_element.text.strip()
             # Clean up bullet points and excess whitespace
             title = re.sub(r'[\s•]+', ' ', title).strip() 
-            title = re.sub(r'^[\s•]+|[\s•]+$', '', title)                     
+            title = re.sub(r'^[\s•]+|[\s•]+$', '', title) 
             title = re.sub(r'\b(?:vide\s*-\s*grenier[s]?|Vide\s*Grenier)\b', 'Vg', title, flags=re.IGNORECASE)
             
             return title
@@ -170,6 +198,7 @@ def extract_ville_and_arrondissement(full_address: str) -> str:
         return ville
     return "NA"
 
+
 # --- 3. Main Scraping Logic Functions ---
 def scrape_master_page(url: str) -> List[Manif]:
     print(f"Step 1: Fetching links from master page: {url}")
@@ -222,6 +251,8 @@ def scrape_event_details(manif: Manif) -> Manif:
     return manif
 
 def process_and_output(manifs: List[Manif]):
+    """Groups, sorts, prints to screen, and UPDATES the online JSON file."""
+    
     manifs_by_date: Dict[datetime, List[Manif]] = defaultdict(list)
     for manif in manifs:
         manifs_by_date[manif.ManifDate].append(manif)
@@ -232,10 +263,6 @@ def process_and_output(manifs: List[Manif]):
 
     json_output_data: Dict[str, Any] = {}
     
-    print("\n" + "="*80)
-    print("SCRAPING RESULTS (Grouped and Sorted)")
-    print("="*80)
-
     # Set locale for output date formatting (French)
     current_locale = locale.getlocale(locale.LC_TIME)
     try:
@@ -252,12 +279,9 @@ def process_and_output(manifs: List[Manif]):
         if date != DEFAULT_DATE:
             date_str_formatted = date.strftime('%A %d %B %Y')
         
-        header = f"{date_str_formatted} - {len(manifs_list)} events"
-        print(f"\n## {header} ##")
-        
         json_group: List[Dict[str, Any]] = []
         
-        for i, manif in enumerate(manifs_list):
+        for manif in manifs_list:
             manif_dict = {
                 "Titre": manif.Titre,
                 "Exposants": manif.Exposants,
@@ -267,11 +291,6 @@ def process_and_output(manifs: List[Manif]):
                 "ManifLink": manif.ManifLink
             }
             json_group.append(manif_dict)
-
-            print(f"  {i+1}. {manif.Titre} ({manif.Ville})")
-            print(f"     Exposants: {manif.Exposants}, Adresse: {manif.Adresse}")
-            print(f"     Date: {manif_dict['ManifDate']}")
-            print(f"     Link: {manif.ManifLink}")
         
         json_output_data[date_str_formatted] = json_group
 
@@ -279,18 +298,19 @@ def process_and_output(manifs: List[Manif]):
     try: locale.setlocale(locale.LC_TIME, current_locale)
     except: pass
     
-    print(f"\nWriting grouped and sorted results to {JSON_FILE_NAME}...")
-    try:
-        with open(JSON_FILE_NAME, 'w', encoding='utf-8') as f:
-            metadata = {"last_update": datetime.now().strftime('%d.%m.%Y %H:%M:%S')}
-            final_data = {"metadata": metadata, "events": json_output_data}
-            json.dump(final_data, f, ensure_ascii=False, indent=4)
-        print("JSON file successfully created.")
-    except IOError as e:
-        print(f"Error writing JSON file: {e}")
+    # --- ONLINE UPDATE LOGIC ---
+    metadata = {"last_update": datetime.now().strftime('%d.%m.%Y %H:%M:%S')}
+    final_data = {"metadata": metadata, "events": json_output_data}
+    
+    # Use the provided function to update the remote JSON file
+    update_jsonhosting(JSON_HOSTING_URL, EDIT_KEY, final_data)
 
 # --- Execution Block ---
 if __name__ == "__main__":
+    if not EDIT_KEY:
+        print("🚨 Warning: JSONHOSTING_EDIT_KEY environment variable is not set locally.")
+        print("   The script will attempt to run, but the final update to jsonhosting.com will fail.")
+    
     print("--- Starting Brocabrac Scraper ---")
     manifs_with_links = scrape_master_page(MASTER_URL)
     

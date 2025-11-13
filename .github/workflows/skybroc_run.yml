@@ -1,0 +1,32 @@
+name: Skybroc v0.1
+
+on:
+  # Runs once a day at 10:00 AM UTC (adjust as needed)
+  schedule:
+    - cron: '0 10 * * *'
+  # Allows manual run from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  scrape_and_update:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔄 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x' 
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+
+      - name: ⚙️ Run Scraper and Update JSONHosting
+        run: python tools/skybroc.py
+        env:
+          # Securely pass the edit key from GitHub Secrets to the Python script
+          JSONHOSTING_EDIT_KEY: ${{ secrets.JSONHOSTING_EDIT_KEY }}
