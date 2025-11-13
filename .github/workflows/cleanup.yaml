@@ -1,4 +1,4 @@
-name: Cleanup Old Runs (via gh CLI)
+name: Cleanup Old Workflow Runs
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ on:
       cutoff_date:
         description: 'Delete runs created BEFORE this date (e.g., 2024-01-01T00:00:00Z)'
         required: true
-        default: '2024-01-01T00:00:00Z'
+        default: '2025-11-11T00:00:00Z'
       # Variable 2: Status (Conclusion)
       run_conclusion:
         description: 'Conclusion(s) to delete (e.g., failure|cancelled). Use pipe (|) for OR.'
