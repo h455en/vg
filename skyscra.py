@@ -200,6 +200,8 @@ def group_and_sort(manifs):
     grouped_sorted = {d: sorted(grouped[d], key=lambda x: x.get("Exposants", -1), reverse=True) for d in sorted_dates}
     return grouped_sorted
 
+
+
 # =================================================================
 # /////////////////// RUN IT ////////////////////////////////////
 # =================================================================
@@ -234,7 +236,7 @@ def main():
 
     grouped_events = group_and_sort(manifs)
     update_jsonhosting(JSON_URL, EDIT_KEY, grouped_events)
-    print("\n✅ Scraping complete.")
+    print("\n✅ [SkyScrap] Scraping complete.")
 
 if __name__ == "__main__":
     main()
