@@ -1,8 +1,10 @@
 """
-//////////////////  SKYSCRAPY //////////////////////////
-Scrapes event data and updates JSON hosted on https://jsonhosting.com/
+        //////////////////  SKYSCRAPY //////////////////////////
+        Scrapes event data and updates JSON hosted on https://jsonhosting.com/
 """
 
+
+import time
 import os
 import re
 import json
@@ -17,8 +19,8 @@ from playwright.sync_api import sync_playwright
 # =================================================================
 
 # --- JSONHOSTING CONFIG ---
-JSON_URL = "https://jsonhosting.com/api/json/c4b35902"   # replace with your own JSONHosting API URL
-EDIT_KEY = os.getenv("EDIT_KEY")                # stored as GitHub secret
+JSON_URL = "https://jsonhosting.com/api/json/c3cdf9e5"   # replace with your own JSONHosting API URL
+EDIT_KEY = "01d3d54c95b3039f1758f48e7473dae365f00b03be449da84bd5d0fc237e894e" #os.getenv("EDIT_KEY")                # stored as GitHub secret
 
 # --- SCRAPING CONFIG ---
 YEAR = "2025"
@@ -39,10 +41,6 @@ MONTH_FR = {
 # JSONHOSTING API HANDLER 
 # =================================================================
 
-
-import requests
-import json
-import time
 
 def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 2, delay: int = 5):
     """
