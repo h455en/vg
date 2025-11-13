@@ -1,9 +1,9 @@
-name: Skybroc v0.1
+name: Skybroc v0.11
 
 on:
-  # Runs once a day at 10:00 AM UTC (adjust as needed)
+  # Runs once a day at 9:30 PM Paris time (20:30 UTC)
   schedule:
-    - cron: '0 10 * * *'
+    - cron: '30 20 * * *'
   # Allows manual run from the Actions tab
   workflow_dispatch:
 
@@ -19,6 +19,15 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.x' 
+
+      # --- 1. Cache dependencies ---
+      - name: 💾 Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: 📦 Install dependencies
         run: |

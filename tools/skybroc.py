@@ -11,14 +11,14 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 
-# --- CONSTANTS FOR ONLINE HOSTING ---
-JSON_HOSTING_URL = "https://jsonhosting.com/api/json/2ea29f9a"
-# The EDIT_KEY will be read from the environment variable in the GitHub Action
-EDIT_KEY = "7d4982b93df21c740681018af810d5faeda577b5031d33dbb39825ca596635db"  # os.environ.get("JSONHOSTING_EDIT_KEY") 
-# ------------------------------------
+#_____________CONFIG_____________________
 
-# --- CONFIGURATION & CONSTANTS ---
-MASTER_URL = "https://brocabrac.fr/ile-de-france/vide-grenier/?d=2025-11-15,2025-11-23"
+MASTER_URL = "https://brocabrac.fr/ile-de-france/vide-grenier/?d=2025-11-15,2025-12-21"
+
+JSON_HOSTING_URL = "https://jsonhosting.com/api/json/2ea29f9a"
+EDIT_KEY = "7d4982b93df21c740681018af810d5faeda577b5031d33dbb39825ca596635db"  # os.environ.get("JSONHOSTING_EDIT_KEY") 
+#________________________________________
+
 REQUEST_HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
 DEFAULT_DATE = datetime(1, 1, 1)
 
@@ -34,7 +34,6 @@ FRENCH_WEEKDAYS = {
 }
 
 # --- 0. JSON Hosting Update Function ---
-# This function is used to update the online JSON file.
 def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 2, delay: int = 5):
     if not edit_key:
         raise ValueError("❌ EDIT_KEY is missing or empty. Please set it as an environment variable.")
@@ -66,7 +65,6 @@ def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 
             else:
                 print("❌ All attempts failed.")
                 return False
-
 
 # --- 1. Data Structure (Manif Object) ---
 @dataclass
