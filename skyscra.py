@@ -19,6 +19,7 @@ from playwright.sync_api import sync_playwright
 # =================================================================
 
 # --- JSONHOSTING CONFIG ---
+# Rate limited to 100 requests/hour per IP • Max 1MB per JSON • No auth needed for GET
 JSON_URL = "https://jsonhosting.com/api/json/c3cdf9e5"   # replace with your own JSONHosting API URL
 EDIT_KEY = "01d3d54c95b3039f1758f48e7473dae365f00b03be449da84bd5d0fc237e894e" #os.getenv("EDIT_KEY")                # stored as GitHub secret
 

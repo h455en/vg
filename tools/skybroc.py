@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 
 #_____________CONFIG_____________________
 
-MASTER_URL = "https://brocabrac.fr/ile-de-france/vide-grenier/?d=2025-11-15,2025-12-21"
+MASTER_URL = "hhttps://brocabrac.fr/ile-de-france/vide-grenier/?d=2025-11-22,2026-01-31"
 
 JSON_HOSTING_URL = "https://jsonhosting.com/api/json/2ea29f9a"
 EDIT_KEY = "7d4982b93df21c740681018af810d5faeda577b5031d33dbb39825ca596635db"  # os.environ.get("JSONHOSTING_EDIT_KEY") 
@@ -78,7 +78,6 @@ class Manif:
     ManifLink: str = "NA"
 
 # --- 2. Utility Methods for Extraction and Formatting ---
-# (normalize_french_date, parse_french_date, extract_manif_date, extract_titre, extract_exposants, extract_adresse, extract_ville_and_arrondissement remain unchanged)
 def normalize_french_date(date_str: str) -> str:
     """Replaces French month and weekday names with English equivalents for parsing."""
     normalized_str = date_str.lower()
@@ -303,7 +302,10 @@ def process_and_output(manifs: List[Manif]):
     # Use the provided function to update the remote JSON file
     update_jsonhosting(JSON_HOSTING_URL, EDIT_KEY, final_data)
 
-# --- Execution Block ---
+#=======================================================
+#__________________RUN_________________________________
+#=======================================================
+
 if __name__ == "__main__":
     if not EDIT_KEY:
         print("🚨 Warning: JSONHOSTING_EDIT_KEY environment variable is not set locally.")
