@@ -12,8 +12,7 @@ import requests
 from bs4 import BeautifulSoup
 
 #_____________CONFIG_____________________
-
-MASTER_URL = "hhttps://brocabrac.fr/ile-de-france/vide-grenier/?d=2025-11-22,2026-01-31"
+MASTER_URL = "hhttps://brocabrac.fr/ile-de-france/vide-grenier/?d=2025-11-22,2025-11-30"
 
 JSON_HOSTING_URL = "https://jsonhosting.com/api/json/2ea29f9a"
 EDIT_KEY = "7d4982b93df21c740681018af810d5faeda577b5031d33dbb39825ca596635db"  # os.environ.get("JSONHOSTING_EDIT_KEY") 
@@ -33,7 +32,7 @@ FRENCH_WEEKDAYS = {
     'vendredi': '', 'samedi': '', 'dimanche': ''
 }
 
-# --- 0. JSON Hosting Update Function ---
+#------------- 0. JSON Hosting Update Function ---
 def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 2, delay: int = 5):
     if not edit_key:
         raise ValueError("❌ EDIT_KEY is missing or empty. Please set it as an environment variable.")
@@ -42,8 +41,7 @@ def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 
         "X-Edit-Key": edit_key,
         "Content-Type": "application/json",
     }
-
-    # Ensure the data is JSON-formatted string
+  
     json_payload = json.dumps(data, ensure_ascii=False)
     
     for attempt in range(1, retries + 1):
@@ -51,7 +49,7 @@ def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 
             print(f"\nAttempting to update JSONHosting at: {json_url} (Attempt {attempt}/{retries})")
             response = requests.patch(json_url, headers=headers, data=json_payload, timeout=15)
             response.raise_for_status()
-            print(f"\JsonHosting [{json_url}]")
+            print(f"[{json_url}]")
             print("✅ Successfully updated JSON on jsonhosting.com")
             return True
 
@@ -66,7 +64,7 @@ def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 
                 print("❌ All attempts failed.")
                 return False
 
-# --- 1. Data Structure (Manif Object) ---
+#---------- 1. Data Structure (Manif Object) ---
 @dataclass
 class Manif:
     """The required object structure for each event."""

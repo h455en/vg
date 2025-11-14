@@ -1,8 +1,7 @@
 """
-        //////////////////  SKYSCRAPY //////////////////////////
-        Scrapes event data and updates JSON hosted on https://jsonhosting.com/
+        //////////////////  SKYSCRAPY /////////////////////////////
+        Scrapes event data and updates to https://jsonhosting.com/
 """
-
 
 import time
 import os
@@ -38,9 +37,9 @@ MONTH_FR = {
     7: "Juillet", 8: "Août", 9: "Septembre", 10: "Octobre", 11: "Novembre", 12: "Décembre"
 }
 
-# =================================================================
+# ============================================
 # JSONHOSTING API HANDLER 
-# =================================================================
+# ============================================
 
 def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 2, delay: int = 5):
     if not edit_key:
@@ -58,7 +57,7 @@ def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 
             print(f"\nAttempting to update JSONHosting at: {json_url} (Attempt {attempt}/{retries})")
             response = requests.patch(json_url, headers=headers, data=json_payload, timeout=15)
             response.raise_for_status()
-            print(f"\JsonHosting [{json_url}]")
+            print(f"[{json_url}]")
             print("✅ Successfully updated JSON on jsonhosting.com")
             return True
 
@@ -73,9 +72,9 @@ def update_jsonhosting(json_url: str, edit_key: str, data: dict, retries: int = 
                 print("❌ All attempts failed.")
                 return False
 
-# =================================================================
+# ===============================================
 #  DATE UTILITIES
-# =================================================================
+# ===============================================
 
 def format_date_fr(dt: datetime) -> str:
     if not isinstance(dt, datetime):
@@ -113,9 +112,9 @@ def parse_fr_date_string(s: str):
     except ValueError:
         return None
 
-# =================================================================
+# =========================================
 #  SCRAPING LOGIC
-# =================================================================
+# =========================================
 
 def fetch_page_content(url, wait_ms=1000):
     with sync_playwright() as p:
@@ -201,9 +200,9 @@ def group_and_sort(manifs):
     grouped_sorted = {d: sorted(grouped[d], key=lambda x: x.get("Exposants", -1), reverse=True) for d in sorted_dates}
     return grouped_sorted
 
-# =================================================================
-# /////////////////// RUN IT ////////////////////////////////////
-# =================================================================
+# ===========================================
+# /////////////// RUN IT ////////////////
+# ===========================================
 
 def main():
     print("Starting Vide-Greniers Scraper...")
@@ -239,5 +238,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

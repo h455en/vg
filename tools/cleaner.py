@@ -5,12 +5,11 @@ import glob
 import sys
 
 #================= CONFIGURATION ===============
-
 BASE_PATH = r"C:\Users\hdoghmen\OneDrive\VNTD_LBC_25\0.Warehouse\1.Route"
 PDF_FOLDER = r"2025\NOV\5__SAM_15_NOV_25"
 TARGET_FOLDER = os.path.join(BASE_PATH, PDF_FOLDER)
 PREFIX = "VG__"
-# --- Style Parameters ---
+#------- Style Parameters -------------
 FONT_NAME = "helv"
 FONT_SIZE = 16
 TEXT_COLOR_255 = (175, 10, 60)      # Deep Magenta/Red for Text
@@ -44,7 +43,6 @@ def print_error(msg):
 def convert_rgb_255_to_1(rgb_255_tuple):    
     return tuple(c / 255.0 for c in rgb_255_tuple)
 
-
 def is_page_blank(page: fitz.Page) -> bool:
     if page.get_text().strip():
         return False
@@ -55,7 +53,6 @@ def is_page_blank(page: fitz.Page) -> bool:
     if page.get_contents():
         return len(page.get_contents()) < 5
     return True
-
 
 def add_styled_text_with_box(page, text):
     text_color = convert_rgb_255_to_1(TEXT_COLOR_255)
@@ -134,7 +131,7 @@ def process_and_merge_pdfs(input_path: str):
             total_pages_removed += pages_removed
 
             if len(temp) == 0:
-                print("→ All pages blank. Skipped.")
+                print("All pages blank. Skipped.")
                 temp.close()
                 continue
 
@@ -146,7 +143,7 @@ def process_and_merge_pdfs(input_path: str):
             final_doc.insert_pdf(temp, links=False)
             temp.close()
 
-            print_success(f"→ Processed successfully | Removed {pages_removed} blank page(s)")
+            print_success(f"Processed successfully | Removed {pages_removed} blank page(s)")
 
         except Exception as e:
             print_error(f"Error processing {filename}: {e}")
