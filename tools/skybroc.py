@@ -12,7 +12,7 @@ import requests
 from bs4 import BeautifulSoup
 
 #_____________CONFIG_____________________
-MASTER_URL = "hhttps://brocabrac.fr/ile-de-france/vide-grenier/?d=2025-11-22,2025-11-30"
+MASTER_URL = "https://brocabrac.fr/ile-de-france/vide-grenier/?d=2025-11-22,2025-12-28"
 
 JSON_HOSTING_URL = "https://jsonhosting.com/api/json/2ea29f9a"
 EDIT_KEY = "7d4982b93df21c740681018af810d5faeda577b5031d33dbb39825ca596635db"  # os.environ.get("JSONHOSTING_EDIT_KEY") 
@@ -23,8 +23,8 @@ DEFAULT_DATE = datetime(1, 1, 1)
 
 # Explicitly define French month/weekday names for robust parsing
 FRENCH_MONTHS = {
-    'janvier': 'January', 'février': 'February', 'mars': 'March', 'avril': 'April',
-    'mai': 'May', 'juin': 'June', 'juillet': 'July', 'août': 'August',
+    'janvier': 'January', 'février': 'February', 'mars': 'March', 'avril': 'April', 'mai': 'May', 
+    'juin': 'June', 'juillet': 'July', 'août': 'August',
     'septembre': 'September', 'octobre': 'October', 'novembre': 'November', 'décembre': 'December'
 }
 FRENCH_WEEKDAYS = {
@@ -309,11 +309,11 @@ if __name__ == "__main__":
         print("🚨 Warning: JSONHOSTING_EDIT_KEY environment variable is not set locally.")
         print("   The script will attempt to run, but the final update to jsonhosting.com will fail.")
     
-    print("--- Starting Brocabrac Scraper ---")
+    print("[INFO]-Starting Brocabrac Scraper ---")
     manifs_with_links = scrape_master_page(MASTER_URL)
     
     if not manifs_with_links:
-        print("\nScraping aborted: No event links were found on the master page.")
+        print("\n[ERROR]-Scraping aborted: No event links were found on the master page.")
     else:
         print(f"\nStep 2: Scraping details for {len(manifs_with_links)} events...")
         completed_manifs = [scrape_event_details(manif) for manif in manifs_with_links]

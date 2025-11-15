@@ -92,7 +92,7 @@ def add_bottom_line(doc):
     page.draw_line(p1, p2, color=line_color, width=LINE_WIDTH)
 
 
-# ---------- Main Processing Function ----------
+#---------- Main Processing Function ----------
 def process_and_merge_pdfs(input_path: str):
     if not os.path.isdir(input_path):
         print_error(f"Error: Input directory not found: {input_path}")

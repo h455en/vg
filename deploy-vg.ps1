@@ -1,21 +1,31 @@
 
 # VG deploy
 
-$pmp = "pmp026"
-$version = "0.26"
-Write-Host "Preparing R$version ($pmp)" -ForegroundColor Cyan
-$sources = "D:\HASSEN\WORK\pmpvid\App\"
-$ReleaseFolder = "D:\HASSEN\WORK\pmpvid\Release\"
-$folder = $ReleaseFolder + "App_v" + $version + ".zip"
+$msg = "AUTO - sky broc 09"
+git  commit -am $msg  ; Start-Sleep -Seconds 3; git push
 
-$compress = @{
-    LiteralPath      = ($sources + "index.html"), ($sources + "app.js"), ($sources + "style.css")
-    CompressionLevel = "Fastest"
-    DestinationPath  = $folder
-}
 
-Compress-Archive @compress
-Write-Host "Release $version ($pmp)" -ForegroundColor Green
+Start-Sleep -Seconds 10
+
+$wfName = "SkyScraper v2025.11.15.1" 
+gh workflow run $wfName  --ref main
+
+
+# $pmp = "pmp026"
+# $version = "0.26"
+# Write-Host "Preparing R$version ($pmp)" -ForegroundColor Cyan
+# $sources = "D:\HASSEN\WORK\pmpvid\App\"
+# $ReleaseFolder = "D:\HASSEN\WORK\pmpvid\Release\"
+# $folder = $ReleaseFolder + "App_v" + $version + ".zip"
+
+# $compress = @{
+#     LiteralPath      = ($sources + "index.html"), ($sources + "app.js"), ($sources + "style.css")
+#     CompressionLevel = "Fastest"
+#     DestinationPath  = $folder
+# }
+
+# Compress-Archive @compress
+# Write-Host "Release $version ($pmp)" -ForegroundColor Green
 
 # Deploy
 # Rollback
