@@ -1,14 +1,19 @@
 
 # VG deploy
 
-$msg = "AUTO - sky broc 09"
+$msg = "AUTO - sky broc 10"
 git  commit -am $msg  ; Start-Sleep -Seconds 3; git push
 
 
 Start-Sleep -Seconds 10
 
-$wfName = "SkyScraper v2025.11.15.1" 
-gh workflow run $wfName  --ref main
+$scrapWf = "SkyScraper v2025.11.15.1" 
+gh workflow run $scrapWf  --ref main
+
+
+$brocWf = "Skybroc v0.13"
+gh workflow run $brocWf  --ref main
+
 
 
 # $pmp = "pmp026"
