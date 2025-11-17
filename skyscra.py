@@ -26,7 +26,8 @@ EDIT_KEY = "01d3d54c95b3039f1758f48e7473dae365f00b03be449da84bd5d0fc237e894e" #o
 YEAR = "2025"
 MIN_DATE = f"{YEAR}-11-10"
 MAX_DATE = f"{YEAR}-12-31"
-MASTER_URL = f"https://vide-greniers.org/evenements/Ile-de-France?min=2025-11-22&max=2025-12-28&tags%5B0%5D=1"
+#MASTER_URL = f"https://vide-greniers.org/evenements/Ile-de-France?min=2025-11-22&max=2025-12-28&tags%5B0%5D=1"
+MASTER_URL = os.environ.get("MASTER_URL")
 
 # --- LOCALE ---
 FALLBACK_DATE = "01.01.0001"

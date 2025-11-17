@@ -1,31 +1,33 @@
-name: SkyScraper v2025.11.16.2
+name: SkyScraper v2025.11.16.3
 
 on:
   schedule:
-    - cron: '0 3 * * 1'    # Every Monday at 03:00
-    - cron: '30 4 * * *'   # Every Wednesday at 04:30
-    - cron: '0 9 * * 5'    # Every Friday at 09:00
+    - cron: '0 3 * * 1'
+    - cron: '30 4 * * *'
+    - cron: '0 9 * * 5'
   push:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      master_url:
+        description: "Full MASTER_URL string for the scraper"
+        required: true
+        type: string
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository
       - name: 1.Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Set up Python
       - name: 2.Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      # Step 3: Cache Python dependencies
       - name: 3.Cache pip
         uses: actions/cache@v3
         with:
@@ -34,14 +36,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      # Step 4: Install dependencies
       - name: 4.Install dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           python -m playwright install --with-deps
 
-      # Step 5: Confirm files
       - name: 5.List repository files
         run: |
           echo "Current directory:"
@@ -49,21 +49,19 @@ jobs:
           echo "Files here:"
           ls -R
 
-      # Step 6: Debug EDIT_KEY presence
       - name: 6.Check EDIT_KEY
         env:
           EDIT_KEY: ${{ secrets.JSONHOST_EDIT_KEY }}
         run: |
           echo "Checking EDIT_KEY environment variable..."
           if [ -z "$EDIT_KEY" ]; then
-            echo "❌ EDIT_KEY is missing or empty"
+            echo "EDIT_KEY is missing or empty"
             exit 1
-          else
-            echo "✅ EDIT_KEY is present"
           fi
+          echo "EDIT_KEY is present"
 
-      # Step 7: Run scraper
       - name: 7.Run SkyScra
         env:
           EDIT_KEY: ${{ secrets.JSONHOST_EDIT_KEY }}
+          MASTER_URL: ${{ github.event.inputs.master_url }}
         run: python skyscra.py
