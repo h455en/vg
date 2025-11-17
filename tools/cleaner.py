@@ -5,8 +5,14 @@ import glob
 import sys
 
 #================= CONFIGURATION ===============
+
+# 7__SAM_22_NOV_25
+# 8__DIM_23_NOV_25
+# 9_SAM_29_NOV_25
+# 10__DIM_30_NOV_25
+
 BASE_PATH = r"C:\Users\hdoghmen\OneDrive\VNTD_LBC_25\0.Warehouse\1.Route"
-PDF_FOLDER = r"2025\NOV\5__SAM_15_NOV_25"
+PDF_FOLDER = r"2025\NOV\7__SAM_22_NOV_25"
 TARGET_FOLDER = os.path.join(BASE_PATH, PDF_FOLDER)
 PREFIX = "VG__"
 #------- Style Parameters -------------
@@ -107,7 +113,7 @@ def process_and_merge_pdfs(input_path: str):
     output_path = os.path.join(input_path, f"{PREFIX}{folder_name}.pdf")
 
     print(f"[{len(pdf_files)}] - PDFs found. Output: {output_path}")
-    print("-" * 60)
+    print("_" * 60)
 
     final_doc = fitz.open()
     total_pages_removed = 0

@@ -1,77 +1,47 @@
-<<<<<<< HEAD
-name: Cleanup Old Workflow Runs
-=======
-name: Cleanup Old Workdlow Runs
->>>>>>> bd5c49cf9f1181e3238dc9ae41be4386dbd12ad6
+name: Clean Old Workflow Runs v0.1
 
 on:
   workflow_dispatch:
     inputs:
-      # Variable 1: Cutoff Date (ISO 8601 format)
-      cutoff_date:
-        description: 'Delete runs created BEFORE this date (e.g., 2024-01-01T00:00:00Z)'
+      cutoff_datetime:
+        description: "Delete runs BEFORE this Paris datetime (YYYY-MM-DDTHH:MM:SS)"
         required: true
-        default: '2025-11-11T00:00:00Z'
-      # Variable 2: Status (Conclusion)
-      run_conclusion:
-        description: 'Conclusion(s) to delete (e.g., failure|cancelled). Use pipe (|) for OR.'
+        type: string
+      status:
+        description: "Only delete runs with this status (completed, failure, etc.)"
         required: true
-        default: 'failure|cancelled'
+        type: string
 
 jobs:
-  cleanup_runs:
+  clean-runs:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      actions: write # Crucial: Required permission to delete runs
 
     steps:
-      - name: ⚙️ Install JQ (JSON Processor)
-        # JQ is essential for filtering the API response
-        run: sudo apt-get install jq -y
-        
-      - name: 🗑️ List, Filter, and Delete Workflow Runs
-        env:
-          # Store inputs as environment variables for easier access in the script
-          CUTOFF_DATE: ${{ github.event.inputs.cutoff_date }}
-          RUN_STATUS: ${{ github.event.inputs.run_conclusion }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
+      - name: Prepare cutoff datetime (Paris → UTC)
+        id: convert
         run: |
-          # The repository to operate on
-          OWNER_REPO=${{ github.repository }}
-          
-          echo "Looking for runs created before $CUTOFF_DATE with status $RUN_STATUS..."
-          
-          # --- STEP 1 & 2: List and Filter ---
-          # 1. gh api lists runs using the REST API endpoint and handles pagination.
-          # 2. jq filters the list:
-          #    - created_at < $DATE: Only runs older than the cutoff date.
-          #    - $STATUS | test(.conclusion): Checks if the run's conclusion matches the regex (e.g., failure OR cancelled).
-          #    - Finally, it outputs the .id of the matching runs, one per line.
-          RUN_IDS=$(gh api --method GET -H "Accept: application/vnd.github+json" /repos/$OWNER_REPO/actions/runs \
-            --paginate \
-            | jq -r --arg DATE "$CUTOFF_DATE" --arg STATUS "$RUN_STATUS" \
-              '.workflow_runs[] | select(
-                (.created_at < $DATE) and 
-                ($STATUS | test(.conclusion))
-              ) | .id'
-          )
-          
-          if [ -z "$RUN_IDS" ]; then
-            echo "✅ No workflow runs found matching criteria. Done."
-            exit 0
-          fi
+          CUTOFF="${{ github.event.inputs.cutoff_datetime }}"
+          PARIS_TIME="${CUTOFF}+01:00"
+          UTC_TIME=$(date --utc -d "$PARIS_TIME" +"%Y-%m-%dT%H:%M:%SZ")
+          echo "utc_cutoff=$UTC_TIME" >> $GITHUB_OUTPUT
 
-          echo "Found the following run IDs to delete: $RUN_IDS"
-          
-          # --- STEP 3: Delete ---
-          # Loop through the list of run IDs and call the DELETE API endpoint for each one.
-          for RUN_ID in $RUN_IDS; do
-            echo "Deleting run ID: $RUN_ID"
-            gh api --method DELETE /repos/$OWNER_REPO/actions/runs/$RUN_ID \
-              -H "Accept: application/vnd.github+json"
-            # Note: The API returns a 204 No Content on success, which gh api handles silently.
+      - name: Delete old runs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATUS: ${{ github.event.inputs.status }}
+          CUTOFF_UTC: ${{ steps.convert.outputs.utc_cutoff }}
+          REPO: ${{ github.repository }}
+        run: |
+          runs=$(gh api -X GET repos/$REPO/actions/runs --paginate --jq '.workflow_runs[] | {id: .id, status: .status, created_at: .created_at}')
+          echo "$runs" | while read -r line; do
+            id=$(echo "$line" | jq -r '.id')
+            st=$(echo "$line" | jq -r '.status')
+            created=$(echo "$line" | jq -r '.created_at')
+
+            if [[ "$st" == "$STATUS" ]]; then
+              if [[ "$created" < "$CUTOFF_UTC" ]]; then
+                echo "Deleting run: $id (created: $created, status: $st)"
+                gh api -X DELETE repos/$REPO/actions/runs/$id
+              fi
+            fi
           done
-          
-          echo "🗑️ Cleanup complete."

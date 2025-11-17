@@ -20,8 +20,6 @@ EDIT_KEY = "7d4982b93df21c740681018af810d5faeda577b5031d33dbb39825ca596635db"  #
 
 REQUEST_HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
 DEFAULT_DATE = datetime(1, 1, 1)
-
-# Explicitly define French month/weekday names for robust parsing
 FRENCH_MONTHS = {
     'janvier': 'January', 'février': 'February', 'mars': 'March', 'avril': 'April', 'mai': 'May', 
     'juin': 'June', 'juillet': 'July', 'août': 'August',
