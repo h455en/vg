@@ -1,12 +1,16 @@
-name: Skybroc v0.14
+name: Skybroc v0.15
 
 on: 
   schedule:
-    - cron: '0 3 * * 1'    # Every Monday at 03:00
-    - cron: '30 4 * * *'   # Every Wednesday at 04:30
-    - cron: '0 9 * * 5'    # Every Friday at 09:00
-  # Allows manual run from the Actions tab
+    - cron: '0 3 * * 1'
+    - cron: '30 4 * * *'
+    - cron: '0 9 * * 5'
   workflow_dispatch:
+    inputs:
+      master_url:
+        description: "Provide MASTER_URL for brocabrac.fr"
+        required: true
+        type: string
 
 jobs:
   scrape_and_update:
@@ -19,9 +23,8 @@ jobs:
       - name: 2.Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x' 
+          python-version: '3.x'
 
-      # --- 1. Cache dependencies ---
       - name: 3.Cache pip dependencies
         uses: actions/cache@v4
         with:
@@ -36,7 +39,7 @@ jobs:
           pip install requests beautifulsoup4
 
       - name: 5.Run SkyBroc
-        run: python tools/skybroc.py
         env:
-          # Securely pass the edit key from GitHub Secrets to the Python script
           JSONHOSTING_EDIT_KEY: ${{ secrets.JSONHOSTING_EDIT_KEY }}
+          MASTER_URL: ${{ github.event.inputs.master_url }}
+        run: python tools/skybroc.py

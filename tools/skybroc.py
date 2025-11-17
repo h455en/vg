@@ -12,8 +12,8 @@ import requests
 from bs4 import BeautifulSoup
 
 #_____________CONFIG_____________________
-MASTER_URL = "https://brocabrac.fr/ile-de-france/vide-grenier/?d=2025-11-22,2025-12-28"
-
+#MASTER_URL = "https://brocabrac.fr/ile-de-france/vide-grenier/?d=2025-11-22,2025-12-28"
+MASTER_URL = os.environ.get("MASTER_URL")
 JSON_HOSTING_URL = "https://jsonhosting.com/api/json/2ea29f9a"
 EDIT_KEY = "7d4982b93df21c740681018af810d5faeda577b5031d33dbb39825ca596635db"  # os.environ.get("JSONHOSTING_EDIT_KEY") 
 #________________________________________
