@@ -1,14 +1,14 @@
-name: Clean Old Workflow Runs v0.1
+name: Clean Old Workflow Runs v0.2
 
 on:
   workflow_dispatch:
     inputs:
       cutoff_datetime:
-        description: "Delete runs BEFORE this Paris datetime (YYYY-MM-DDTHH:MM:SS)"
+        description: "Provide Datetime in this format to delete events before this (YYYY-MM-DDTHH:MM:SS)"
         required: true
         type: string
       status:
-        description: "Only delete runs with this status (completed, failure, etc.)"
+        description: "Provide status (completed|failure)"
         required: true
         type: string
 
