@@ -89,8 +89,7 @@ def parse_french_date(date_str: str) -> datetime:
     """Converts a French date string to a datetime object robustly."""
     if not date_str: return DEFAULT_DATE
     
-    normalized_str = normalize_french_date(date_str)
-    
+    normalized_str = normalize_french_date(date_str)    
     formats = ['%d %B %Y', '%d %b %Y']
     
     for fmt in formats:
@@ -124,8 +123,7 @@ def extract_manif_date(event_soup: BeautifulSoup) -> datetime:
     except Exception:
         return DEFAULT_DATE
 
-def extract_titre(event_soup: BeautifulSoup) -> str:
-    """Extracts the Titre, cleans it, and replaces 'vide-grenier' variants with 'Vg'."""
+def extract_titre(event_soup: BeautifulSoup) -> str:   
     try:
         title_element = event_soup.find('h1')
         if title_element:
@@ -291,7 +289,6 @@ def process_and_output(manifs: List[Manif]):
     try: locale.setlocale(locale.LC_TIME, current_locale)
     except: pass
     
-    # --- ONLINE UPDATE LOGIC ---
     metadata = {"last_update": datetime.now().strftime('%d.%m.%Y %H:%M:%S')}
     final_data = {"metadata": metadata, "events": json_output_data}
     

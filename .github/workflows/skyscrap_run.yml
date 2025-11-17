@@ -1,4 +1,4 @@
-name: SkyScraper v2025.11.16.3
+name: SkyScraper v2025.11.17.1
 
 on:
   schedule:
@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       master_url:
-        description: "Full MASTER_URL string for the scraper"
+        description: "Provide MASTER_URL string for the scraper"
         required: true
         type: string
 
