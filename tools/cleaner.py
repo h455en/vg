@@ -3,16 +3,19 @@ import fitz  # PyMuPDF
 import os
 import glob
 import sys
+import shutil
 
 #================= CONFIGURATION ===============
-
-# 7__SAM_22_NOV_25
-# 8__DIM_23_NOV_25
 # 9_SAM_29_NOV_25
 # 10__DIM_30_NOV_25
 
 BASE_PATH = r"C:\Users\hdoghmen\OneDrive\VNTD_LBC_25\0.Warehouse\1.Route"
-PDF_FOLDER = r"2025\NOV\7__SAM_22_NOV_25"
+PDF_FOLDER = r"2025\NOV\8__DIM_23_NOV_25"
+
+
+#BASE_PATH = r"C:\Users\hdoghmen\Downloads\down01"
+#PDF_FOLDER = r"BB"
+
 TARGET_FOLDER = os.path.join(BASE_PATH, PDF_FOLDER)
 PREFIX = "VG__"
 #------- Style Parameters -------------
@@ -175,4 +178,4 @@ def process_and_merge_pdfs(input_path: str):
 #   RUN
 #=====================================================
 if __name__ == "__main__":
-    process_and_merge_pdfs(TARGET_FOLDER)
+    process_and_merge_pdfs(TARGET_FOLDER)    
