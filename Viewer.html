@@ -1,0 +1,1304 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Events Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --indigo: #4f46e5;
+            --muted: #6b7280;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --sidebar-bg: #eef2ff;
+            --accent: #eef2ff;
+        }
+
+        html,
+        body {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body {
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+            font-size: 16px;
+            /* BUMPED: Increased base font size from 14px to 16px */
+            background: var(--bg);
+            margin: 0;
+            color: #0f172a;
+        }
+
+        /* Top nav */
+        header.app-header {
+            background: var(--card);
+            border-bottom: 1px solid #e6edf3;
+            position: sticky;
+            /* FIX: Keeps header visible on scroll */
+            top: 0;
+            z-index: 40;
+        }
+
+        .topbar {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 12px 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            /* Ensures brand doesn't shrink when search is present */
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 18px;
+            /* Slightly bigger brand title */
+            font-weight: 600;
+            color: #0b1220;
+        }
+
+        /* --- NEW MENU STYLE --- */
+        nav.topnav {
+            display: flex;
+            gap: 0px;
+            align-items: center;
+            border: 1px solid #e6edf3;
+            border-radius: 8px;
+            padding: 0;
+            background: #f8fafc;
+            flex-shrink: 0;
+        }
+
+        .topnav button {
+            background: transparent;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 0;
+            cursor: pointer;
+            color: #1f2937;
+            font-weight: 500;
+            transition: background 0.15s ease;
+            font-size: 14px;
+            /* Ensure nav buttons aren't too big */
+        }
+
+        .topnav button:hover {
+            background: #eef2ff;
+            color: var(--indigo);
+        }
+
+        /* Apply rounded corners to first and last buttons */
+        .topnav button:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+
+        .topnav button:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+
+        .topnav .active {
+            color: white;
+            background: var(--indigo);
+            font-weight: 600;
+        }
+
+        .topnav .active:hover {
+            background: var(--indigo);
+            color: white;
+        }
+
+        /* --- END NEW MENU STYLE --- */
+
+
+        /* progress line (inline near header area) */
+        #progress-wrap {
+            height: 4px;
+            width: 100%;
+            background: transparent;
+            overflow: hidden;
+            display: block;
+        }
+
+        #progress {
+            height: 4px;
+            width: 0%;
+            transition: width 260ms linear;
+            border-radius: 2px;
+        }
+
+        /* Main layout - takes up remaining space */
+        .layout {
+            flex: 1;
+            display: flex;
+            gap: 16px;
+            max-width: 1200px;
+            margin: 18px auto;
+            padding: 0 16px;
+            align-items: flex-start;
+        }
+
+        /* Sidebar - FIX: Set max width smaller */
+        aside.sidebar {
+            width: 25%;
+            min-width: 200px;
+            max-width: 250px;
+            /* Reduced from 300px to 250px */
+            background: var(--sidebar-bg);
+            border-radius: 12px;
+            padding: 12px;
+            transition: width .32s ease, transform .32s ease;
+            box-shadow: 0 6px 18px rgba(12, 18, 35, 0.04);
+            flex-shrink: 0;
+        }
+
+        aside.sidebar.collapsed {
+            width: 56px;
+            overflow: hidden;
+        }
+
+        .sidebar .title {
+            font-size: 14px;
+            color: #0b1220;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .src-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .src-btn {
+            text-align: left;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            color: #0b1220;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .src-btn:hover {
+            background: rgba(79, 70, 229, 0.08);
+            color: var(--indigo);
+        }
+
+        .src-btn.active {
+            background: var(--accent);
+            box-shadow: inset 3px 0 0 var(--indigo);
+            color: var(--indigo);
+        }
+
+        /* Content card - Takes up remaining 3/4 space */
+        .card {
+            flex: 1;
+            background: var(--card);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 6px 20px rgba(12, 18, 35, 0.04);
+            min-width: 0;
+        }
+
+        /* month tabs */
+        .month-tabs {
+            display: flex;
+            gap: 8px;
+            overflow: auto;
+            padding-bottom: 6px;
+            margin-bottom: 12px;
+        }
+
+        .month-tab {
+            padding: 8px 12px;
+            border-radius: 999px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .month-tab:hover {
+            transform: translateY(-2px);
+            transition: transform .14s ease;
+            opacity: 0.95;
+        }
+
+        /* events - NEW STYLING */
+        .day-card {
+            border-radius: 12px;
+            /* slightly more rounded */
+            border: 1px solid #e0e7ff;
+            /* softer border */
+            margin-bottom: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(12, 18, 35, 0.05);
+            /* subtle shadow */
+        }
+
+        .day-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 12px 16px;
+            /* slightly larger padding */
+            align-items: center;
+            cursor: pointer;
+            /* Base background is applied by JS */
+        }
+
+        /* Make day text bigger */
+        .day-head strong {
+            font-size: 18px;
+            /* Bigger font for the date/day */
+            font-weight: 700;
+        }
+
+        .day-content {
+            padding: 12px;
+            display: block;
+            border-top: 1px solid rgba(224, 231, 255, 0.5);
+        }
+
+        /* Add shadow and better border to events */
+        .event-row {
+            background: white;
+            border: 1px solid #eef2f8;
+            padding: 12px;
+            /* slightly larger padding */
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            box-shadow: 0 2px 5px rgba(12, 18, 35, 0.02);
+            /* very subtle shadow on event rows */
+        }
+
+        /* Title is smaller (14px) and bold */
+        .event-row .title {
+            font-weight: 700;
+            color: #0b1220;
+            text-decoration: none;
+            font-size: 14px;
+            display: block;
+            line-height: 1.3;
+        }
+
+        /* Meta/Address is bigger (18px) and normal weight */
+        .event-row .meta {
+            color: var(--muted);
+            font-size: 18px;
+            /* BUMPED: Event text is bigger than title */
+            font-weight: 500;
+            line-height: 1.3;
+            margin-top: 4px;
+        }
+
+        /* config list */
+        .config-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+            padding: 8px;
+            border-radius: 8px;
+            background: #f8fafc;
+            border: 1px solid #eef2f8;
+        }
+
+        .cfg-actions button {
+            font-size: 12px;
+            padding: 6px 8px;
+            border-radius: 6px;
+        }
+
+        /* toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 8px 24px rgba(2, 6, 23, 0.12);
+            opacity: 0;
+            transform: translateY(-10px) scale(.98);
+            transition: all .22s ease;
+            z-index: 60;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .toast.ok {
+            background: #16a34a;
+        }
+
+        /* green */
+        .toast.err {
+            background: #dc2626;
+        }
+
+        /* red */
+
+        /* progress color states */
+        #progress.ok {
+            background: #16a34a;
+        }
+
+        #progress.err {
+            background: #dc2626;
+        }
+
+        #progress.loading {
+            background: linear-gradient(90deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.95));
+            animation: prog 1.3s linear infinite;
+        }
+
+        @keyframes prog {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        /* Footer style */
+        footer.app-footer {
+            background: var(--card);
+            border-top: 1px solid #e6edf3;
+            padding: 10px 16px;
+            flex-shrink: 0;
+            /* Prevent footer from shrinking */
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: flex-end;
+            /* Align right */
+            gap: 20px;
+            align-items: center;
+            font-size: 11px;
+            /* Very small font as requested */
+            color: var(--muted);
+        }
+
+
+        /* responsive */
+        @media (max-width:900px) {
+            .layout {
+                padding: 0 12px;
+                flex-direction: column;
+            }
+
+            aside.sidebar {
+                /* Overwrite desktop sizing for mobile */
+                width: 100%;
+                max-width: none;
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="app-header">
+        <div class="topbar">
+            <div class="brand">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+                    <rect width="24" height="24" rx="6" fill="#eef2ff" />
+                    <path d="M7 12h10M7 8h10M7 16h10" stroke="#4f46e5" stroke-width="1.6" stroke-linecap="round" />
+                </svg>
+                <h1>Vg Events Viewer</h1>
+            </div>
+
+            <nav class="topnav" aria-label="Main navigation">
+                <button id="nav-events" class="active" onclick="showSection('events')">Events</button>
+                <button id="nav-map" onclick="showSection('map')">Map</button>
+                <button id="nav-route" onclick="openRoute()">Route</button>
+                <button id="nav-config" onclick="showSection('config')">Config</button>
+            </nav>
+
+            <input id="filter-input" placeholder="Rechercher titre, adresse ou ville..."
+                style="flex: 1; max-width: 300px; padding:8px;border-radius:8px;border:1px solid #e6edf3"
+                oninput="applyFilter()">
+
+            <div style="display:flex;align-items:center;gap:12px;">
+                <label style="font-size:12px;color:var(--muted);">
+                    <input id="json-file-input" type="file" multiple accept=".json" style="display:none">
+                    <button class="btn" onclick="document.getElementById('json-file-input').click()"
+                        style="background:var(--indigo); color:white; border:none; border-radius:8px; padding:8px 10px;">Load
+                        files</button>
+                </label>
+            </div>
+        </div>
+
+        <div id="progress-wrap" aria-hidden="true">
+            <div id="progress"></div>
+        </div>
+    </header>
+
+    <div class="layout">
+
+        <aside id="sidebar" class="sidebar collapsed">
+            <div class="title">
+                <div>Sources</div>
+                <button id="toggleSidebar" title="Collapse"
+                    style="background:transparent;border:none;cursor:pointer;font-weight:700;color:var(--muted)">☰</button>
+            </div>
+            <div class="src-list" id="sources-list" aria-live="polite"></div>
+        </aside>
+
+        <div class="card">
+            <section id="section-events">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                    <div style="display:flex;gap:12px;align-items:center;">
+                        <h2 style="margin:0;font-size:18px;font-weight:700">Événements par mois</h2>
+                    </div>
+                    <div></div>
+                </div>
+
+                <div class="month-tabs" id="month-tabs" aria-label="Months"></div>
+
+                <div id="month-content"></div>
+                <p id="no-events" style="color:var(--muted); display:none;">Aucun événement trouvé.</p>
+            </section>
+
+            <section id="section-map" class="hidden" aria-hidden="true">
+                <h3 style="margin-top:0">Carte</h3>
+                <div
+                    style="height:380px;background:#f8fafc;border-radius:10px;border:1px solid #eef2f8; display:flex; align-items:center; justify-content:center; color:var(--muted)">
+                    Map rendering is not implemented in this basic viewer, but data is ready.
+                </div>
+            </section>
+
+            <section id="section-config" class="hidden" aria-hidden="true">
+                <h3 style="margin-top:0">Configuration des sources</h3>
+                <form id="source-form" style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;margin-top:12px;"
+                    onsubmit="return saveSource(event)">
+                    <input id="src-name" placeholder="Name e.g. Vg" required
+                        style="padding:8px;border-radius:8px;border:1px solid #e6edf3" />
+                    <input id="src-url" placeholder="https://jsonhosting.com/api/json/..." required
+                        style="padding:8px;border-radius:8px;border:1px solid #e6edf3" />
+                    <div style="display:flex;gap:8px;">
+                        <button type="submit"
+                            style="background:var(--indigo);color:white;border:none;padding:8px 12px;border-radius:8px">Save</button>
+                        <button type="button" onclick="resetForm()"
+                            style="background:white;border:1px solid #e6edf3;padding:8px 12px;border-radius:8px">Reset</button>
+                    </div>
+                </form>
+
+                <div id="config-list" style="margin-top:12px;display:flex;flex-direction:column;gap:8px"></div>
+            </section>
+        </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div id="footer-status-all">Initializing...</div>
+        </div>
+    </footer>
+
+    <script>
+        /* --- Config --- */
+        const PROXY = 'https://api.codetabs.com/v1/proxy/?quest=';
+        const STORAGE_KEY = 'eventsviewer_sources_v3';
+        const MONTH_ABBR = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+        const DAY_MAP = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+        const DAY_COLORS = {
+            'Samedi': '#7DF9FF', // Light Cyan
+            'Dimanche': '#FFFAA0' // Light Yellow
+        };
+        const OTHER_DAY_COLOR = '#FAA0A0'; // Light Red
+        const TAB_COLORS = ['#4f46e5', '#2563eb', '#16a34a', '#0ea5a4', '#06b6d4', '#db2777', '#f59e0b', '#7c3aed', '#10b981', '#ef4444', '#0ea5a4', '#f97316'];
+        const START_ADDRESS = "5 rue victor considérant 75014 paris"; // Default origin address for maps
+
+        /* --- State --- */
+        let activeSource = null;
+        let activeFilterQuery = '';
+
+        // Global state for source data and status (replaces cache)
+        const sourceCounts = {};
+        let lastUpdate = 'N/A';
+
+        /* --- Helpers --- */
+        const $ = id => document.getElementById(id);
+        const safeId = s => String(s).replace(/[^a-z0-9]/gi, '_');
+
+        function showToast(message, status = 'ok', ms = 2200) {
+            const t = $('toast');
+            t.textContent = message;
+            t.className = 'toast show ' + (status === 'err' ? 'err' : 'ok');
+            t.setAttribute('aria-label', message);
+            clearTimeout(t._h);
+            t._h = setTimeout(() => t.className = 'toast', ms);
+        }
+
+        /**
+         * UPDATED: Consolidates all status info into the footer.
+         */
+        function updateFooterStatus() {
+            // CORRECTION: Use Object.entries() to get both 'name' and 'details' object
+            const parts = Object.entries(sourceCounts)
+                // 1. Filter: Keep only initialized sources that have events or are the active source
+                .filter(([name, details]) =>
+                    details && (details.count > 0 || name === activeSource)
+                )
+                // 2. Map: Format the remaining sources into the display string
+                .map(([name, details]) =>
+                    `${name} (${details.count})`
+                );
+
+            const lastUpdateDisplay = lastUpdate === 'N/A' ? 'N/A' : new Date(lastUpdate).toLocaleString('fr-FR');
+
+            let footerContent = parts.join(' | ');
+
+            if (footerContent) {
+                footerContent += ' | ';
+            } else {
+                footerContent = 'No data loaded. | ';
+            }
+
+            footerContent += `Last update : ${lastUpdateDisplay}`;
+
+            $('footer-status-all').textContent = footerContent;
+        }
+
+
+        function getFrenchDay(date) {
+            if (!date) return '';
+            return DAY_MAP[date.getDay()];
+        }
+
+        function getDirectionsUrl(eventAddress) {
+            const origin = encodeURIComponent(START_ADDRESS);
+            const destination = encodeURIComponent(eventAddress);
+            // This URL structure is for Google Maps directions
+            return `https://www.google.com/maps/dir/${origin}/${destination}`;
+        }
+
+        function highlightText(text, query) {
+            if (!query) return text;
+            const regex = new RegExp(query, 'gi');
+            // Pale yellow background color is #ffffe0
+            return text.replace(regex, match => `<mark style="background-color: #ffffe0; padding: 0 2px;">${match}</mark>`);
+        }
+
+        /* --- Progress bar (inline bar under header) --- */
+        const progressEl = (() => $('progress'))();
+        function progressStart() {
+            progressEl.className = 'loading';
+            progressEl.style.width = '6%';
+            setTimeout(() => progressEl.style.width = '35%', 80);
+        }
+        function progressSetOk() {
+            progressEl.className = 'ok';
+            progressEl.style.width = '100%';
+            setTimeout(() => { progressEl.style.width = '0%'; progressEl.className = ''; }, 700);
+        }
+        function progressSetErr() {
+            progressEl.className = 'err';
+            progressEl.style.width = '100%';
+            setTimeout(() => { progressEl.style.width = '0%'; progressEl.className = ''; }, 1200);
+        }
+
+        /* --- Date parsing & grouping --- */
+
+        /**
+         * Parses a date string, handling optional leading weekdays and both French/English month names.
+         * @param {string} str - The date string (e.g., "Saturday 22 November 2025" or "22 Novembre 2025").
+         * @returns {Date | null} The parsed Date object.
+         */
+        function parseEventDate(str) {
+            if (!str) return null;
+
+            const match = str.match(/(?:[a-zA-ZÀ-ÿ]+\s+)*(\d{1,2})\s+([a-zéûäàîôA-Z]+)\s+(\d{4})/i);
+
+            if (!match) return null;
+
+            const d = +match[1];
+            const monthStr = match[2].toLowerCase();
+            const y = +match[3];
+
+            const map = {
+                // French months
+                janvier: 0, février: 1, fevrier: 1, mars: 2, avril: 3, mai: 4, juin: 5,
+                juillet: 6, août: 7, aout: 7, septembre: 8, octobre: 9, novembre: 10, décembre: 11, decembre: 11,
+                // English months
+                january: 0, february: 1, march: 2, april: 3, may: 4, june: 5, july: 6, august: 7,
+                september: 8, october: 9, november: 10, december: 11
+            };
+
+            const mo = map[monthStr];
+
+            return typeof mo === 'number' ? new Date(y, mo, d) : null;
+        }
+
+        function formatMonthKey(d) { return `${MONTH_ABBR[d.getMonth()]} ${d.getFullYear()}`; }
+
+        /**
+         * Recursively extracts and normalizes event objects, keeping only 6 specific properties.
+         * @param {object|array} node - The current JSON node.
+         * @param {Array<object>} out - The array to push valid, normalized events into.
+         */
+        function extractEvents(node, out) {
+            if (!node) return;
+
+            // Define the only keys we want to keep
+            const eventKeys = ["Titre", "Ville", "Adresse", "Exposants", "ManifDate", "ManifLink"];
+            const requiredKeys = ["Titre", "Adresse", "ManifDate"]; // Minimum required fields for an object to be considered an event
+
+            // Helper function to normalize an event object
+            const normalizeEvent = (item) => {
+                const event = {};
+                eventKeys.forEach(k => {
+                    if (item.hasOwnProperty(k)) event[k] = item[k];
+                });
+                return event;
+            };
+
+            if (Array.isArray(node)) {
+                // Filter the array to find valid event objects, then normalize them
+                const validEvents = node.filter(item =>
+                    typeof item === 'object' && requiredKeys.every(k => item.hasOwnProperty(k))
+                ).map(normalizeEvent);
+
+                if (validEvents.length > 0) {
+                    out.push(...validEvents);
+                } else {
+                    // Recurse into array elements if they are objects (for deep/complex arrays)
+                    node.forEach(v => extractEvents(v, out));
+                }
+            }
+            else if (typeof node === 'object') {
+                // 1. Check if the object itself is a single, valid event
+                if (requiredKeys.every(k => node.hasOwnProperty(k))) {
+                    // Normalize and push single event
+                    out.push(normalizeEvent(node));
+                }
+
+                // 2. Recurse into object values (keys) to find nested event arrays/objects
+                Object.values(node).forEach(v => extractEvents(v, out));
+            }
+        }
+
+        function groupEvents(evts) {
+            const g = {};
+            for (const e of evts) {
+                const d = parseEventDate(e.ManifDate);
+                if (!d) continue;
+                const m = formatMonthKey(d);
+                g[m] ??= {};
+                g[m][e.ManifDate] ??= [];
+                g[m][e.ManifDate].push(e);
+            }
+            return g;
+        }
+        function sortGrouped(g) {
+            const out = {};
+            Object.keys(g).sort((a, b) => {
+                const [ma, ya] = a.split(' '), [mb, yb] = b.split(' ');
+                const ia = MONTH_ABBR.indexOf(ma), ib = MONTH_ABBR.indexOf(mb);
+                return (+ya - +yb) || ia - ib;
+            }).forEach(m => {
+                out[m] = {};
+                Object.keys(g[m]).sort((a, b) => parseEventDate(a) - parseEventDate(b))
+                    .forEach(d => out[m][d] = [...g[m][d]]);
+            });
+            return out;
+        }
+
+        /**
+         * Toggles the clicked day's content and collapses all others in the same month.
+         * @param {HTMLElement} currentDayCard - The .day-card element that was clicked.
+         * @param {string} monthPanelId - The ID of the parent month panel (e.g., "panel_JUN_2025").
+         */
+        function toggleDayCollapse(currentDayCard, monthPanelId) {
+            const currentContent = currentDayCard.querySelector('.day-content');
+
+            // 1. Check if the clicked group is currently open
+            const isOpen = currentContent.style.display === 'block';
+
+            // 2. Iterate over all day cards in the current month panel and collapse them
+            const monthPanel = $(monthPanelId);
+            if (monthPanel) {
+                monthPanel.querySelectorAll('.day-card').forEach(dayCard => {
+                    const content = dayCard.querySelector('.day-content');
+                    if (content) {
+                        content.style.display = 'none';
+                    }
+                });
+            }
+
+            // 3. If the clicked group was not open (i.e., we want to open it now), then open it
+            if (!isOpen) {
+                currentContent.style.display = 'block';
+            }
+        }
+
+        /* --- Render functions --- */
+        function renderSources() {
+            const s = loadSources();
+            const left = $('sources-list'); left.innerHTML = '';
+            const cfg = $('config-list'); cfg.innerHTML = '';
+
+            // Ensure some defaults for Vg and Broc 
+            if (Object.keys(s).length === 0) {
+                s['Vg'] = 'https://jsonhosting.com/api/json/c3cdf9e5';
+                s['Broc'] = 'https://jsonhosting.com/api/json/2ea29f9a';
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+            }
+
+            Object.keys(s).forEach(name => {
+                const url = s[name];
+
+                // left sidebar button
+                const btn = document.createElement('button');
+                btn.className = 'src-btn' + (activeSource === name ? ' active' : '');
+                btn.textContent = name;
+                btn.title = url;
+                btn.onclick = () => selectSource(name);
+                left.appendChild(btn);
+
+                // config row
+                const row = document.createElement('div'); row.className = 'config-row';
+
+                // NEW: Div to hold name and URL with Copy URL button
+                const leftDiv = document.createElement('div'); leftDiv.style.fontSize = '13px';
+                leftDiv.style.display = 'flex';
+                leftDiv.style.alignItems = 'center';
+
+                const nameUrlSpan = document.createElement('span');
+                nameUrlSpan.textContent = name + ' — ' + url;
+                leftDiv.appendChild(nameUrlSpan);
+
+                // Copy URL button
+                const copyUrlBtn = document.createElement('button');
+                copyUrlBtn.textContent = '';
+                copyUrlBtn.title = 'Copy URL';
+                copyUrlBtn.style.padding = '0 6px';
+                copyUrlBtn.style.marginLeft = '8px';
+                copyUrlBtn.style.background = 'transparent';
+                copyUrlBtn.style.border = 'none';
+                copyUrlBtn.style.cursor = 'pointer';
+                copyUrlBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1"></rect></svg>`;
+                copyUrlBtn.onclick = () => copyToClipboard(url);
+
+                if (!url.startsWith('local://')) { // Don't show copy for local pseudo-URLs
+                    leftDiv.appendChild(copyUrlBtn);
+                }
+
+                const right = document.createElement('div'); right.className = 'cfg-actions';
+                const eBtn = document.createElement('button'); eBtn.textContent = 'Edit'; eBtn.onclick = () => editSource(name);
+                const dBtn = document.createElement('button'); dBtn.textContent = 'Delete'; dBtn.onclick = () => removeSource(name);
+                [eBtn, dBtn].forEach(b => { b.style.marginLeft = '6px'; b.style.padding = '6px 8px'; b.style.border = '1px solid #e6edf3'; b.style.borderRadius = '6px'; b.style.background = 'white'; });
+
+                right.appendChild(eBtn); right.appendChild(dBtn);
+                row.appendChild(leftDiv);
+                row.appendChild(right);
+                cfg.appendChild(row);
+            });
+
+            // update active highlight
+            document.querySelectorAll('.src-btn').forEach(el => {
+                if (el.textContent === activeSource) el.classList.add('active'); else el.classList.remove('active');
+            });
+        }
+
+        // Renders the Month tabs based on grouped data
+        function renderTabsForGrouped(g) {
+            const tabs = $('month-tabs'); tabs.innerHTML = '';
+            const months = Object.keys(g);
+            if (!months.length) { $('no-events').style.display = 'block'; return; } else $('no-events').style.display = 'none';
+
+            months.forEach((m, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'month-tab';
+                btn.style.background = TAB_COLORS[i % TAB_COLORS.length];
+                btn.textContent = m;
+                btn.onclick = () => openMonth(m);
+                btn.dataset.month = m;
+                tabs.appendChild(btn);
+            });
+        }
+
+        function renderMonthContent(g) {
+            const container = $('month-content'); container.innerHTML = '';
+            Object.keys(g).forEach(month => {
+                const monthId = 'panel_' + safeId(month); // Pre-calculate month ID
+                const panel = document.createElement('div'); panel.id = monthId;
+                panel.style.display = 'none'; // hidden by default; openMonth will show first
+
+                Object.keys(g[month]).sort((a, b) => parseEventDate(a) - parseEventDate(b)).forEach(day => {
+                    const dateObj = parseEventDate(day);
+                    const frenchDay = getFrenchDay(dateObj); // e.g. "Samedi"
+
+                    // Remove duplicate day name from display string
+                    const displayDate = day.replace(new RegExp(`^${frenchDay}\\s+`, 'i'), '');
+
+                    const color = DAY_COLORS[frenchDay] || OTHER_DAY_COLOR;
+
+                    const dayDiv = document.createElement('div'); dayDiv.className = 'day-card';
+                    const head = document.createElement('div'); head.className = 'day-head';
+                    head.style.background = color; // Apply day color
+
+                    head.innerHTML = `<div><strong>${frenchDay} ${displayDate}</strong> <span style="color:#1f2937;font-size:13px;font-weight:500">(${g[month][day].length})</span></div>`;
+
+                    // Update click handler to use new collapse logic
+                    head.onclick = () => toggleDayCollapse(dayDiv, monthId);
+
+                    const content = document.createElement('div'); content.className = 'day-content';
+
+                    // add events
+                    g[month][day].forEach(ev => {
+
+                        const directionsAddress = (ev.Adresse || '').trim() + (ev.Ville ? ', ' + ev.Ville : '');
+                        const directionsUrl = getDirectionsUrl(directionsAddress);
+
+                        const metaAddress = (ev.Adresse || '').trim().replace(/,\s*$/g, '');
+
+                        const evRow = document.createElement('div'); evRow.className = 'event-row';
+
+                        // 1. Copy Address button
+                        const clipBtn = document.createElement('button'); clipBtn.className = 'copy-addr-btn'; clipBtn.title = 'Copy address';
+                        clipBtn.style.flexShrink = 0;
+                        clipBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1"></rect></svg>`;
+                        clipBtn.onclick = () => copyToClipboard(metaAddress);
+
+                        // 2. Copy Event Link button (NEW)
+                        const linkBtn = document.createElement('button'); linkBtn.className = 'copy-link-btn'; linkBtn.title = 'Copy event link';
+                        linkBtn.style.flexShrink = 0;
+                        linkBtn.style.marginLeft = '4px';
+                        linkBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.74 1.74"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`;
+                        linkBtn.onclick = () => copyToClipboard(ev.ManifLink || window.location.href);
+
+                        // 3. Event Body (Title + Meta)
+                        const body = document.createElement('div'); body.style.flex = '1';
+
+                        // New Title Format: Titre (Ville) 
+                        const newTitleText = `${ev.Titre || 'Sans titre'} ${ev.Ville ? `(${ev.Ville})` : ''}`.trim();
+
+                        const title = document.createElement('a');
+                        title.href = ev.ManifLink || '#';
+                        title.target = '_blank';
+                        title.className = 'title';
+                        title.innerHTML = highlightText(newTitleText, activeFilterQuery);
+
+                        // Exposants logic and formatting
+                        const exposantCount = parseInt(ev.Exposants) || 0;
+                        let exposantDisplay = '';
+                        let exposantColor = 'inherit';
+
+                        if (exposantCount > 0) {
+                            if (exposantCount >= 300) {
+                                exposantColor = '#dc2626'; // Red
+                            } else if (exposantCount >= 101) {
+                                exposantColor = '#f59e0b'; // Orange
+                            }
+                            exposantDisplay = `<span style="font-weight:700; color:${exposantColor};">${exposantCount}</span> | `;
+                        }
+
+                        // New Meta Format: <Exposant Count> | Adresse
+                        const metaText = `${exposantDisplay}${metaAddress}`;
+
+                        const meta = document.createElement('div');
+                        meta.className = 'meta';
+                        meta.innerHTML = highlightText(metaText, activeFilterQuery);
+
+                        body.appendChild(title);
+                        body.appendChild(meta);
+
+                        // 4. Directions icon button
+                        const mapBtn = document.createElement('button'); mapBtn.className = 'map-btn'; mapBtn.title = 'Itinéraire Google Maps';
+                        mapBtn.style.flexShrink = 0;
+                        // Signpost/Navigation icon
+                        mapBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>`;
+                        mapBtn.onclick = () => window.open(directionsUrl, '_blank');
+
+                        evRow.appendChild(clipBtn);
+                        evRow.appendChild(linkBtn); // Added link button
+                        evRow.appendChild(body);
+                        evRow.appendChild(mapBtn);
+                        content.appendChild(evRow);
+                    });
+
+                    content.style.display = 'none';
+                    dayDiv.appendChild(head); dayDiv.appendChild(content);
+                    panel.appendChild(dayDiv);
+                });
+
+                container.appendChild(panel);
+            });
+
+            // show first month panel by default if exists
+            const first = Object.keys(g)[0];
+            if (first) openMonth(first);
+        }
+
+        /**
+         * Updates the main event display area.
+         */
+        function updateEventUI(r, g, name) {
+            renderTabsForGrouped(g);
+            renderMonthContent(g);
+            renderSources(); // ensure highlight is correct
+        }
+
+        /* --- UI actions for months and sources --- */
+        function openMonth(month) {
+            // show selected month panel and mark tab active; do not clear data when switching
+            document.querySelectorAll('.month-tab').forEach(tb => tb.classList.remove('active'));
+            const tab = [...document.querySelectorAll('.month-tab')].find(x => x.textContent === month);
+            if (tab) tab.classList.add('active');
+
+            // hide all panels
+            document.querySelectorAll('[id^="panel_"]').forEach(el => el.style.display = 'none');
+            const panel = $('panel_' + safeId(month));
+            if (panel) panel.style.display = 'block';
+
+            // When changing month, all days should be collapsed by default
+            panel.querySelectorAll('.day-content').forEach(el => el.style.display = 'none');
+
+        }
+
+        /* --- Sources storage CRUD --- */
+        function loadSources() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
+        }
+        function saveSources(obj) { localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); renderSources(); }
+
+        function saveSource(e) {
+            e.preventDefault();
+            const name = $('src-name').value.trim();
+            const url = $('src-url').value.trim();
+            if (!name || !url) return false;
+            const s = loadSources(); s[name] = url; saveSources(s);
+            $('src-name').value = ''; $('src-url').value = '';
+            showToast('Source saved', 'ok');
+            selectSource(name);
+            return false;
+        }
+        function resetForm() { $('src-name').value = ''; $('src-url').value = ''; }
+        function editSource(name) {
+            const s = loadSources();
+            if (!s[name]) return showToast('Source not found', 'err');
+            $('src-name').value = name; $('src-url').value = s[name];
+        }
+        function removeSource(name) {
+            const s = loadSources(); if (!s[name]) return;
+            delete s[name]; saveSources(s);
+            delete sourceCounts[name];
+            updateFooterStatus();
+            showToast('Source removed', 'ok');
+            if (activeSource === name) {
+                activeSource = null;
+                updateEventUI([], {}, null); // Clear UI
+            }
+        }
+
+        /* --- Core Fetching Logic (No Caching) --- */
+        async function fetchSource(name, url) {
+            const fetchUrl = url.startsWith('http') ? PROXY + encodeURIComponent(url) : url;
+
+            progressStart();
+            console.log(`[DEBUG: ${name}] Starting fetch from: ${fetchUrl}`);
+
+            try {
+                const res = await fetch(fetchUrl);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+
+                const text = await res.text();
+                // CONSOLE LOG FOR DEBUGGING JSON STRUCTURE
+                console.log(`[DEBUG: ${name}] Raw Response Text (first 500 chars):`, text.substring(0, 500) + '...');
+
+                const json = JSON.parse(text);
+                // CONSOLE LOG FOR DEBUGGING JSON STRUCTURE
+                console.log(`[DEBUG: ${name}] Parsed JSON Structure:`, json);
+
+                const r = [];
+                extractEvents(json, r);
+
+                // CONSOLE LOG FOR DEBUGGING EVENT COUNT
+                console.log(`[DEBUG: ${name}] Extracted Events Count: ${r.length}`);
+                if (r.length === 0) {
+                    console.warn(`[DEBUG: ${name}] Events count is 0. If you expected events, please inspect the "Parsed JSON Structure" log above and adjust the 'extractEvents' function if the events are deeply nested.`);
+                }
+
+                const g = sortGrouped(groupEvents(r));
+
+                const now = new Date().toISOString();
+                lastUpdate = now;
+
+                // Update global state for this source
+                sourceCounts[name] = { count: r.length, loadedAt: now, status: 'ok', rawEvents: r, grouped: g };
+
+                // If this is the active source, update the UI
+                if (activeSource === name) {
+                    updateEventUI(r, g, name);
+                }
+
+                updateFooterStatus();
+                progressSetOk();
+
+                // Map Ready Notification (NEW)
+                if (r.length > 0) {
+                    showToast(`Map data ready (${r.length} events loaded).`, 'ok', 3000);
+                }
+
+            } catch (err) {
+                // Update global state for error (count 0, clear data)
+                sourceCounts[name] = { count: 0, loadedAt: new Date().toISOString(), status: 'error', rawEvents: [], grouped: {} };
+                const errorMessage = `Load error for ${name} (Proxy/CORS/JSON parse failure).`;
+
+                if (activeSource === name) {
+                    updateEventUI([], {}, name); // Clear UI
+                }
+
+                updateFooterStatus();
+                progressSetErr();
+                showToast(errorMessage, 'err');
+                console.error(`Fetch failed for ${name}:`, err);
+            }
+        }
+
+
+        /* --- Source Selection (Always fetches or loads data) --- */
+        async function selectSource(name) {
+            const all = loadSources();
+            if (!all[name]) return showToast('Source not found', 'err');
+
+            activeSource = name;
+            renderSources(); // Update visual highlight
+
+            // Clear filter when changing source
+            $('filter-input').value = '';
+            activeFilterQuery = '';
+
+            const loadedData = sourceCounts[name];
+
+            if (loadedData && loadedData.status === 'ok') {
+                // Data is present from a previous successful fetch, display it immediately
+                updateEventUI(loadedData.rawEvents, loadedData.grouped, name);
+            } else {
+                // Clear UI if no valid data is present
+                updateEventUI([], {}, name);
+            }
+            updateFooterStatus(); // Update footer to show selection
+
+            // Always initiate a new fetch/load to get the freshest data 
+            if (all[name].startsWith('local://')) {
+                // For local files, we just ensure the empty data is loaded and wait for user input
+                if (!loadedData) {
+                    sourceCounts[name] = { count: 0, loadedAt: new Date().toISOString(), status: 'idle', rawEvents: [], grouped: {} };
+                }
+                updateEventUI([], {}, name);
+                updateFooterStatus();
+            } else {
+                await fetchSource(name, all[name]);
+            }
+        }
+
+        /* --- Local file handling (input) --- */
+        function handleFiles(fileList) {
+            if (!fileList || fileList.length === 0) return showToast('No files selected', 'err');
+            const files = Array.from(fileList).filter(f => f.name.toLowerCase().endsWith('.json'));
+            if (!files.length) {
+                $('json-file-input').value = '';
+                return showToast('No JSON files found', 'err');
+            }
+
+            progressStart();
+            const sourceName = 'Local';
+
+            const accum = [];
+            let processed = 0;
+
+            files.forEach(f => {
+                const r = new FileReader();
+                r.onload = e => {
+                    try {
+                        const js = JSON.parse(e.target.result);
+                        console.log(`[DEBUG: ${sourceName}] Parsed JSON for ${f.name}:`, js);
+                        extractEvents(js, accum);
+                    } catch (ex) {
+                        console.warn('invalid json', f.name, ex);
+                        showToast(`Invalid JSON in ${f.name}`, 'err', 4000);
+                    }
+                    processed++;
+                    if (processed === files.length) {
+
+                        const s = loadSources();
+                        // Add or update 'Local' source in storage
+                        s[sourceName] = 'local://loaded:' + files.length;
+                        saveSources(s);
+
+                        activeSource = sourceName;
+
+                        const g = sortGrouped(groupEvents(accum));
+
+                        const now = new Date().toISOString();
+                        lastUpdate = now;
+
+                        // Populate rawEvents and grouped data correctly
+                        sourceCounts[sourceName] = { count: accum.length, loadedAt: now, status: 'ok', rawEvents: accum, grouped: g };
+
+                        updateEventUI(accum, g, sourceName);
+                        updateFooterStatus();
+
+                        progressSetOk();
+                        showToast(`Local files loaded. Found ${accum.length} events.`, 'ok');
+                    }
+                };
+                r.onerror = e => {
+                    processed++;
+                    console.error('File read error', f.name, e);
+                    showToast(`File read error for ${f.name}`, 'err', 4000);
+                    if (processed === files.length) {
+                        progressSetErr();
+                        updateFooterStatus();
+                    }
+                }
+                r.readAsText(f);
+            });
+            $('json-file-input').value = '';
+        }
+
+
+        /* --- File input wiring --- */
+        $('json-file-input').addEventListener('change', ev => {
+            handleFiles(ev.target.files);
+        });
+
+        /* --- Clipboard --- */
+        function copyToClipboard(txt) {
+            navigator.clipboard.writeText(txt).then(() => {
+                showToast('Copied to clipboard', 'ok');
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+                // Fallback attempt for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = txt;
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('Copied to clipboard (fallback)', 'ok');
+                } catch (e) {
+                    showToast('Copy failed', 'err');
+                }
+                document.body.removeChild(textarea);
+            });
+        }
+
+        /* --- Filter --- */
+        function applyFilter() {
+            const q = $('filter-input').value.trim().toLowerCase();
+            activeFilterQuery = q;
+
+            const loadedData = sourceCounts[activeSource];
+            if (!loadedData || loadedData.status !== 'ok') {
+                // If there's no data, clear the UI, but don't error out.
+                renderTabsForGrouped({});
+                renderMonthContent({});
+                return;
+            }
+
+            const rawEventsToFilter = loadedData.rawEvents;
+
+            const filtered = rawEventsToFilter.filter(e =>
+                (e.Titre || '').toLowerCase().includes(q) ||
+                (e.Adresse || '').toLowerCase().includes(q) ||
+                (e.Ville || '').toLowerCase().includes(q)
+            );
+
+            // Group filtered events.
+            const g = sortGrouped(groupEvents(filtered));
+
+            // Re-render months and content using the filtered group
+            renderTabsForGrouped(g);
+            renderMonthContent(g);
+        }
+
+        /* --- Sidebar toggle --- */
+        $('toggleSidebar').addEventListener('click', () => {
+            const sb = $('sidebar');
+            sb.classList.toggle('collapsed');
+        });
+
+        /* --- Nav / Route --- */
+        function showSection(name) {
+            ['events', 'map', 'config'].forEach(s => {
+                const el = document.getElementById('section-' + s);
+                if (!el) return;
+                if (s === name) { el.classList.remove('hidden'); el.removeAttribute('aria-hidden'); }
+                else { el.classList.add('hidden'); el.setAttribute('aria-hidden', 'true'); }
+            });
+            document.querySelectorAll('.topnav button').forEach(b => b.classList.remove('active'));
+            if (name === 'events') $('nav-events').classList.add('active');
+            if (name === 'map') $('nav-map').classList.add('active');
+            if (name === 'config') $('nav-config').classList.add('active');
+        }
+        function openRoute() { window.open('RoutePlan.html', '_blank'); }
+
+        /* --- Init --- */
+        function init() {
+            renderSources();
+            const s = loadSources();
+            const sourceNames = Object.keys(s);
+
+            // 1. Initialise all sources state and trigger fetch for online ones
+            sourceNames.forEach(name => {
+                sourceCounts[name] = { count: 0, loadedAt: new Date().toISOString(), status: 'idle', rawEvents: [], grouped: {} };
+                if (!s[name].startsWith('local://')) {
+                    fetchSource(name, s[name]);
+                }
+            });
+
+            // 2. Set the active source and update UI (clears it initially)
+            if (sourceNames.length > 0) {
+                activeSource = sourceNames[0];
+                renderSources();
+                updateEventUI([], {}, activeSource);
+            }
+
+            // 3. Set the initial footer status
+            updateFooterStatus();
+        }
+        init();
+
+    </script>
+</body>
+
+</html>
