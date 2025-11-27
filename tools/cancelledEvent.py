@@ -101,7 +101,8 @@ def main():
         "https://vide-greniers.org/evenement/920292/20251123",  # Cancelled
         "https://vide-greniers.org/evenement/936432/20251123",  # Not cancelled
         "https://vide-greniers.org/evenement/936423/20251130",
-        "https://vide-greniers.org/evenement/941827/20251122",
+        "https://vide-greniers.org/evenement/935010/20251129", # cancelled
+        "https://vide-greniers.org/evenement/941827/20251122", 
         "https://vide-greniers.org/evenement/512674/20251123"
     ]
     

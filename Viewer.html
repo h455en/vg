@@ -27,7 +27,6 @@
         body {
             font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
             font-size: 16px;
-            /* BUMPED: Increased base font size from 14px to 16px */
             background: var(--bg);
             margin: 0;
             color: #0f172a;
@@ -38,7 +37,6 @@
             background: var(--card);
             border-bottom: 1px solid #e6edf3;
             position: sticky;
-            /* FIX: Keeps header visible on scroll */
             top: 0;
             z-index: 40;
         }
@@ -58,18 +56,16 @@
             align-items: center;
             gap: 10px;
             flex-shrink: 0;
-            /* Ensures brand doesn't shrink when search is present */
         }
 
         .brand h1 {
             margin: 0;
             font-size: 18px;
-            /* Slightly bigger brand title */
             font-weight: 600;
             color: #0b1220;
         }
 
-        /* --- NEW MENU STYLE --- */
+        /* --- MENU STYLE --- */
         nav.topnav {
             display: flex;
             gap: 0px;
@@ -91,7 +87,8 @@
             font-weight: 500;
             transition: background 0.15s ease;
             font-size: 14px;
-            /* Ensure nav buttons aren't too big */
+            white-space: nowrap;
+            /* Prevent wrap in menu items */
         }
 
         .topnav button:hover {
@@ -119,10 +116,7 @@
             color: white;
         }
 
-        /* --- END NEW MENU STYLE --- */
-
-
-        /* progress line (inline near header area) */
+        /* progress line */
         #progress-wrap {
             height: 4px;
             width: 100%;
@@ -138,77 +132,16 @@
             border-radius: 2px;
         }
 
-        /* Main layout - takes up remaining space */
+        /* Main layout - Sidebar removed, so no need for complex row/column layouts */
         .layout {
             flex: 1;
-            display: flex;
-            gap: 16px;
+            display: block;
             max-width: 1200px;
             margin: 18px auto;
             padding: 0 16px;
-            align-items: flex-start;
         }
 
-        /* Sidebar - FIX: Set max width smaller */
-        aside.sidebar {
-            width: 25%;
-            min-width: 200px;
-            max-width: 250px;
-            /* Reduced from 300px to 250px */
-            background: var(--sidebar-bg);
-            border-radius: 12px;
-            padding: 12px;
-            transition: width .32s ease, transform .32s ease;
-            box-shadow: 0 6px 18px rgba(12, 18, 35, 0.04);
-            flex-shrink: 0;
-        }
-
-        aside.sidebar.collapsed {
-            width: 56px;
-            overflow: hidden;
-        }
-
-        .sidebar .title {
-            font-size: 14px;
-            color: #0b1220;
-            font-weight: 600;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .src-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .src-btn {
-            text-align: left;
-            padding: 8px 10px;
-            border-radius: 8px;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            color: #0b1220;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .src-btn:hover {
-            background: rgba(79, 70, 229, 0.08);
-            color: var(--indigo);
-        }
-
-        .src-btn.active {
-            background: var(--accent);
-            box-shadow: inset 3px 0 0 var(--indigo);
-            color: var(--indigo);
-        }
-
-        /* Content card - Takes up remaining 3/4 space */
+        /* Content card */
         .card {
             flex: 1;
             background: var(--card);
@@ -222,7 +155,7 @@
         .month-tabs {
             display: flex;
             gap: 8px;
-            overflow: auto;
+            overflow-x: auto;
             padding-bottom: 6px;
             margin-bottom: 12px;
         }
@@ -234,6 +167,8 @@
             font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
+            flex-shrink: 0;
+            /* Important for horizontal scroll */
         }
 
         .month-tab:hover {
@@ -242,16 +177,13 @@
             opacity: 0.95;
         }
 
-        /* events - NEW STYLING */
+        /* events */
         .day-card {
             border-radius: 12px;
-            /* slightly more rounded */
             border: 1px solid #e0e7ff;
-            /* softer border */
             margin-bottom: 16px;
             overflow: hidden;
             box-shadow: 0 4px 10px rgba(12, 18, 35, 0.05);
-            /* subtle shadow */
         }
 
         .day-head {
@@ -259,16 +191,12 @@
             justify-content: space-between;
             gap: 10px;
             padding: 12px 16px;
-            /* slightly larger padding */
             align-items: center;
             cursor: pointer;
-            /* Base background is applied by JS */
         }
 
-        /* Make day text bigger */
         .day-head strong {
             font-size: 18px;
-            /* Bigger font for the date/day */
             font-weight: 700;
         }
 
@@ -278,39 +206,53 @@
             border-top: 1px solid rgba(224, 231, 255, 0.5);
         }
 
-        /* Add shadow and better border to events */
+        /* Event Row Styling */
         .event-row {
             background: white;
             border: 1px solid #eef2f8;
             padding: 12px;
-            /* slightly larger padding */
             border-radius: 8px;
             margin-bottom: 8px;
             display: flex;
             gap: 10px;
             align-items: flex-start;
             box-shadow: 0 2px 5px rgba(12, 18, 35, 0.02);
-            /* very subtle shadow on event rows */
         }
 
-        /* Title is smaller (14px) and bold */
+        .event-row button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        /* Title: Made bigger (18px) and bolder (700) */
         .event-row .title {
             font-weight: 700;
             color: #0b1220;
             text-decoration: none;
-            font-size: 14px;
+            font-size: 18px;
             display: block;
             line-height: 1.3;
         }
 
-        /* Meta/Address is bigger (18px) and normal weight */
+        /* Meta/Address: Made smaller (14px) and normal weight */
         .event-row .meta {
             color: var(--muted);
-            font-size: 18px;
-            /* BUMPED: Event text is bigger than title */
+            font-size: 14px;
             font-weight: 500;
             line-height: 1.3;
             margin-top: 4px;
+        }
+
+        /* Map Section Styling */
+        #map-container {
+            height: 60vh;
+            min-height: 350px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 1px solid #eef2f8;
+            transition: opacity 0.3s ease;
         }
 
         /* config list */
@@ -325,10 +267,20 @@
             border: 1px solid #eef2f8;
         }
 
+        .cfg-actions {
+            display: flex;
+            flex-wrap: wrap;
+            /* Allow buttons to wrap on small screens */
+            gap: 6px;
+            justify-content: flex-end;
+        }
+
         .cfg-actions button {
             font-size: 12px;
             padding: 6px 8px;
             border-radius: 6px;
+            margin-left: 0 !important;
+            /* Override inline style */
         }
 
         /* toast */
@@ -395,7 +347,6 @@
             border-top: 1px solid #e6edf3;
             padding: 10px 16px;
             flex-shrink: 0;
-            /* Prevent footer from shrinking */
         }
 
         .footer-content {
@@ -403,27 +354,73 @@
             margin: 0 auto;
             display: flex;
             justify-content: flex-end;
-            /* Align right */
-            gap: 20px;
             align-items: center;
             font-size: 11px;
-            /* Very small font as requested */
             color: var(--muted);
+            width: 100%;
         }
 
 
         /* responsive */
-        @media (max-width:900px) {
+        @media (max-width: 900px) {
             .layout {
-                padding: 0 12px;
-                flex-direction: column;
+                padding: 0 8px;
+                margin-top: 12px;
             }
 
-            aside.sidebar {
-                /* Overwrite desktop sizing for mobile */
-                width: 100%;
-                max-width: none;
-                display: none;
+            /* Topbar adjustments for mobile */
+            .topbar {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+                padding: 10px 8px;
+            }
+
+            .topbar .brand {
+                flex-basis: 100%;
+                justify-content: center;
+                margin-bottom: 8px;
+            }
+
+            .topnav {
+                order: 3;
+                /* Move to the bottom row */
+                flex-basis: 100%;
+                justify-content: flex-start;
+                /* Align left for scroll */
+                overflow-x: auto;
+                padding: 0;
+            }
+
+            .topnav button {
+                font-size: 13px;
+                padding: 7px 10px;
+            }
+
+            #filter-input {
+                order: 2;
+                /* Move below brand */
+                max-width: none !important;
+                flex: 1 !important;
+                margin: 0;
+            }
+
+            .topbar>div:last-child {
+                order: 4;
+                /* Move file input/load button down */
+                flex-basis: 100%;
+                justify-content: center;
+            }
+
+            #map-container {
+                height: 50vh;
+                min-height: 300px;
+            }
+
+            .cfg-actions button {
+                margin-left: 0 !important;
+                flex-basis: 45%;
+                /* Make buttons take half width */
             }
         }
     </style>
@@ -444,8 +441,9 @@
             <nav class="topnav" aria-label="Main navigation">
                 <button id="nav-events" class="active" onclick="showSection('events')">Events</button>
                 <button id="nav-map" onclick="showSection('map')">Map</button>
-                <button id="nav-route" onclick="openRoute()">Route</button>
-                <button id="nav-config" onclick="showSection('config')">Config</button>
+                <button id="nav-route" onclick="openRoute('Route.html')">Route</button>
+                <button id="nav-best" onclick="showSection('best')">Best</button>
+                <button id="nav-routeplan" onclick="openRoute('RoutePlan.html')">Route Plan</button>
             </nav>
 
             <input id="filter-input" placeholder="Rechercher titre, adresse ou ville..."
@@ -469,20 +467,11 @@
 
     <div class="layout">
 
-        <aside id="sidebar" class="sidebar collapsed">
-            <div class="title">
-                <div>Sources</div>
-                <button id="toggleSidebar" title="Collapse"
-                    style="background:transparent;border:none;cursor:pointer;font-weight:700;color:var(--muted)">☰</button>
-            </div>
-            <div class="src-list" id="sources-list" aria-live="polite"></div>
-        </aside>
-
         <div class="card">
             <section id="section-events">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
                     <div style="display:flex;gap:12px;align-items:center;">
-                        <h2 style="margin:0;font-size:18px;font-weight:700">Événements par mois</h2>
+                        <h2 style="margin:0;font-size:18px;font-weight:700" id="events-header">Événements</h2>
                     </div>
                     <div></div>
                 </div>
@@ -494,31 +483,20 @@
             </section>
 
             <section id="section-map" class="hidden" aria-hidden="true">
-                <h3 style="margin-top:0">Carte</h3>
-                <div
-                    style="height:380px;background:#f8fafc;border-radius:10px;border:1px solid #eef2f8; display:flex; align-items:center; justify-content:center; color:var(--muted)">
-                    Map rendering is not implemented in this basic viewer, but data is ready.
+                <h3 style="margin-top:0">Carte des événements</h3>
+                <div id="map-container">
                 </div>
             </section>
 
-            <section id="section-config" class="hidden" aria-hidden="true">
-                <h3 style="margin-top:0">Configuration des sources</h3>
-                <form id="source-form" style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;margin-top:12px;"
-                    onsubmit="return saveSource(event)">
-                    <input id="src-name" placeholder="Name e.g. Vg" required
-                        style="padding:8px;border-radius:8px;border:1px solid #e6edf3" />
-                    <input id="src-url" placeholder="https://jsonhosting.com/api/json/..." required
-                        style="padding:8px;border-radius:8px;border:1px solid #e6edf3" />
-                    <div style="display:flex;gap:8px;">
-                        <button type="submit"
-                            style="background:var(--indigo);color:white;border:none;padding:8px 12px;border-radius:8px">Save</button>
-                        <button type="button" onclick="resetForm()"
-                            style="background:white;border:1px solid #e6edf3;padding:8px 12px;border-radius:8px">Reset</button>
-                    </div>
-                </form>
-
-                <div id="config-list" style="margin-top:12px;display:flex;flex-direction:column;gap:8px"></div>
+            <section id="section-best" class="hidden" aria-hidden="true">
+                <h3 style="margin-top:0">My Best Events</h3>
+                <div id="best-events-list">
+                </div>
+                <p id="no-best-events" style="color:var(--muted); display:none; margin-top:12px;">No events saved to
+                    Best
+                    list yet.</p>
             </section>
+
         </div>
     </div>
 
@@ -526,14 +504,40 @@
 
     <footer class="app-footer">
         <div class="footer-content">
-            <div id="footer-status-all">Initializing...</div>
+            <div id="footer-status-all" style="flex:1;">Initializing...</div>
+
+            <button id="toggle-config-btn" onclick="toggleConfig()"
+                style="background:var(--indigo);color:white;border:none;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:600;margin-left:10px; flex-shrink: 0;">
+                Config
+            </button>
         </div>
+
+        <section id="section-config" class="hidden" aria-hidden="true"
+            style="max-width:1200px; margin:0 auto; padding-top:10px; border-top:1px solid #e6edf3; width:100%;">
+            <h3 style="margin-top:0; font-size:16px;">Source Configuration</h3>
+            <form id="source-form" style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;margin-top:12px;"
+                onsubmit="return saveSource(event)">
+                <input id="src-name" placeholder="Name e.g. Vg" required
+                    style="padding:8px;border-radius:8px;border:1px solid #e6edf3" />
+                <input id="src-url" placeholder="https://jsonhosting.com/api/json/..." required
+                    style="padding:8px;border-radius:8px;border:1px solid #e6edf3" />
+                <div style="display:flex;gap:8px; flex-shrink:0;">
+                    <button type="submit"
+                        style="background:var(--indigo);color:white;border:none;padding:8px 12px;border-radius:8px">Save</button>
+                    <button type="button" onclick="resetForm()"
+                        style="background:white;border:1px solid #e6edf3;padding:8px 12px;border-radius:8px">Reset</button>
+                </div>
+            </form>
+
+            <div id="config-list" style="margin-top:12px;display:flex;flex-direction:column;gap:8px"></div>
+        </section>
     </footer>
 
     <script>
         /* --- Config --- */
         const PROXY = 'https://api.codetabs.com/v1/proxy/?quest=';
         const STORAGE_KEY = 'eventsviewer_sources_v3';
+        const BEST_KEY = 'eventsviewer_best_v1';
         const MONTH_ABBR = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
         const DAY_MAP = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
         const DAY_COLORS = {
@@ -543,14 +547,24 @@
         const OTHER_DAY_COLOR = '#FAA0A0'; // Light Red
         const TAB_COLORS = ['#4f46e5', '#2563eb', '#16a34a', '#0ea5a4', '#06b6d4', '#db2777', '#f59e0b', '#7c3aed', '#10b981', '#ef4444', '#0ea5a4', '#f97316'];
         const START_ADDRESS = "5 rue victor considérant 75014 paris"; // Default origin address for maps
+        const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search?format=json&limit=1';
 
         /* --- State --- */
         let activeSource = null;
         let activeFilterQuery = '';
 
-        // Global state for source data and status (replaces cache)
+        // Global state for source data and status
         const sourceCounts = {};
         let lastUpdate = 'N/A';
+        let bestEventsState = loadBestEvents(); // Load 'Best' state on start
+
+        // Map State
+        let mapInstance = null;
+        let mapLibsLoaded = false;
+        let mapMarkers = [];
+        let geocodingCache = {}; // Cache for lat/lon lookup
+        let currentMonthTab = null; // To track the currently selected month tab
+
 
         /* --- Helpers --- */
         const $ = id => document.getElementById(id);
@@ -565,17 +579,11 @@
             t._h = setTimeout(() => t.className = 'toast', ms);
         }
 
-        /**
-         * UPDATED: Consolidates all status info into the footer.
-         */
         function updateFooterStatus() {
-            // CORRECTION: Use Object.entries() to get both 'name' and 'details' object
             const parts = Object.entries(sourceCounts)
-                // 1. Filter: Keep only initialized sources that have events or are the active source
                 .filter(([name, details]) =>
                     details && (details.count > 0 || name === activeSource)
                 )
-                // 2. Map: Format the remaining sources into the display string
                 .map(([name, details]) =>
                     `${name} (${details.count})`
                 );
@@ -595,6 +603,16 @@
             $('footer-status-all').textContent = footerContent;
         }
 
+        function updateEventsHeader() {
+            const header = $('events-header');
+            if (activeSource) {
+                const count = sourceCounts[activeSource]?.count || 0;
+                header.textContent = `Événements - ${activeSource} (${count})`;
+            } else {
+                header.textContent = `Événements`;
+            }
+        }
+
 
         function getFrenchDay(date) {
             if (!date) return '';
@@ -604,18 +622,17 @@
         function getDirectionsUrl(eventAddress) {
             const origin = encodeURIComponent(START_ADDRESS);
             const destination = encodeURIComponent(eventAddress);
-            // This URL structure is for Google Maps directions
-            return `https://www.google.com/maps/dir/${origin}/${destination}`;
+            // FIX: Corrected to standard Google Maps Directions URL
+            return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
         }
 
         function highlightText(text, query) {
             if (!query) return text;
             const regex = new RegExp(query, 'gi');
-            // Pale yellow background color is #ffffe0
             return text.replace(regex, match => `<mark style="background-color: #ffffe0; padding: 0 2px;">${match}</mark>`);
         }
 
-        /* --- Progress bar (inline bar under header) --- */
+        /* --- Progress bar --- */
         const progressEl = (() => $('progress'))();
         function progressStart() {
             progressEl.className = 'loading';
@@ -634,12 +651,6 @@
         }
 
         /* --- Date parsing & grouping --- */
-
-        /**
-         * Parses a date string, handling optional leading weekdays and both French/English month names.
-         * @param {string} str - The date string (e.g., "Saturday 22 November 2025" or "22 Novembre 2025").
-         * @returns {Date | null} The parsed Date object.
-         */
         function parseEventDate(str) {
             if (!str) return null;
 
@@ -652,10 +663,8 @@
             const y = +match[3];
 
             const map = {
-                // French months
                 janvier: 0, février: 1, fevrier: 1, mars: 2, avril: 3, mai: 4, juin: 5,
                 juillet: 6, août: 7, aout: 7, septembre: 8, octobre: 9, novembre: 10, décembre: 11, decembre: 11,
-                // English months
                 january: 0, february: 1, march: 2, april: 3, may: 4, june: 5, july: 6, august: 7,
                 september: 8, october: 9, november: 10, december: 11
             };
@@ -667,19 +676,12 @@
 
         function formatMonthKey(d) { return `${MONTH_ABBR[d.getMonth()]} ${d.getFullYear()}`; }
 
-        /**
-         * Recursively extracts and normalizes event objects, keeping only 6 specific properties.
-         * @param {object|array} node - The current JSON node.
-         * @param {Array<object>} out - The array to push valid, normalized events into.
-         */
         function extractEvents(node, out) {
             if (!node) return;
 
-            // Define the only keys we want to keep
             const eventKeys = ["Titre", "Ville", "Adresse", "Exposants", "ManifDate", "ManifLink"];
-            const requiredKeys = ["Titre", "Adresse", "ManifDate"]; // Minimum required fields for an object to be considered an event
+            const requiredKeys = ["Titre", "Adresse", "ManifDate"];
 
-            // Helper function to normalize an event object
             const normalizeEvent = (item) => {
                 const event = {};
                 eventKeys.forEach(k => {
@@ -689,7 +691,6 @@
             };
 
             if (Array.isArray(node)) {
-                // Filter the array to find valid event objects, then normalize them
                 const validEvents = node.filter(item =>
                     typeof item === 'object' && requiredKeys.every(k => item.hasOwnProperty(k))
                 ).map(normalizeEvent);
@@ -697,18 +698,14 @@
                 if (validEvents.length > 0) {
                     out.push(...validEvents);
                 } else {
-                    // Recurse into array elements if they are objects (for deep/complex arrays)
                     node.forEach(v => extractEvents(v, out));
                 }
             }
             else if (typeof node === 'object') {
-                // 1. Check if the object itself is a single, valid event
                 if (requiredKeys.every(k => node.hasOwnProperty(k))) {
-                    // Normalize and push single event
                     out.push(normalizeEvent(node));
                 }
 
-                // 2. Recurse into object values (keys) to find nested event arrays/objects
                 Object.values(node).forEach(v => extractEvents(v, out));
             }
         }
@@ -739,20 +736,13 @@
             return out;
         }
 
-        /**
-         * Toggles the clicked day's content and collapses all others in the same month.
-         * @param {HTMLElement} currentDayCard - The .day-card element that was clicked.
-         * @param {string} monthPanelId - The ID of the parent month panel (e.g., "panel_JUN_2025").
-         */
         function toggleDayCollapse(currentDayCard, monthPanelId) {
             const currentContent = currentDayCard.querySelector('.day-content');
-
-            // 1. Check if the clicked group is currently open
             const isOpen = currentContent.style.display === 'block';
 
-            // 2. Iterate over all day cards in the current month panel and collapse them
             const monthPanel = $(monthPanelId);
             if (monthPanel) {
+                // Collapse all day cards in this panel first
                 monthPanel.querySelectorAll('.day-card').forEach(dayCard => {
                     const content = dayCard.querySelector('.day-content');
                     if (content) {
@@ -761,19 +751,70 @@
                 });
             }
 
-            // 3. If the clicked group was not open (i.e., we want to open it now), then open it
+            // Open the clicked one if it was closed
             if (!isOpen) {
                 currentContent.style.display = 'block';
+            }
+        }
+
+        /* --- Best Events Logic --- */
+        function loadBestEvents() {
+            try {
+                return JSON.parse(localStorage.getItem(BEST_KEY) || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        function saveBestEvents() {
+            localStorage.setItem(BEST_KEY, JSON.stringify(bestEventsState));
+            // Only re-render the best section if it is currently visible (SILENTLY FILL)
+            if ($('section-best') && !$('section-best').classList.contains('hidden')) {
+                renderBestSection();
+            }
+        }
+
+        /**
+         * Generates a unique ID for an event based on its core properties.
+         * @param {object} event 
+         * @returns {string}
+         */
+        function getEventId(event) {
+            // Concatenate unique properties to form a simple ID for comparison
+            return `${event.Titre || ''}|${event.Adresse || ''}|${event.ManifDate || ''}`;
+        }
+
+        function isEventInBest(event) {
+            const id = getEventId(event);
+            return bestEventsState.some(e => getEventId(e) === id);
+        }
+
+        function toggleBestEvent(event) {
+            const id = getEventId(event);
+            const index = bestEventsState.findIndex(e => getEventId(e) === id);
+
+            if (index > -1) {
+                // Remove
+                bestEventsState.splice(index, 1);
+                showToast('Event removed from Best', 'ok', 1500);
+            } else {
+                // Add
+                bestEventsState.push(event);
+                showToast('Event added to Best', 'ok', 1500);
+            }
+            saveBestEvents();
+
+            // Re-render the current events view to update the button icon instantly
+            if ($('section-events') && !$('section-events').classList.contains('hidden')) {
+                applyFilter(); // This will re-render the event list with updated buttons
             }
         }
 
         /* --- Render functions --- */
         function renderSources() {
             const s = loadSources();
-            const left = $('sources-list'); left.innerHTML = '';
             const cfg = $('config-list'); cfg.innerHTML = '';
 
-            // Ensure some defaults for Vg and Broc 
             if (Object.keys(s).length === 0) {
                 s['Vg'] = 'https://jsonhosting.com/api/json/c3cdf9e5';
                 s['Broc'] = 'https://jsonhosting.com/api/json/2ea29f9a';
@@ -783,18 +824,10 @@
             Object.keys(s).forEach(name => {
                 const url = s[name];
 
-                // left sidebar button
-                const btn = document.createElement('button');
-                btn.className = 'src-btn' + (activeSource === name ? ' active' : '');
-                btn.textContent = name;
-                btn.title = url;
-                btn.onclick = () => selectSource(name);
-                left.appendChild(btn);
-
-                // config row
+                // config row (used by all source management now)
                 const row = document.createElement('div'); row.className = 'config-row';
 
-                // NEW: Div to hold name and URL with Copy URL button
+                // Div to hold name and URL with Copy URL button
                 const leftDiv = document.createElement('div'); leftDiv.style.fontSize = '13px';
                 leftDiv.style.display = 'flex';
                 leftDiv.style.alignItems = 'center';
@@ -815,28 +848,56 @@
                 copyUrlBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1"></rect></svg>`;
                 copyUrlBtn.onclick = () => copyToClipboard(url);
 
-                if (!url.startsWith('local://')) { // Don't show copy for local pseudo-URLs
+                if (!url.startsWith('local://')) {
                     leftDiv.appendChild(copyUrlBtn);
                 }
 
                 const right = document.createElement('div'); right.className = 'cfg-actions';
+
+                // NEW: View button - this now handles source selection logic
+                const vBtn = document.createElement('button'); vBtn.textContent = 'View'; vBtn.onclick = () => selectSource(name);
+
                 const eBtn = document.createElement('button'); eBtn.textContent = 'Edit'; eBtn.onclick = () => editSource(name);
                 const dBtn = document.createElement('button'); dBtn.textContent = 'Delete'; dBtn.onclick = () => removeSource(name);
-                [eBtn, dBtn].forEach(b => { b.style.marginLeft = '6px'; b.style.padding = '6px 8px'; b.style.border = '1px solid #e6edf3'; b.style.borderRadius = '6px'; b.style.background = 'white'; });
 
-                right.appendChild(eBtn); right.appendChild(dBtn);
+                // NEW: Download button
+                const dlBtn = document.createElement('button'); dlBtn.textContent = 'Download';
+                if (url.startsWith('http')) {
+                    // Assuming the raw URL is the one without the proxy for downloading
+                    dlBtn.onclick = () => downloadSource(name, url);
+                } else {
+                    dlBtn.disabled = true;
+                    dlBtn.style.opacity = 0.5;
+                    dlBtn.title = 'Only remote sources can be downloaded.';
+                }
+
+                [vBtn, eBtn, dBtn, dlBtn].forEach(b => {
+                    b.style.border = '1px solid #e6edf3';
+                    b.style.borderRadius = '6px';
+                    b.style.background = 'white';
+                    b.style.cursor = b.disabled ? 'default' : 'pointer';
+                });
+
+                // Highlight the active source's button
+                if (activeSource === name) {
+                    // FIX: Must wrap 'var(...)' in quotes when assigning to style property in JS
+                    vBtn.style.background = 'var(--accent)';
+                    vBtn.style.color = 'var(--indigo)';
+                    vBtn.style.fontWeight = 600;
+                }
+
+
+                right.appendChild(vBtn);
+                right.appendChild(eBtn);
+                right.appendChild(dBtn);
+                right.appendChild(dlBtn);
+
                 row.appendChild(leftDiv);
                 row.appendChild(right);
                 cfg.appendChild(row);
             });
-
-            // update active highlight
-            document.querySelectorAll('.src-btn').forEach(el => {
-                if (el.textContent === activeSource) el.classList.add('active'); else el.classList.remove('active');
-            });
         }
 
-        // Renders the Month tabs based on grouped data
         function renderTabsForGrouped(g) {
             const tabs = $('month-tabs'); tabs.innerHTML = '';
             const months = Object.keys(g);
@@ -853,32 +914,47 @@
             });
         }
 
-        function renderMonthContent(g) {
-            const container = $('month-content'); container.innerHTML = '';
+        /**
+         * Renders grouped events into a container. This is used for both 'Events' and 'Best' sections.
+         * @param {Object} g - The grouped and sorted events.
+         * @param {string} containerId - The ID of the container element (e.g., 'month-content', 'best-events-list').
+         * @param {string} prefixId - Prefix for month and day panel IDs (e.g., 'panel_', 'best_panel_').
+         * @param {boolean} showMonthHeader - If true, displays the month name before event days.
+         */
+        function renderGroupedEvents(g, containerId, prefixId, showMonthHeader = false) {
+            const container = $(containerId); container.innerHTML = '';
+
             Object.keys(g).forEach(month => {
-                const monthId = 'panel_' + safeId(month); // Pre-calculate month ID
+                const monthId = prefixId + safeId(month);
+
+                // Add month header for the 'Best' section where all months are displayed
+                if (showMonthHeader) {
+                    const monthHeader = document.createElement('h4');
+                    monthHeader.textContent = month;
+                    monthHeader.style.cssText = 'margin:16px 0 8px 0; font-size:16px; font-weight:700; color:var(--indigo); border-bottom:1px solid #eef2f8; padding-bottom:4px;';
+                    container.appendChild(monthHeader);
+                }
+
                 const panel = document.createElement('div'); panel.id = monthId;
-                panel.style.display = 'none'; // hidden by default; openMonth will show first
+                panel.dataset.monthName = month; // Used by openMonth for 'Events' section
 
                 Object.keys(g[month]).sort((a, b) => parseEventDate(a) - parseEventDate(b)).forEach(day => {
                     const dateObj = parseEventDate(day);
-                    const frenchDay = getFrenchDay(dateObj); // e.g. "Samedi"
-
-                    // Remove duplicate day name from display string
+                    const frenchDay = getFrenchDay(dateObj);
                     const displayDate = day.replace(new RegExp(`^${frenchDay}\\s+`, 'i'), '');
 
                     const color = DAY_COLORS[frenchDay] || OTHER_DAY_COLOR;
 
                     const dayDiv = document.createElement('div'); dayDiv.className = 'day-card';
                     const head = document.createElement('div'); head.className = 'day-head';
-                    head.style.background = color; // Apply day color
+                    head.style.background = color;
 
                     head.innerHTML = `<div><strong>${frenchDay} ${displayDate}</strong> <span style="color:#1f2937;font-size:13px;font-weight:500">(${g[month][day].length})</span></div>`;
 
-                    // Update click handler to use new collapse logic
                     head.onclick = () => toggleDayCollapse(dayDiv, monthId);
 
                     const content = document.createElement('div'); content.className = 'day-content';
+                    content.style.display = 'none'; // Always start collapsed
 
                     // add events
                     g[month][day].forEach(ev => {
@@ -890,13 +966,28 @@
 
                         const evRow = document.createElement('div'); evRow.className = 'event-row';
 
+                        // 0. Best Button (Add/Remove)
+                        const isBest = isEventInBest(ev);
+                        const bestBtn = document.createElement('button'); bestBtn.className = 'best-toggle-btn';
+                        bestBtn.title = isBest ? 'Remove from Best' : 'Add to Best';
+                        bestBtn.style.flexShrink = 0;
+                        bestBtn.style.marginRight = '4px';
+
+                        // Use Plus/Minus icons
+                        bestBtn.innerHTML = isBest
+                            ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>` // Minus/Red
+                            : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`; // Plus/Green
+
+                        bestBtn.onclick = () => toggleBestEvent(ev);
+
+
                         // 1. Copy Address button
                         const clipBtn = document.createElement('button'); clipBtn.className = 'copy-addr-btn'; clipBtn.title = 'Copy address';
                         clipBtn.style.flexShrink = 0;
                         clipBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1"></rect></svg>`;
                         clipBtn.onclick = () => copyToClipboard(metaAddress);
 
-                        // 2. Copy Event Link button (NEW)
+                        // 2. Copy Event Link button
                         const linkBtn = document.createElement('button'); linkBtn.className = 'copy-link-btn'; linkBtn.title = 'Copy event link';
                         linkBtn.style.flexShrink = 0;
                         linkBtn.style.marginLeft = '4px';
@@ -906,7 +997,7 @@
                         // 3. Event Body (Title + Meta)
                         const body = document.createElement('div'); body.style.flex = '1';
 
-                        // New Title Format: Titre (Ville) 
+                        // Title Format: Titre (Ville) 
                         const newTitleText = `${ev.Titre || 'Sans titre'} ${ev.Ville ? `(${ev.Ville})` : ''}`.trim();
 
                         const title = document.createElement('a');
@@ -929,7 +1020,7 @@
                             exposantDisplay = `<span style="font-weight:700; color:${exposantColor};">${exposantCount}</span> | `;
                         }
 
-                        // New Meta Format: <Exposant Count> | Adresse
+                        // Meta Format: <Exposant Count> | Adresse
                         const metaText = `${exposantDisplay}${metaAddress}`;
 
                         const meta = document.createElement('div');
@@ -942,18 +1033,17 @@
                         // 4. Directions icon button
                         const mapBtn = document.createElement('button'); mapBtn.className = 'map-btn'; mapBtn.title = 'Itinéraire Google Maps';
                         mapBtn.style.flexShrink = 0;
-                        // Signpost/Navigation icon
                         mapBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>`;
                         mapBtn.onclick = () => window.open(directionsUrl, '_blank');
 
+                        evRow.appendChild(bestBtn);
                         evRow.appendChild(clipBtn);
-                        evRow.appendChild(linkBtn); // Added link button
+                        evRow.appendChild(linkBtn);
                         evRow.appendChild(body);
                         evRow.appendChild(mapBtn);
                         content.appendChild(evRow);
                     });
 
-                    content.style.display = 'none';
                     dayDiv.appendChild(head); dayDiv.appendChild(content);
                     panel.appendChild(dayDiv);
                 });
@@ -961,38 +1051,81 @@
                 container.appendChild(panel);
             });
 
-            // show first month panel by default if exists
-            const first = Object.keys(g)[0];
-            if (first) openMonth(first);
         }
 
-        /**
-         * Updates the main event display area.
-         */
         function updateEventUI(r, g, name) {
             renderTabsForGrouped(g);
-            renderMonthContent(g);
-            renderSources(); // ensure highlight is correct
+            renderGroupedEvents(g, 'month-content', 'panel_', false); // Use new generic renderer
+            updateEventsHeader();
+            renderSources(); // Re-render source list in config to update active button
+
+            // Open the first month by default if not already set, or re-open the current one
+            const months = Object.keys(g);
+            if (months.length > 0) {
+                const monthToOpen = currentMonthTab && months.includes(currentMonthTab) ? currentMonthTab : months[0];
+                openMonth(monthToOpen);
+            }
+
+            // Clear map on data change
+            if (mapInstance) {
+                mapMarkers = [];
+                mapInstance.eachLayer(layer => {
+                    if (layer instanceof L.Marker) {
+                        mapInstance.removeLayer(layer);
+                    }
+                });
+            }
         }
 
-        /* --- UI actions for months and sources --- */
+        function renderBestSection() {
+            const container = $('best-events-list');
+            const noEvents = $('no-best-events');
+            const bestEvents = loadBestEvents();
+
+            if (bestEvents.length === 0) {
+                container.innerHTML = '';
+                noEvents.style.display = 'block';
+                return;
+            }
+
+            noEvents.style.display = 'none';
+
+            // Group and sort best events by date
+            const grouped = sortGrouped(groupEvents(bestEvents));
+
+            // Use the same renderer as the events section, but show month headers
+            renderGroupedEvents(grouped, 'best-events-list', 'best_panel_', true);
+        }
+
+
         function openMonth(month) {
-            // show selected month panel and mark tab active; do not clear data when switching
+            currentMonthTab = month;
+
             document.querySelectorAll('.month-tab').forEach(tb => tb.classList.remove('active'));
             const tab = [...document.querySelectorAll('.month-tab')].find(x => x.textContent === month);
             if (tab) tab.classList.add('active');
 
-            // hide all panels
-            document.querySelectorAll('[id^="panel_"]').forEach(el => el.style.display = 'none');
-            const panel = $('panel_' + safeId(month));
-            if (panel) panel.style.display = 'block';
+            // Find all month panels in the events section
+            document.querySelectorAll('#month-content > div').forEach(el => {
+                el.style.display = 'none';
+            });
 
-            // When changing month, all days should be collapsed by default
-            panel.querySelectorAll('.day-content').forEach(el => el.style.display = 'none');
+            const panel = document.querySelector(`#month-content > div[data-month-name="${month}"]`);
 
+            if (panel) {
+                panel.style.display = 'block';
+                // Automatically open the first day of the newly opened month panel
+                const firstDayCard = panel.querySelector('.day-card');
+                if (firstDayCard) {
+                    const firstDayContent = firstDayCard.querySelector('.day-content');
+                    if (firstDayContent) {
+                        firstDayContent.style.display = 'block';
+                    }
+                }
+            }
         }
 
-        /* --- Sources storage CRUD --- */
+        /* --- Sources storage CRUD & Download --- */
         function loadSources() {
             try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
         }
@@ -1022,16 +1155,55 @@
             updateFooterStatus();
             showToast('Source removed', 'ok');
             if (activeSource === name) {
-                activeSource = null;
-                updateEventUI([], {}, null); // Clear UI
+                const remainingSources = Object.keys(loadSources());
+                if (remainingSources.length > 0) {
+                    selectSource(remainingSources[0]);
+                } else {
+                    activeSource = null;
+                    updateEventUI([], {}, null);
+                }
             }
         }
 
-        /* --- Core Fetching Logic (No Caching) --- */
-        async function fetchSource(name, url) {
+        /**
+         * Downloads the raw JSON from the source URL.
+         * @param {string} name - Source name.
+         * @param {string} url - Source URL.
+         */
+        async function downloadSource(name, url) {
+            progressStart();
+
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+
+                const blob = await res.blob();
+
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `${name}_events_${new Date().toISOString().substring(0, 10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(a.href);
+
+                progressSetOk();
+                showToast(`Successfully downloaded ${name}.json`, 'ok', 3000);
+
+            } catch (err) {
+                progressSetErr();
+                showToast(`Download failed for ${name}. Check URL or CORS settings.`, 'err', 5000);
+                console.error(`Download failed for ${name}:`, err);
+            }
+        }
+
+
+        /* --- Core Fetching Logic --- */
+        async function fetchSource(name, url, isInitialLoad = false) {
             const fetchUrl = url.startsWith('http') ? PROXY + encodeURIComponent(url) : url;
 
-            progressStart();
+            if (isInitialLoad) progressStart();
+
             console.log(`[DEBUG: ${name}] Starting fetch from: ${fetchUrl}`);
 
             try {
@@ -1039,95 +1211,285 @@
                 if (!res.ok) throw new Error('HTTP ' + res.status);
 
                 const text = await res.text();
-                // CONSOLE LOG FOR DEBUGGING JSON STRUCTURE
-                console.log(`[DEBUG: ${name}] Raw Response Text (first 500 chars):`, text.substring(0, 500) + '...');
-
                 const json = JSON.parse(text);
-                // CONSOLE LOG FOR DEBUGGING JSON STRUCTURE
-                console.log(`[DEBUG: ${name}] Parsed JSON Structure:`, json);
 
                 const r = [];
                 extractEvents(json, r);
-
-                // CONSOLE LOG FOR DEBUGGING EVENT COUNT
-                console.log(`[DEBUG: ${name}] Extracted Events Count: ${r.length}`);
-                if (r.length === 0) {
-                    console.warn(`[DEBUG: ${name}] Events count is 0. If you expected events, please inspect the "Parsed JSON Structure" log above and adjust the 'extractEvents' function if the events are deeply nested.`);
-                }
-
                 const g = sortGrouped(groupEvents(r));
 
                 const now = new Date().toISOString();
                 lastUpdate = now;
 
-                // Update global state for this source
-                sourceCounts[name] = { count: r.length, loadedAt: now, status: 'ok', rawEvents: r, grouped: g };
+                // Store raw event data with coordinates pre-populated later by renderMap
+                sourceCounts[name] = { count: r.length, loadedAt: now, status: 'ok', rawEvents: r, grouped: g, mappedEvents: [] };
 
-                // If this is the active source, update the UI
                 if (activeSource === name) {
                     updateEventUI(r, g, name);
                 }
 
                 updateFooterStatus();
-                progressSetOk();
+                if (isInitialLoad) progressSetOk();
 
-                // Map Ready Notification (NEW)
-                if (r.length > 0) {
-                    showToast(`Map data ready (${r.length} events loaded).`, 'ok', 3000);
+                if (r.length > 0 && activeSource === name) {
+                    showToast(`Events data loaded. Total: ${r.length} events.`, 'ok', 3000);
                 }
 
             } catch (err) {
-                // Update global state for error (count 0, clear data)
                 sourceCounts[name] = { count: 0, loadedAt: new Date().toISOString(), status: 'error', rawEvents: [], grouped: {} };
                 const errorMessage = `Load error for ${name} (Proxy/CORS/JSON parse failure).`;
 
                 if (activeSource === name) {
-                    updateEventUI([], {}, name); // Clear UI
+                    updateEventUI([], {}, name);
                 }
 
                 updateFooterStatus();
-                progressSetErr();
-                showToast(errorMessage, 'err');
+                if (isInitialLoad) progressSetErr();
+                if (activeSource === name) showToast(errorMessage, 'err');
                 console.error(`Fetch failed for ${name}:`, err);
             }
         }
 
-
-        /* --- Source Selection (Always fetches or loads data) --- */
         async function selectSource(name) {
             const all = loadSources();
             if (!all[name]) return showToast('Source not found', 'err');
 
-            activeSource = name;
-            renderSources(); // Update visual highlight
+            // If we are already on this source and data is loaded, just update UI
+            if (activeSource === name && sourceCounts[name]?.status === 'ok') {
+                updateEventUI(sourceCounts[name].rawEvents, sourceCounts[name].grouped, name);
+                if (mapInstance) renderMap(sourceCounts[name].rawEvents);
+                return;
+            }
 
-            // Clear filter when changing source
+            activeSource = name;
+            renderSources(); // Re-render config list to highlight active source
+            updateEventsHeader();
+
             $('filter-input').value = '';
             activeFilterQuery = '';
 
             const loadedData = sourceCounts[name];
 
             if (loadedData && loadedData.status === 'ok') {
-                // Data is present from a previous successful fetch, display it immediately
+                updateEventUI(loadedData.rawEvents, loadedData.grouped, name);
+                if (mapInstance) renderMap(loadedData.rawEvents);
+            } else if (all[name].startsWith('local://') && loadedData) {
+                // Already loaded local file data, but maybe not rendered yet
                 updateEventUI(loadedData.rawEvents, loadedData.grouped, name);
             } else {
-                // Clear UI if no valid data is present
                 updateEventUI([], {}, name);
             }
-            updateFooterStatus(); // Update footer to show selection
+            updateFooterStatus();
 
-            // Always initiate a new fetch/load to get the freshest data 
-            if (all[name].startsWith('local://')) {
-                // For local files, we just ensure the empty data is loaded and wait for user input
-                if (!loadedData) {
-                    sourceCounts[name] = { count: 0, loadedAt: new Date().toISOString(), status: 'idle', rawEvents: [], grouped: {} };
-                }
-                updateEventUI([], {}, name);
-                updateFooterStatus();
-            } else {
-                await fetchSource(name, all[name]);
+            if (all[name].startsWith('http')) {
+                await fetchSource(name, all[name], true);
             }
         }
+
+        /* --- Map Geocoding and Rendering --- */
+        async function geocodeAddress(address) {
+            if (geocodingCache[address]) return geocodingCache[address];
+
+            try {
+                const url = NOMINATIM_URL + '&q=' + encodeURIComponent(address);
+                const res = await fetch(url);
+                const json = await res.json();
+
+                if (json && json.length > 0) {
+                    const result = { lat: parseFloat(json[0].lat), lon: parseFloat(json[0].lon) };
+                    geocodingCache[address] = result;
+                    return result;
+                }
+            } catch (error) {
+                console.error('Geocoding error:', error);
+            }
+            geocodingCache[address] = null;
+            return null;
+        }
+
+        async function renderMap(events) {
+            if (!mapInstance || !events) return;
+
+            mapMarkers.forEach(m => mapInstance.removeLayer(m));
+            mapMarkers = [];
+            const mappedEvents = [];
+            let bounds = null;
+
+            for (const ev of events) {
+                const fullAddress = `${ev.Adresse || ''}, ${ev.Ville || ''}, France`.trim();
+                if (!fullAddress) continue;
+
+                const coords = await geocodeAddress(fullAddress);
+
+                if (coords) {
+                    const titleText = `${ev.Titre || 'Sans titre'} (${ev.Ville || '?'})`;
+                    const metaText = `${ev.Exposants || '?'} | ${ev.Adresse || '?'}`;
+
+                    const popupContent = `
+                        <div style="max-width:250px;">
+                            <h4 style="font-weight:700; font-size:16px; margin:0;">${titleText}</h4>
+                            <p style="font-size:12px; color:#666; margin:4px 0;">${ev.ManifDate}</p>
+                            <p style="font-size:14px; margin:0 0 8px 0;">${metaText}</p>
+                            <a href="${ev.ManifLink || '#'}" target="_blank" style="color:var(--indigo); font-size:13px; font-weight:600;">Voir l'événement</a>
+                        </div>
+                    `;
+
+                    const marker = L.marker([coords.lat, coords.lon]).addTo(mapInstance)
+                        .bindPopup(popupContent);
+
+                    mapMarkers.push(marker);
+                    mappedEvents.push(ev);
+
+                    if (!bounds) bounds = L.latLngBounds([coords.lat, coords.lon], [coords.lat, coords.lon]);
+                    else bounds.extend([coords.lat, coords.lon]);
+                }
+            }
+
+            if (sourceCounts[activeSource]) {
+                sourceCounts[activeSource].mappedEvents = mappedEvents;
+            }
+
+            if (bounds && mapMarkers.length > 0) {
+                mapInstance.fitBounds(bounds, { padding: [50, 50] });
+            } else {
+                mapInstance.setView([46.603354, 1.888334], 6);
+            }
+
+            if (mappedEvents.length > 0) {
+                showToast(`${mappedEvents.length} events were mapped successfully!`, 'ok', 4000);
+            } else {
+                showToast(`No events could be mapped for the selected source.`, 'err', 4000);
+            }
+        }
+
+        /* --- Lazy Loading of Map Libraries --- */
+        function loadMapLibs(callback) {
+            if (mapLibsLoaded) {
+                callback();
+                return;
+            }
+
+            progressStart();
+
+            // 1. Load Leaflet CSS
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+            link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+            link.crossOrigin = '';
+            document.head.appendChild(link);
+
+            // 2. Load Leaflet JS
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            script.integrity = 'sha256-20n6n+A4GfJfeWjYwWkE/B5uK5l9L5kP9z8mO+3j/Qc=';
+            script.crossOrigin = '';
+
+            script.onload = () => {
+                mapLibsLoaded = true;
+                progressSetOk();
+                showToast('Map library loaded.', 'ok', 1500);
+                callback();
+            };
+
+            script.onerror = () => {
+                progressSetErr();
+                showToast('Failed to load map library.', 'err', 4000);
+            }
+
+            document.head.appendChild(script);
+        }
+
+        function initMap() {
+            if (mapInstance) return; // Already initialized
+
+            try {
+                // Initialize map instance
+                mapInstance = L.map('map-container').setView([46.603354, 1.888334], 6); // Default view: Center of France
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                }).addTo(mapInstance);
+
+                // If a source is active, render its data immediately
+                if (activeSource && sourceCounts[activeSource] && sourceCounts[activeSource].status === 'ok') {
+                    renderMap(sourceCounts[activeSource].rawEvents);
+                }
+
+                // Fix map tile rendering issue in hidden containers by forcing an update
+                setTimeout(() => mapInstance.invalidateSize(true), 100);
+
+            } catch (e) {
+                console.error("Map initialization failed. Leaflet might not be loaded.", e);
+            }
+        }
+
+
+        /* --- Nav / Route / Config --- */
+        function showSection(name) {
+            // Main sections in the 'card'
+            ['events', 'map', 'best'].forEach(s => {
+                const el = document.getElementById('section-' + s);
+                if (!el) return;
+                if (s === name) {
+                    el.classList.remove('hidden');
+                    el.removeAttribute('aria-hidden');
+                }
+                else {
+                    el.classList.add('hidden');
+                    el.setAttribute('aria-hidden', 'true');
+                }
+            });
+
+            // Hide config section in footer when switching main tabs
+            const configSection = $('section-config');
+            if (configSection) {
+                configSection.classList.add('hidden');
+                configSection.setAttribute('aria-hidden', 'true');
+                $('toggle-config-btn').textContent = 'Config';
+            }
+
+            document.querySelectorAll('.topnav button').forEach(b => b.classList.remove('active'));
+            const navBtn = document.getElementById('nav-' + name);
+            if (navBtn) navBtn.classList.add('active');
+
+            if (name === 'map' && !mapLibsLoaded) {
+                loadMapLibs(initMap);
+            } else if (name === 'map' && mapInstance) {
+                setTimeout(() => {
+                    mapInstance.invalidateSize(true);
+                    if (activeSource && sourceCounts[activeSource] && sourceCounts[activeSource].status === 'ok' && mapMarkers.length > 0) {
+                        const bounds = L.latLngBounds(mapMarkers.map(m => m.getLatLng()));
+                        mapInstance.fitBounds(bounds, { padding: [50, 50] });
+                    } else if (activeSource && sourceCounts[activeSource] && sourceCounts[activeSource].status === 'ok') {
+                        renderMap(sourceCounts[activeSource].rawEvents);
+                    }
+                }, 100);
+            } else if (name === 'best') {
+                renderBestSection();
+            }
+        }
+
+        function openRoute(filename) {
+            window.open(filename, '_blank');
+        }
+
+        function toggleConfig() {
+            const configSection = $('section-config');
+            const btn = $('toggle-config-btn');
+            const isHidden = configSection.classList.contains('hidden');
+
+            if (isHidden) {
+                configSection.classList.remove('hidden');
+                configSection.removeAttribute('aria-hidden');
+                btn.textContent = 'Close Config';
+            } else {
+                configSection.classList.add('hidden');
+                configSection.setAttribute('aria-hidden', 'true');
+                btn.textContent = 'Config';
+            }
+        }
+
 
         /* --- Local file handling (input) --- */
         function handleFiles(fileList) {
@@ -1149,7 +1511,6 @@
                 r.onload = e => {
                     try {
                         const js = JSON.parse(e.target.result);
-                        console.log(`[DEBUG: ${sourceName}] Parsed JSON for ${f.name}:`, js);
                         extractEvents(js, accum);
                     } catch (ex) {
                         console.warn('invalid json', f.name, ex);
@@ -1159,7 +1520,6 @@
                     if (processed === files.length) {
 
                         const s = loadSources();
-                        // Add or update 'Local' source in storage
                         s[sourceName] = 'local://loaded:' + files.length;
                         saveSources(s);
 
@@ -1170,11 +1530,11 @@
                         const now = new Date().toISOString();
                         lastUpdate = now;
 
-                        // Populate rawEvents and grouped data correctly
-                        sourceCounts[sourceName] = { count: accum.length, loadedAt: now, status: 'ok', rawEvents: accum, grouped: g };
+                        sourceCounts[sourceName] = { count: accum.length, loadedAt: now, status: 'ok', rawEvents: accum, grouped: g, mappedEvents: [] };
 
                         updateEventUI(accum, g, sourceName);
                         updateFooterStatus();
+                        if (mapInstance) renderMap(accum);
 
                         progressSetOk();
                         showToast(`Local files loaded. Found ${accum.length} events.`, 'ok');
@@ -1194,7 +1554,6 @@
             $('json-file-input').value = '';
         }
 
-
         /* --- File input wiring --- */
         $('json-file-input').addEventListener('change', ev => {
             handleFiles(ev.target.files);
@@ -1206,7 +1565,6 @@
                 showToast('Copied to clipboard', 'ok');
             }).catch(err => {
                 console.error('Could not copy text: ', err);
-                // Fallback attempt for older browsers
                 const textarea = document.createElement('textarea');
                 textarea.value = txt;
                 document.body.appendChild(textarea);
@@ -1229,9 +1587,8 @@
 
             const loadedData = sourceCounts[activeSource];
             if (!loadedData || loadedData.status !== 'ok') {
-                // If there's no data, clear the UI, but don't error out.
                 renderTabsForGrouped({});
-                renderMonthContent({});
+                renderGroupedEvents({}, 'month-content', 'panel_', false);
                 return;
             }
 
@@ -1243,34 +1600,18 @@
                 (e.Ville || '').toLowerCase().includes(q)
             );
 
-            // Group filtered events.
             const g = sortGrouped(groupEvents(filtered));
 
-            // Re-render months and content using the filtered group
             renderTabsForGrouped(g);
-            renderMonthContent(g);
-        }
+            renderGroupedEvents(g, 'month-content', 'panel_', false);
 
-        /* --- Sidebar toggle --- */
-        $('toggleSidebar').addEventListener('click', () => {
-            const sb = $('sidebar');
-            sb.classList.toggle('collapsed');
-        });
-
-        /* --- Nav / Route --- */
-        function showSection(name) {
-            ['events', 'map', 'config'].forEach(s => {
-                const el = document.getElementById('section-' + s);
-                if (!el) return;
-                if (s === name) { el.classList.remove('hidden'); el.removeAttribute('aria-hidden'); }
-                else { el.classList.add('hidden'); el.setAttribute('aria-hidden', 'true'); }
-            });
-            document.querySelectorAll('.topnav button').forEach(b => b.classList.remove('active'));
-            if (name === 'events') $('nav-events').classList.add('active');
-            if (name === 'map') $('nav-map').classList.add('active');
-            if (name === 'config') $('nav-config').classList.add('active');
+            // Re-select the month to open the corresponding tab/panel
+            const months = Object.keys(g);
+            if (months.length > 0) {
+                const monthToOpen = currentMonthTab && months.includes(currentMonthTab) ? currentMonthTab : months[0];
+                openMonth(monthToOpen);
+            }
         }
-        function openRoute() { window.open('RoutePlan.html', '_blank'); }
 
         /* --- Init --- */
         function init() {
@@ -1278,22 +1619,27 @@
             const s = loadSources();
             const sourceNames = Object.keys(s);
 
-            // 1. Initialise all sources state and trigger fetch for online ones
+            // 1. Initialize sourceCounts structure and start fetching all remote sources
             sourceNames.forEach(name => {
-                sourceCounts[name] = { count: 0, loadedAt: new Date().toISOString(), status: 'idle', rawEvents: [], grouped: {} };
+                sourceCounts[name] = { count: 0, loadedAt: new Date().toISOString(), status: 'idle', rawEvents: [], grouped: {}, mappedEvents: [] };
                 if (!s[name].startsWith('local://')) {
-                    fetchSource(name, s[name]);
+                    // Fetch all sources in the background, but only display the first one initially
+                    const isFirstSource = name === sourceNames[0];
+                    fetchSource(name, s[name], isFirstSource);
                 }
             });
 
-            // 2. Set the active source and update UI (clears it initially)
+            // 2. Select the first source to display its events immediately (will wait for fetch if remote)
             if (sourceNames.length > 0) {
-                activeSource = sourceNames[0];
-                renderSources();
-                updateEventUI([], {}, activeSource);
+                selectSource(sourceNames[0]);
+            } else {
+                updateEventsHeader();
+                updateEventUI([], {}, null);
             }
 
-            // 3. Set the initial footer status
+            // Load initial state for the best events, even if the section is not visible
+            bestEventsState = loadBestEvents();
+
             updateFooterStatus();
         }
         init();
