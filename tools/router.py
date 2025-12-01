@@ -9,16 +9,17 @@ from datetime import datetime
 import webbrowser
 import json
 import glob
+import re
 
 #==========================CONFIG=============================================
-INPUT_DIR = r"C:\Users\hdoghmen\Downloads\down01\CC"  # Directory containing PDF files
-OUTPUT_BASE_DIR = r"C:\Users\hdoghmen\Downloads\down01\CC"
+INPUT_DIR = r"C:\Users\hdoghmen\OneDrive\VNTD_LBC_25\0.Warehouse\1.Route\DEC\1__SAM_06_DEC_25"  # Directory containing PDF files
+OUTPUT_BASE_DIR = INPUT_DIR # can
 MIN_W = 300
 MIN_H = 300
 CROP_LEFT = 15   # percentage of the width to keep from the left
 CROP_RIGHT = 45  # percentage of the width to keep from the right
 IMG_TO_DISK = "off"  # "on" to write images to disk, "off" to use base64 in HTML
-OUTPUT_HTML = "route_plan.html"  # Output HTML file name
+# OUTPUT_HTML will be generated dynamically: VG_+ <last folder of the INPUT_DIR>.html
 #=======================================================================
 
 # Color codes for console output
@@ -87,6 +88,80 @@ def image_to_base64(pil_img, format='PNG'):
     pil_img.save(buffer, format=format)
     return base64.b64encode(buffer.getvalue()).decode('utf-8')
 
+def extract_route_timing_info(text):
+    """
+    Extract route timing information like '8:10 AM - 8:48 AM (38 min)' from text.
+    Specifically looks for patterns like '5 Rue Victor Considérant, 75014 Paris 8:10 AM - 8:48 AM (38 min)'
+    and extracts only the timing part.
+    """
+    print_color("  🔍 Searching for route timing information...", Colors.BLUE)
+    
+    # More specific pattern to match the timing part after address
+    # Looks for: time AM/PM - time AM/PM (duration min)
+    patterns = [
+        # Pattern that captures timing after address text
+        r'(?:\b\d{1,3}\s+(?:[A-Za-zÀ-ÿ]+\s+){{1,5}},\s*\d{{5}}\s+[A-Za-zÀ-ÿ]+\s*)?(\d{{1,2}}:\d{{2}}\s*[AP]M\s*-\s*\d{{1,2}}:\d{{2}}\s*[AP]M\s*\(\s*\d+\s*min\s*\))',
+        # More general pattern for timing with duration
+        r'(\d{1,2}:\d{2}\s*[AP]M\s*-\s*\d{1,2}:\d{2}\s*[AP]M\s*\(\s*\d+\s*min\s*\))',
+        # Pattern without spaces
+        r'(\d{1,2}:\d{2}[AP]M\s*-\s*\d{1,2}:\d{2}[AP]M\s*\(\s*\d+\s*min\s*\))',
+        # Pattern with different spacing
+        r'(\d{1,2}:\d{2}\s*[AP]M\s*[-–]\s*\d{1,2}:\d{2}\s*[AP]M\s*\([^)]*\))'
+    ]
+    
+    for i, pattern in enumerate(patterns):
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            timing_text = match.group(1)
+            # Clean up any extra spaces
+            timing_text = re.sub(r'\s+', ' ', timing_text).strip()
+            print_color(f"  ✅ Extracted route timing: {timing_text}", Colors.GREEN)
+            return timing_text
+    
+    # If no specific pattern matches, try to find any timing range
+    fallback_patterns = [
+        r'\d{1,2}:\d{2}\s*[AP]M\s*[-–]\s*\d{1,2}:\d{2}\s*[AP]M',
+        r'\d{1,2}:\d{2}\s*[-–]\s*\d{1,2}:\d{2}\s*[AP]M'
+    ]
+    
+    for pattern in fallback_patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            timing_text = match.group(0)
+            print_color(f"  ⚠ Extracted basic timing range: {timing_text}", Colors.YELLOW)
+            return timing_text
+    
+    # Debug: Print a sample of the text to help with pattern matching
+    sample_text = text[:500] if len(text) > 500 else text
+    print_color(f"  🔎 Sample text for debugging: {sample_text}", Colors.CYAN)
+    print_color("  ❌ No route timing information found", Colors.RED)
+    return None
+
+def parse_folder_name(folder_name):
+    """
+    Parse folder name like 'H__Marché Gros-la-Fontaine 75016' 
+    Returns tuple: (prefix, main_name)
+    """
+    # Split by double underscore
+    parts = folder_name.split('__', 1)
+    if len(parts) == 2:
+        return parts[0], parts[1]
+    else:
+        return "", folder_name
+
+def get_dynamic_output_html():
+    """Generate dynamic output HTML filename based on last folder of INPUT_DIR"""
+    last_folder = os.path.basename(os.path.normpath(INPUT_DIR))
+    return f"VG_{last_folder}.html"
+
+def get_footer_info():
+    """Generate footer information with current time and weather info"""
+    now = datetime.now()
+    formatted_time = now.strftime("%d %b - %H:%M")
+    # For demo purposes, using fixed rain percentage - you can integrate weather API here
+    rain_percentage = "30%"  # This can be made dynamic with weather API
+    return f"Generated at : {formatted_time} | {rain_percentage} rain"
+
 # ---------------------------------------------------
 # EXTRACT EMBEDDED IMAGES >= MIN_W x MIN_H
 # ---------------------------------------------------
@@ -145,9 +220,17 @@ def extract_large_images(doc, embed_dir, pdf_name, all_images_data):
 # EXPORT ALL NON-BLANK PAGES AS IMAGES + EDGE CROP
 # ---------------------------------------------------
 def export_pages_as_images(doc, page_dir, pdf_name, all_images_data):
+    route_timing_info = None
+    
     for page_number, page in enumerate(doc, start=1):
         if page_is_blank_rule1(page):
             continue
+
+        # Extract route timing info from first page
+        if page_number == 1 and not route_timing_info:
+            text = page.get_text()
+            print_color(f"  📄 Extracting text from page 1 of {pdf_name}", Colors.BLUE)
+            route_timing_info = extract_route_timing_info(text)
 
         pix = page.get_pixmap(dpi=150)
         temp_file = f"temp_page_{pdf_name}.png"
@@ -163,11 +246,16 @@ def export_pages_as_images(doc, page_dir, pdf_name, all_images_data):
         else:
             # Store in memory for HTML
             base64_data = image_to_base64(pil_img)
-            all_images_data.append({
+            image_data = {
                 'folder': pdf_name,
                 'name': f"page_{page_number}.png",
                 'base64': f"data:image/png;base64,{base64_data}"
-            })
+            }
+            # Add route timing info only to the first image
+            if page_number == 1 and route_timing_info:
+                image_data['route_timing_info'] = route_timing_info
+                
+            all_images_data.append(image_data)
             print_color(f"  ✓ Processed page image: page_{page_number}.png", Colors.CYAN)
 
     if os.path.exists(f"temp_page_{pdf_name}.png"):
@@ -210,15 +298,30 @@ def create_html_gallery(all_images_data, output_file):
         folder_name = img_data['folder']
         if folder_name not in folders_dict:
             folders_dict[folder_name] = []
+        
         folders_dict[folder_name].append({
             'name': img_data['name'],
-            'base64': img_data['base64']
+            'base64': img_data['base64'],
+            'route_timing_info': img_data.get('route_timing_info')
         })
     
     for folder_name, images in folders_dict.items():
+        # Find if any image in this folder has route timing info
+        folder_timing_info = None
+        for image in images:
+            if image.get('route_timing_info'):
+                folder_timing_info = image['route_timing_info']
+                break
+        
+        # Parse folder name for prefix and main name
+        prefix, main_name = parse_folder_name(folder_name)
+        
         folders_data.append({
             'name': folder_name,
-            'images': images
+            'prefix': prefix,
+            'main_name': main_name,
+            'images': images,
+            'route_timing_info': folder_timing_info
         })
     
     print_color(f"📁 Found {len(folders_data)} folders with {len(all_images_data)} total images", Colors.YELLOW)
@@ -248,6 +351,7 @@ def create_html_gallery(all_images_data, output_file):
 def create_html_content(folders_data, master_dir):
     """Create the HTML content for the gallery"""
     folders_json = json.dumps(folders_data)
+    footer_info = get_footer_info()
     
     # Dhuhr prayer times data
     dhuhr_times_json = '''
@@ -310,7 +414,7 @@ def create_html_content(folders_data, master_dir):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Images Gallery</title>
+    <title>Route Plan v1.0</title>
     <style>
         * {{
             margin: 0;
@@ -360,12 +464,28 @@ def create_html_content(folders_data, master_dir):
         .dhuhr-countdown {{
             font-size: 16px;
             font-weight: 600;
-            color: #ff3b30;
-            background: #fff0f0;
             padding: 8px 12px;
             border-radius: 8px;
-            border: 1px solid #ffd1d1;
-            box-shadow: 0 2px 8px rgba(255, 59, 48, 0.2);
+            border: 1px solid;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }}
+        
+        .dhuhr-countdown.green {{
+            color: #2e7d32;
+            background: #f1f8e9;
+            border-color: #c5e1a5;
+        }}
+        
+        .dhuhr-countdown.orange {{
+            color: #ef6c00;
+            background: #fff3e0;
+            border-color: #ffb74d;
+        }}
+        
+        .dhuhr-countdown.red {{
+            color: #c62828;
+            background: #ffebee;
+            border-color: #ef9a9a;
         }}
         
         .real-time-clock {{
@@ -380,13 +500,13 @@ def create_html_content(folders_data, master_dir):
         
         .folder-section {{
             position: relative;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
         }}
         
         .folder-section::after {{
             content: '';
             position: absolute;
-            bottom: -8px;
+            bottom: -12px;
             left: 0;
             right: 0;
             height: 2px;
@@ -398,8 +518,38 @@ def create_html_content(folders_data, master_dir):
             display: block;
         }}
         
+        /* Different colors for each section */
+        .folder-header.color-0 {{
+            background: linear-gradient(135deg, #fff9c4, #fff59d);
+            border-left: 4px solid #fbc02d;
+        }}
+        
+        .folder-header.color-1 {{
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 4px solid #2196f3;
+        }}
+        
+        .folder-header.color-2 {{
+            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+            border-left: 4px solid #4caf50;
+        }}
+        
+        .folder-header.color-3 {{
+            background: linear-gradient(135deg, #fce4ec, #f8bbd9);
+            border-left: 4px solid #e91e63;
+        }}
+        
+        .folder-header.color-4 {{
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+            border-left: 4px solid #9c27b0;
+        }}
+        
+        .folder-header.color-5 {{
+            background: linear-gradient(135deg, #e0f2f1, #b2dfdb);
+            border-left: 4px solid #009688;
+        }}
+        
         .folder-header {{
-            background: #fff9c4;
             padding: 15px;
             border-radius: 12px;
             margin-bottom: 10px;
@@ -412,26 +562,54 @@ def create_html_content(folders_data, master_dir):
             transition: all 0.3s ease;
         }}
         
-        .folder-header:nth-child(even) {{
-            background: #fffde7;
-        }}
-        
         .folder-header:hover {{
-            background: #fff59d;
             box-shadow: 0 6px 20px rgba(0,0,0,0.15);
             transform: translateY(-1px);
         }}
         
         .folder-title {{
             display: flex;
-            align-items: center;
-            gap: 10px;
+            align-items: flex-start;
+            gap: 12px;
+            flex: 1;
         }}
         
-        .folder-name {{
-            font-size: 18px;
+        .folder-prefix {{
+            background: rgba(0, 0, 0, 0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            min-width: 30px;
+            text-align: center;
+        }}
+        
+        .folder-name-container {{
+            flex: 1;
+        }}
+        
+        .folder-main-name {{
+            font-size: 16px;
             font-weight: 600;
             color: #1d1d1f;
+            margin-bottom: 4px;
+        }}
+        
+        .route-timing-info {{
+            font-size: 14px;
+            color: #d32f2f;
+            font-weight: 500;
+            background: #ffebee;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            border-left: 3px solid #d32f2f;
+        }}
+        
+        .copy-buttons {{
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }}
         
         .copy-icon {{
@@ -461,6 +639,7 @@ def create_html_content(folders_data, master_dir):
             border-radius: 12px;
             font-size: 12px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin-left: 10px;
         }}
         
         .folder-content {{
@@ -487,12 +666,24 @@ def create_html_content(folders_data, master_dir):
             max-width: 100%;
             border: 2px solid #f0f0f0;
             transition: all 0.3s ease;
+            cursor: pointer;
         }}
         
         .image-card:hover {{
             transform: translateY(-4px);
             box-shadow: 0 12px 35px rgba(0,0,0,0.25);
             border-color: #e0e0e0;
+        }}
+        
+        .image-card.zoomed {{
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1.1);
+            z-index: 1000;
+            max-width: 90vw;
+            max-height: 90vh;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
         }}
         
         .image-container {{
@@ -504,6 +695,22 @@ def create_html_content(folders_data, master_dir):
             width: 100%;
             height: auto;
             display: block;
+            transition: transform 0.3s ease;
+        }}
+        
+        .image-card.zoomed .image-container img {{
+            transform: scale(1.05);
+        }}
+        
+        /* Red line after each image set */
+        .folder-content::after {{
+            content: '';
+            display: block;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ff3b30, transparent);
+            margin-top: 25px;
+            border-radius: 2px;
         }}
         
         footer {{
@@ -511,6 +718,8 @@ def create_html_content(folders_data, master_dir):
             padding: 20px 0;
             color: #86868b;
             font-size: 14px;
+            border-top: 1px solid #e5e5e7;
+            margin-top: 20px;
         }}
         
         .empty-state {{
@@ -575,13 +784,60 @@ def create_html_content(folders_data, master_dir):
         .toast.show {{
             opacity: 1;
         }}
+        
+        /* Overlay for zoomed images */
+        .overlay {{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }}
+        
+        .overlay.active {{
+            opacity: 1;
+            pointer-events: all;
+        }}
+        
+        /* Mobile-specific styles */
+        @media (max-width: 768px) {{
+            .copy-icon {{
+                display: none; /* Hide copy button on mobile */
+            }}
+            
+            .top-menu {{
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }}
+            
+            .time-display {{
+                flex-direction: column;
+                gap: 10px;
+            }}
+            
+            .folder-title {{
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }}
+            
+            .folder-prefix {{
+                align-self: flex-start;
+            }}
+        }}
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Horizontal Menu -->
         <div class="top-menu">
-            <div class="menu-title">PDF Images Gallery</div>
+            <div class="menu-title">Route Plan v1.0</div>
             <div class="time-display">
                 <div class="dhuhr-countdown" id="dhuhrCountdown"></div>
                 <div class="real-time-clock" id="realTimeClock"></div>
@@ -595,9 +851,13 @@ def create_html_content(folders_data, master_dir):
         </main>
         
         <footer>
+            <p>{footer_info}</p>
             <p>{len(folders_data)} folders • {sum(len(folder['images']) for folder in folders_data)} images</p>
         </footer>
     </div>
+
+    <!-- Overlay for zoomed images -->
+    <div class="overlay" id="overlay"></div>
 
     <!-- Floating Home Button -->
     <button class="floating-home" onclick="goToHome()" title="Collapse all and go to top">
@@ -657,12 +917,14 @@ def create_html_content(folders_data, master_dir):
             return null;
         }}
         
-        // Calculate time remaining until Dhuhr
+        // Calculate time remaining until Dhuhr and apply color coding
         function updateDhuhrCountdown(now) {{
             const dhuhrTimeStr = getNearestDhuhrTime(now);
+            const countdownElement = document.getElementById('dhuhrCountdown');
             
             if (!dhuhrTimeStr) {{
-                document.getElementById('dhuhrCountdown').textContent = 'No Dhuhr time';
+                countdownElement.textContent = 'No Dhuhr time';
+                countdownElement.className = 'dhuhr-countdown';
                 return;
             }}
             
@@ -676,16 +938,29 @@ def create_html_content(folders_data, master_dir):
                 dhuhrTime.setDate(dhuhrTime.getDate() + 1);
             }}
             
-            // Calculate difference
+            // Calculate difference in minutes
             const diffMs = dhuhrTime - now;
+            const diffMinutes = Math.floor(diffMs / (1000 * 60));
             
-            // Convert to hours and minutes
-            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-            const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            // Convert to hours and minutes for display
+            const diffHours = Math.floor(diffMinutes / 60);
+            const remainingMinutes = diffMinutes % 60;
             
             // Format as HH:MM
-            const formattedTime = `${{diffHours.toString().padStart(2, '0')}}:${{diffMinutes.toString().padStart(2, '0')}}`;
-            document.getElementById('dhuhrCountdown').textContent = `${{formattedTime}} to Dhuhr`;
+            const formattedTime = `${{diffHours.toString().padStart(2, '0')}}:${{remainingMinutes.toString().padStart(2, '0')}}`;
+            
+            // Apply color coding based on time remaining
+            let colorClass = '';
+            if (diffMinutes > 30) {{
+                colorClass = 'green';
+            }} else if (diffMinutes >= 15 && diffMinutes <= 29) {{
+                colorClass = 'orange';
+            }} else {{
+                colorClass = 'red';
+            }}
+            
+            countdownElement.textContent = `${{formattedTime}} to Dhuhr`;
+            countdownElement.className = `dhuhr-countdown ${{colorClass}}`;
         }}
         
         // Show toast notification
@@ -699,13 +974,20 @@ def create_html_content(folders_data, master_dir):
             }}, 2000);
         }}
         
-        // Copy folder name to clipboard
-        function copyFolderName(folderName) {{
-            navigator.clipboard.writeText(folderName).then(() => {{
-                showToast('Folder name copied!');
+        // Copy text to clipboard
+        function copyToClipboard(text, message) {{
+            // Check if mobile device
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {{
+                showToast('Copy disabled on mobile');
+                return;
+            }}
+            
+            navigator.clipboard.writeText(text).then(() => {{
+                showToast(message);
             }}).catch(err => {{
                 console.error('Failed to copy: ', err);
-                showToast('Failed to copy folder name');
+                showToast('Failed to copy');
             }});
         }}
         
@@ -715,6 +997,12 @@ def create_html_content(folders_data, master_dir):
             document.querySelectorAll('.folder-content').forEach(content => {{
                 content.classList.remove('active');
             }});
+            
+            // Unzoom all images
+            document.querySelectorAll('.image-card.zoomed').forEach(card => {{
+                card.classList.remove('zoomed');
+            }});
+            document.getElementById('overlay').classList.remove('active');
             
             // Scroll to top
             window.scrollTo({{
@@ -742,6 +1030,45 @@ def create_html_content(folders_data, master_dir):
             }});
         }}
         
+        // Toggle image zoom
+        function toggleImageZoom(imageCard) {{
+            const isZoomed = imageCard.classList.contains('zoomed');
+            const overlay = document.getElementById('overlay');
+            
+            if (isZoomed) {{
+                // Unzoom
+                imageCard.classList.remove('zoomed');
+                overlay.classList.remove('active');
+            }} else {{
+                // Zoom - first unzoom any other zoomed images
+                document.querySelectorAll('.image-card.zoomed').forEach(card => {{
+                    card.classList.remove('zoomed');
+                }});
+                
+                imageCard.classList.add('zoomed');
+                overlay.classList.add('active');
+            }}
+        }}
+        
+        // Handle double tap on mobile for zoom reset
+        function setupMobileDoubleTap() {{
+            let lastTap = 0;
+            document.addEventListener('touchend', function(event) {{
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+                if (tapLength < 500 && tapLength > 0) {{
+                    // Double tap detected
+                    const zoomedImage = document.querySelector('.image-card.zoomed');
+                    if (zoomedImage) {{
+                        zoomedImage.classList.remove('zoomed');
+                        document.getElementById('overlay').classList.remove('active');
+                    }}
+                    event.preventDefault();
+                }}
+                lastTap = currentTime;
+            }});
+        }}
+        
         // Function to render folders and images
         function renderFolders() {{
             const accordion = document.getElementById('folderAccordion');
@@ -760,9 +1087,10 @@ def create_html_content(folders_data, master_dir):
             let accordionHTML = '';
             folders.forEach((folder, index) => {{
                 let imagesHTML = '';
-                folder.images.forEach(image => {{
+                
+                folder.images.forEach((image, imgIndex) => {{
                     imagesHTML += `
-                        <div class="image-card">
+                        <div class="image-card" ondblclick="toggleImageZoom(this)">
                             <div class="image-container">
                                 <img src="${{image.base64}}" alt="${{image.name}}">
                             </div>
@@ -770,19 +1098,35 @@ def create_html_content(folders_data, master_dir):
                     `;
                 }});
                 
+                const colorClass = `color-${{index % 6}}`; // Cycle through 6 colors
+                
                 accordionHTML += `
                     <div class="folder-section" id="section-${{index}}">
-                        <div class="folder-header" onclick="toggleFolder(${{index}})">
+                        <div class="folder-header ${{colorClass}}" onclick="toggleFolder(${{index}})">
                             <div class="folder-title">
-                                <div class="folder-name">${{folder.name}}</div>
-                                <button class="copy-icon" onclick="event.stopPropagation(); copyFolderName('${{folder.name}}')" title="Copy folder name">
+                                ${{folder.prefix ? `<div class="folder-prefix">${{folder.prefix}}</div>` : ''}}
+                                <div class="folder-name-container">
+                                    <div class="folder-main-name">${{folder.main_name}}</div>
+                                    ${{folder.route_timing_info ? `<div class="route-timing-info">⏱ ${{folder.route_timing_info}}</div>` : ''}}
+                                </div>
+                            </div>
+                            <div class="copy-buttons">
+                                ${{folder.prefix ? `
+                                <button class="copy-icon" onclick="event.stopPropagation(); copyToClipboard('${{folder.prefix}}', 'Prefix copied!')" title="Copy prefix">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                                     </svg>
                                 </button>
+                                ` : ''}}
+                                <button class="copy-icon" onclick="event.stopPropagation(); copyToClipboard('${{folder.main_name}}', 'Location copied!')" title="Copy location">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                </button>
+                                <div class="folder-count">${{folder.images.length}}</div>
                             </div>
-                            <div class="folder-count">${{folder.images.length}}</div>
                         </div>
                         <div class="folder-content" id="folder-${{index}}">
                             <div class="image-stack">
@@ -827,9 +1171,20 @@ def create_html_content(folders_data, master_dir):
             // Render folders
             renderFolders();
             
+            // Setup mobile double tap
+            setupMobileDoubleTap();
+            
             // Update red lines on scroll and resize
             window.addEventListener('scroll', updateRedLines);
             window.addEventListener('resize', updateRedLines);
+            
+            // Close zoomed image when clicking overlay
+            document.getElementById('overlay').addEventListener('click', function() {{
+                document.querySelectorAll('.image-card.zoomed').forEach(card => {{
+                    card.classList.remove('zoomed');
+                }});
+                this.classList.remove('active');
+            }});
         }});
     </script>
 </body>
@@ -839,6 +1194,9 @@ def create_html_content(folders_data, master_dir):
 # MAIN PROCESSING
 # ---------------------------------------------------
 def main():
+    # Generate dynamic output filename
+    OUTPUT_HTML = get_dynamic_output_html()
+    
     print_color("🚀 Starting PDF to HTML Gallery Converter", Colors.MAGENTA + Colors.BOLD)
     print_color(f"📁 Input directory: {INPUT_DIR}", Colors.BLUE)
     print_color(f"💾 Image to disk: {IMG_TO_DISK}", Colors.BLUE)

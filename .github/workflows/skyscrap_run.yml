@@ -1,4 +1,4 @@
-name: SkyScraper v2025.11.17.1
+name: SkyScraper v2025.12.01.1
 
 on:
   schedule:
@@ -10,8 +10,8 @@ on:
       - main
   workflow_dispatch:
     inputs:
-      master_url:
-        description: "Provide MASTER_URL string for the scraper"
+      VG_MASTER_URL:
+        description: "Provide VG_MASTER_URL string for the scraper"
         required: true
         type: string
 
@@ -60,8 +60,17 @@ jobs:
           fi
           echo "EDIT_KEY is present"
 
-      - name: 7.Run SkyScra
+      - name: 7.Determine VG_MASTER_URL
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "VG_MASTER_URL=${{ github.event.inputs.VG_MASTER_URL }}" >> $GITHUB_ENV
+          else
+            echo "VG_MASTER_URL=${{ vars.VG_VG_MASTER_URL }}" >> $GITHUB_ENV
+          fi
+        shell: bash
+
+      - name: 8.Run SkyScraper
         env:
           EDIT_KEY: ${{ secrets.JSONHOST_EDIT_KEY }}
-          MASTER_URL: ${{ github.event.inputs.master_url }}
+          VG_MASTER_URL: ${{ env.VG_MASTER_URL }}
         run: python skyscra.py
