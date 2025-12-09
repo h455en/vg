@@ -1,12 +1,20 @@
-name: PaGex
+name: PeGex v0.1
 
 on:
   workflow_dispatch:
     inputs:
       urls_path:
-        description: 'Path to urls.txt (repo-relative) or raw URL to file'
+        description: 'Path to urls.txt (repo-relative) or raw URL'
         required: true
         default: 'urls.txt'
+      output_path:
+        description: 'Output HTML path in repo (branch commit)'
+        required: true
+        default: 'output/cards.html'
+      commit_branch:
+        description: 'Branch to push generated HTML'
+        required: true
+        default: 'generated-html'
 
 jobs:
   scrape:
@@ -27,15 +35,39 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests beautifulsoup4
 
-      - name: Run scraper
+      - name: Run PaGex
         env:
           URLS_PATH: ${{ github.event.inputs.urls_path }}
         run: |
           echo "Using urls_path=${URLS_PATH}"
-          python tools/pagex.py "$URLS_PATH" --output cards.html
+          python tools/pagex.py "$URLS_PATH" --output "${{ github.event.inputs.output_path }}"
+
+      - name: Show generated file info
+        run: |
+          ls -la $(dirname "${{ github.event.inputs.output_path }}") || true
+          wc -c "${{ github.event.inputs.output_path }}" || true
 
       - name: Upload HTML artifact
         uses: actions/upload-artifact@v4
         with:
           name: cards
-          path: cards.html
+          path: ${{ github.event.inputs.output_path }}
+
+      - name: Commit generated HTML to branch
+        env:
+          COMMIT_BRANCH: ${{ github.event.inputs.commit_branch }}
+          FILE_PATH: ${{ github.event.inputs.output_path }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # create branch from default if not exists
+          git fetch origin +refs/heads/${COMMIT_BRANCH}:refs/heads/${COMMIT_BRANCH} || true
+          git checkout -B ${COMMIT_BRANCH}
+          mkdir -p "$(dirname "$FILE_PATH")"
+          git add "$FILE_PATH" || true
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update generated HTML (scrape run at $(date -u +'%Y-%m-%dT%H:%M:%SZ'))" || true
+            git push origin ${COMMIT_BRANCH}
+          fi
