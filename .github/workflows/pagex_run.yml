@@ -1,16 +1,13 @@
-name: PeGex v0.1
+name: PeGex v0.2
 
 on:
   workflow_dispatch:
     inputs:
       urls_path:
-        description: 'Path to urls.txt (repo-relative) or raw URL'
+        description: 'Path to the input file containing URLs (e.g., data/links_posts.txt)'
         required: true
-        default: 'urls.txt'
-      output_path:
-        description: 'Output HTML path in repo (branch commit)'
-        required: true
-        default: 'output/cards.html'
+        # Le script s'attend à ce que le fichier soit dans un sous-dossier (ex: data/)
+        default: 'data/links_default.txt' 
       commit_branch:
         description: 'Branch to push generated HTML'
         required: true
@@ -35,39 +32,67 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests beautifulsoup4
 
-      - name: Run PaGex
-        env:
-          URLS_PATH: ${{ github.event.inputs.urls_path }}
+      - name: Calculate Dynamic Output HTML Path
+        id: path_calc # Cet ID permet de récupérer la sortie dans les étapes suivantes
         run: |
-          echo "Using urls_path=${URLS_PATH}"
-          python tools/pagex.py "$URLS_PATH" --output "${{ github.event.inputs.output_path }}"
+          # 1. Obtenir le chemin du fichier d'entrée
+          INPUT_PATH="${{ github.event.inputs.urls_path }}"
+          # 2. Extraire le nom du fichier (ex: links_abab.txt)
+          FILENAME=$(basename "$INPUT_PATH")
+          # 3. Supprimer le préfixe 'links_' (ex: abab.txt)
+          BASE_NAME_NO_PREFIX=${FILENAME#links_}
+          # 4. Changer l'extension en .html (ex: abab.html)
+          OUTPUT_FILENAME="${BASE_NAME_NO_PREFIX%.*}.html"
+          # 5. Déterminer le dossier de sortie (le même que le dossier d'entrée, ex: data/)
+          OUTPUT_DIR=$(dirname "$INPUT_PATH")
+          # 6. Construire le chemin final (ex: data/abab.html)
+          OUTPUT_PATH="$OUTPUT_DIR/$OUTPUT_FILENAME"
+          
+          echo "Calculated Output Path: $OUTPUT_PATH"
+          # Exporter le chemin de sortie pour les étapes suivantes
+          echo "OUTPUT_PATH=$OUTPUT_PATH" >> $GITHUB_OUTPUT 
+
+      - name: Run HTML Generator
+        run: |
+          # Le script Python attend le chemin du fichier d'URLs comme seul argument
+          python tools/generate_html.py "${{ github.event.inputs.urls_path }}"
 
       - name: Show generated file info
+        # Utiliser la variable OUTPUT_PATH calculée dans l'étape précédente
         run: |
-          ls -la $(dirname "${{ github.event.inputs.output_path }}") || true
-          wc -c "${{ github.event.inputs.output_path }}" || true
+          OUTPUT_PATH="${{ steps.path_calc.outputs.OUTPUT_PATH }}"
+          ls -la $(dirname "$OUTPUT_PATH") || true
+          wc -c "$OUTPUT_PATH" || true
 
       - name: Upload HTML artifact
         uses: actions/upload-artifact@v4
         with:
           name: cards
-          path: ${{ github.event.inputs.output_path }}
+          # Utiliser la variable OUTPUT_PATH calculée
+          path: ${{ steps.path_calc.outputs.OUTPUT_PATH }} 
 
       - name: Commit generated HTML to branch
         env:
           COMMIT_BRANCH: ${{ github.event.inputs.commit_branch }}
-          FILE_PATH: ${{ github.event.inputs.output_path }}
+          # Utiliser la variable OUTPUT_PATH calculée
+          OUTPUT_PATH: ${{ steps.path_calc.outputs.OUTPUT_PATH }} 
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # create branch from default if not exists
+          
+          # Créer la branche de destination si elle n'existe pas
           git fetch origin +refs/heads/${COMMIT_BRANCH}:refs/heads/${COMMIT_BRANCH} || true
           git checkout -B ${COMMIT_BRANCH}
-          mkdir -p "$(dirname "$FILE_PATH")"
-          git add "$FILE_PATH" || true
+          
+          # S'assurer que le répertoire de sortie (ex: data) existe
+          mkdir -p "$(dirname "$OUTPUT_PATH")"
+          
+          # Ajouter le fichier généré
+          git add "$OUTPUT_PATH" || true
+          
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Update generated HTML (scrape run at $(date -u +'%Y-%m-%dT%H:%M:%SZ'))" || true
+            git commit -m "Update generated HTML (scrape run at $(date -u +'%Y-%m-%dT%H:%M:%SZ'))"
             git push origin ${COMMIT_BRANCH}
           fi

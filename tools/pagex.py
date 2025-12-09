@@ -1,407 +1,477 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Scrape pages, build single HTML with:
-- Merriweather for French, Amiri for Arabic
-- Tag tabs (underline) for filtering
-- Carousel per article (French/Arabic slides)
-- Pagination (10 items per page)
-Usage:
-  python scrape_cards.py <urls_path> --output output/french_arabic_cards.html
-urls_path: repo-relative path OR full raw URL to urls.txt
-"""
-
 import requests
 from bs4 import BeautifulSoup
 import random
-import os
-import sys
+import html
+from collections import defaultdict
+import re
 import argparse
-import pathlib
-import json
-from urllib.parse import urlparse
+from pathlib import Path
+import sys
 
-TAILWIND_COLORS = [
-    "bg-red-200", "bg-green-200", "bg-blue-200",
-    "bg-yellow-200", "bg-pink-200", "bg-purple-200",
-    "bg-indigo-200", "bg-teal-200", "bg-orange-200"
-]
+# --- Configuration ---
+# Bootstrap Color Classes for Tags
+COLORS = ["bg-primary", "bg-success", "bg-info", "bg-warning", "bg-danger", "bg-secondary", "bg-dark"]
 tag_colors = {}
 
 def get_tag_color(tag):
+    """Assigns a consistent color class to each unique tag."""
     if tag not in tag_colors:
-        tag_colors[tag] = random.choice(TAILWIND_COLORS)
+        tag_colors[tag] = random.choice(COLORS)
     return tag_colors[tag]
 
-def load_urls_from_path(path):
-    if path.startswith("http://") or path.startswith("https://"):
-        print(f"Downloading URLs from: {path}")
-        r = requests.get(path, timeout=20)
-        r.raise_for_status()
-        content = r.text
-    else:
-        print(f"Reading URLs from local file: {path}")
-        with open(path, "r", encoding="utf-8") as f:
-            content = f.read()
-    urls = [line.strip() for line in content.splitlines() if line.strip()]
-    print(f"Loaded {len(urls)} URL(s).")
-    return urls
-
-def extract_title_near_metadata(soup):
-    # Find the node containing "Publié le" and look for a preceding heading (h1/h2/h3)
-    meta = soup.find(string=lambda t: t and "Publié le" in t)
-    if meta:
-        # walk up to parent and search previous siblings for title tags
-        node = meta.parent
-        for _ in range(6):
-            # look for immediate previous heading siblings
-            prev = node.find_previous_sibling()
-            if not prev:
-                node = node.parent
-                if not node:
-                    break
-                continue
-            if prev.name and prev.name.lower() in ("h1", "h2", "h3"):
-                return prev.get_text(strip=True)
-            node = prev
-        # fallback: find first h1 or h2 in document
-    h = soup.find(["h1","h2"])
-    return h.get_text(strip=True) if h else ""
-
-def extract_text_blocks(url):
+def extract_article(url):
+    """
+    Scrapes the given URL to extract the article title, French text, Arabic text, and tags.
+    Applies filtering for unwanted headers/footers.
+    """
     try:
         print(f"Processing: {url}")
         r = requests.get(url, timeout=15)
         r.encoding = 'utf-8'
         soup = BeautifulSoup(r.text, "html.parser")
 
-        title = extract_title_near_metadata(soup)
-
+        # 1. Find the main content div
         selectors = [
-            {"class": "post-body entry-content"},
-            {"class": "post-body"},
-            {"id": "main-content"},
+            {"class_": "post-body entry-content"},
+            {"class_": "post-body"},
+            {"id": "main-content"}
         ]
         content_div = None
         for sel in selectors:
-            content_div = soup.find("div", sel)
-            if content_div:
-                break
+            content_div = soup.find("div", **sel)
+            if content_div: break
+        
         if not content_div:
             divs = soup.find_all("div")
-            if not divs:
-                print("  -> No divs found on page")
-                return None, None, title, url, []
             content_div = max(divs, key=lambda d: len(d.find_all("p")), default=None)
+        
+        if not content_div:
+            return {"url": url, "title": "Error", "french": "<p>Text could not be extracted</p>", "arabic": "<p>Text could not be extracted</p>", "tags": []}
 
-        if not content_div or len(content_div.find_all("p")) == 0:
-            print("  -> Could not find main paragraphs")
-            return None, None, title, url, []
+        # 2. Extract Title (Logic simplified for robust extraction)
+        title = ""
+        h_tags = content_div.find_all(re.compile(r'^h[1-4]$'))
+        if h_tags:
+            title = h_tags[0].get_text(strip=True)
+        
+        if not title:
+            # Fallback to the first non-empty text before known header content
+            for elem in content_div.find_all(text=True):
+                if "Publié le" in elem or "3ilm char3i" in elem: break
+                if elem.strip() and len(elem.strip()) > 10: 
+                    title = elem.strip()
+                    break
 
-        french_pars = []
-        arabic_pars = []
+        # 3. Extract French and Arabic content and apply filters
+        french, arabic = [], []
         ignore_next = False
+        arabic_regex = re.compile(r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]')
+        
+        # Keywords for filtering unwanted content
+        UNWANTED_HEADINGS = ["La science légiférée - العلم الشرعي", "3ilm char3i", "Publié par", "Partager cet article"]
+        FRENCH_FOOTER_KEYWORDS = ["Catégories", "Newsletter", "Abonnez-vous", "Contre le terrorisme", "copié sans aucune modification"]
+
         for p in content_div.find_all("p"):
-            text = p.get_text(strip=True)
-            if not text:
-                continue
+            t = p.get_text(strip=True)
+            if not t: continue
+            
+            # Filter 1: Stop processing after reaching the known footer keywords
+            if any(keyword in t for keyword in FRENCH_FOOTER_KEYWORDS): 
+                break 
+            
+            # Filter 2: Remove known unwanted header/publishing info (Skip current paragraph)
+            if t.startswith("Publié le") and "3ilm char3i" in t: continue
+            if any(ut in t for ut in UNWANTED_HEADINGS): continue
 
-            # Skip everything starting from "Partager cet article"
-            if "Partager cet article" in text:
-                ignore_next = True
-                continue
-            if ignore_next:
-                continue
-
-            # Skip "Publié le ... par 3ilm char3i"
-            if text.startswith("Publié le") and "3ilm char3i" in text:
-                continue
-
-            # classify
-            if any('\u0600' <= c <= '\u06FF' for c in text):
-                arabic_pars.append(text)
+            if arabic_regex.search(t):
+                arabic.append(html.escape(t))
             else:
-                french_pars.append(text)
+                french.append(html.escape(t))
 
-        french_text = "<p>" + "</p><p>".join(french_pars) + "</p>" if french_pars else ""
-        arabic_text = "<p>" + "</p><p>".join(arabic_pars) + "</p>" if arabic_pars else ""
+        french_html = "<p>" + "</p><p>".join(french) + "</p>" if french else "<p>Not available</p>"
+        arabic_html = "<p>" + "</p><p>".join(arabic) + "</p>" if arabic else "<p>Not available</p>"
 
-        # Tags after "Publié dans"
+        # 4. Extract Tags - Only take the French part 
         tags = []
         published_tag = soup.find(string=lambda t: t and "Publié dans" in t)
         if published_tag:
             parent = published_tag.parent
-            if parent:
-                for a in parent.find_all("a"):
-                    tt = a.get_text(strip=True)
-                    if tt:
-                        tags.append(tt)
+            for a in parent.find_all("a"):
+                tag_text = a.get_text(strip=True)
+                if tag_text:
+                    # Extract only the French part before ' - '
+                    cleaned_tag = tag_text.split(' - ')[0].strip()
+                    if cleaned_tag:
+                        tags.append(cleaned_tag)
 
-        print("  -> Extraction succeeded")
-        return french_text or None, arabic_text or None, title, url, tags
-
+        return {"url": url, "title": title or "No title", "french": french_html, "arabic": arabic_html, "tags": tags}
     except Exception as e:
-        print(f"  -> Error: {e}")
-        return None, None, "", url, []
+        print(f"Error processing {url}: {e}", file=sys.stderr)
+        return {"url": url, "title": "Error", "french": "<p>Text could not be extracted</p>", "arabic": "<p>Text could not be extracted</p>", "tags": []}
 
-def build_html(articles, out_file):
-    # articles: list of dicts {id, title, french, arabic, url, tags}
-    unique_tags = []
-    for a in articles:
-        for t in a["tags"]:
-            if t not in unique_tags:
-                unique_tags.append(t)
-    # assign colors
-    for t in unique_tags:
-        get_tag_color(t)
-
-    # generate cards markup
-    cards = []
-    for idx, a in enumerate(articles):
-        tags_html = ""
-        for t in a["tags"]:
-            color = tag_colors.get(t, random.choice(TAILWIND_COLORS))
-            tags_html += f'<span class="inline-block px-2 py-1 mr-1 mb-1 text-sm rounded {color} hover:opacity-90 card-tag tag" data-tag="{t}" onclick="toggleTag(`{t}`)">{t}</span>'
-        french_block = a["french"] or '<p class="text-gray-400">Not available</p>'
-        arabic_block = a["arabic"] or '<p class="text-gray-400">Not available</p>'
-        title_html = f'<h2 class="text-xl font-semibold mb-2">{a["title"]}</h2>' if a["title"] else ''
-        url_small = f'<div class="mt-2 text-xs text-gray-400 break-words"><a href="{a["url"]}" target="_blank" rel="noopener">{a["url"]}</a></div>'
-
-        card = f'''
-<div class="my-6 card-wrap border-2 card-border pb-4 rounded-lg" data-tags='{json.dumps(a["tags"])}' data-article-index="{idx}">
-  <div class="p-4">
-    {title_html}
-    <div class="carousel" data-idx="{idx}">
-      <div class="carousel-track relative overflow-hidden">
-        <div class="slide w-full p-4 bg-white rounded-lg card-inner" data-slide="0">
-          <button onclick="copyText(this)" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800">📋</button>
-          <div class="font-merri text-base leading-relaxed">{french_block}</div>
-        </div>
-        <div class="slide w-full p-4 bg-white rounded-lg card-inner" data-slide="1">
-          <button onclick="copyText(this)" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800">📋</button>
-          <div class="font-amiri text-base leading-relaxed" dir="rtl">{arabic_block}</div>
-        </div>
-      </div>
-      <div class="mt-2 flex items-center gap-2">
-        <button class="btn-prev px-3 py-1 border rounded text-sm" onclick="prevSlide({idx})">Prev</button>
-        <button class="btn-next px-3 py-1 border rounded text-sm" onclick="nextSlide({idx})">Next</button>
-        <div class="ml-4 text-sm text-gray-600">Slide: <span id="slide-ind-{idx}">1</span>/2</div>
-      </div>
-    </div>
-    {url_small}
-    <div class="mt-2">{tags_html}</div>
-  </div>
-</div>
-'''
-        cards.append(card)
-
-    # Template HTML (single file)
-    html = f'''<!DOCTYPE html>
+def generate_html_content(tags_html, carousel_items):
+    """Generates the full HTML content string using .format() and double braces."""
+    return """
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>French & Arabic Cards</title>
-<!-- Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Amiri&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-body {{ background: #f9fafb; font-family: 'Merriweather', serif; }}
-.font-merri {{ font-family: 'Merriweather', serif; }}
-.font-amiri {{ font-family: 'Amiri', serif; }}
-.arabic {{ text-align: right; }}
-.card-border {{ border-width: 2px; border-color: #9CA3AF; }}
-.slide {{ display: none; position: relative; }}
-.slide.active {{ display: block; }}
-.carousel-track {{ min-height: 6rem; }}
-.tag-tab {{ cursor: pointer; padding: 0.5rem 0.75rem; }}
-.tag-tab.active {{ border-bottom-width: 3px; border-bottom-color: #1D4ED8; }}
-/* smaller link text */
-a {{ color: inherit; }}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Articles Carousel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Literata:wght@400;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* General Styles */
+        body {{font-family: Arial, sans-serif;}}
+        .card-rounded {{border-radius: 1rem;}}
+        
+        /* Font Styles (Literata for French, Amiri for Arabic) */
+        .french-text {{ 
+            font-family: 'Literata', serif; 
+            font-size: 1rem;
+            line-height: 1.6;
+            max-height: 50vh;
+        }}
+        .arabic-text {{ 
+            font-family: 'Amiri', serif; 
+            direction: rtl; 
+            text-align: right; 
+            font-size: 1.1rem;
+            line-height: 1.8;
+            max-height: 50vh;
+        }}
+        
+        /* Carousel/Tag Styles */
+        .tag-tab {{ 
+            cursor: pointer;
+            text-decoration: underline; 
+            transition: opacity 0.2s;
+        }}
+        /* Style for the active/selected tab */
+        .tag-tab.active-filter {{
+            font-weight: bold;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5), 0 0 0 4px #000; 
+            opacity: 1;
+        }}
+        .carousel-item {{ min-height: 80vh; }}
+        
+        /* Pagination Styling */
+        .pagination-container {{ padding: 1rem 0; }}
+        
+        .copy-btn {{ border: none; }}
+        .text-truncate {{ overflow: hidden; white-space: nowrap; }}
+    </style>
 </head>
-<body class="flex flex-col min-h-screen">
+<body>
+    <header class="bg-light py-2 border-bottom shadow-sm sticky-top">
+        <div class="container d-flex flex-wrap align-items-center">
+            <strong class="me-3 text-secondary">Tags:</strong>
+            <div id="tag-container" class="d-flex flex-wrap">
+                {tags_html}
+            </div>
+        </div>
+    </header>
 
-<header class="bg-gray-200 py-2 text-center text-sm">Thin Header</header>
-
-<main class="flex-1 container mx-auto p-4">
-  <!-- Tag tabs -->
-  <div id="tag-tabs" class="mb-4 flex gap-2 flex-wrap border-b pb-2">
-    <div class="tag-tab text-sm font-medium mr-2 underline-none" onclick="clearTags()">All</div>
-'''
-    # add tabs
-    for t in unique_tags:
-        html += f'<div class="tag-tab text-sm font-medium" data-tag-name="{t}" onclick="selectTab(`{t}`)">{t}</div>\n'
-
-    html += '''
-  </div>
-
-  <!-- Pagination controls (top) -->
-  <div class="mb-4 flex justify-between items-center">
-    <div>
-      <button onclick="prevPage()" class="px-3 py-1 border rounded text-sm">Prev</button>
-      <button onclick="nextPage()" class="px-3 py-1 border rounded text-sm ml-2">Next</button>
+    <div id="articleCarousel" class="carousel slide" data-bs-interval="false" data-bs-keyboard="true">
+        
+        <div class="carousel-inner">
+            {carousel_items}
+        </div>
+        
+        <button class="carousel-control-prev" type="button" data-bs-target="#articleCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#articleCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
     </div>
-    <div class="text-sm text-gray-600">Page <span id="page-num">1</span> / <span id="page-total">1</span></div>
-  </div>
 
-  <!-- Cards container -->
-  <div id="cards-container">
-    {''.join(cards)}
-  </div>
-
-  <!-- Pagination controls (bottom) -->
-  <div class="mt-6 flex justify-between items-center">
-    <div>
-      <button onclick="prevPage()" class="px-3 py-1 border rounded text-sm">Prev</button>
-      <button onclick="nextPage()" class="px-3 py-1 border rounded text-sm ml-2">Next</button>
+    <div class="container pagination-container">
+        <nav aria-label="Article navigation">
+            <ul id="article-pagination" class="pagination justify-content-center">
+                </ul>
+        </nav>
     </div>
-    <div class="text-sm text-gray-600">Page <span id="page-num-2">1</span> / <span id="page-total-2">1</span></div>
-  </div>
 
-</main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const articleCarousel = document.getElementById('articleCarousel');
+        const paginationUl = document.getElementById('article-pagination');
+        // Use a safe check before initialization, in case no articles were scraped
+        const carouselItems = articleCarousel ? articleCarousel.querySelectorAll('.carousel-item') : [];
+        let carouselInstance;
+        if (articleCarousel && carouselItems.length > 0) {{
+             carouselInstance = new bootstrap.Carousel(articleCarousel, {{ interval: false, keyboard: true }});
+        }}
+        
+        // --- Core Pagination Logic ---
+        function renderPagination() {{
+            const visibleItems = Array.from(carouselItems).filter(item => item.style.display !== 'none');
+            const visibleCount = visibleItems.length;
+            const activeVisibleIndex = visibleItems.findIndex(item => item.classList.contains('active'));
 
-<footer class="bg-gray-200 py-2 text-center text-sm">Thin Footer</footer>
+            if (visibleCount === 0 || !carouselInstance) {{
+                paginationUl.innerHTML = '';
+                return;
+            }}
 
-<script>
-// Pagination config
-const ITEMS_PER_PAGE = 10;
-const cards = Array.from(document.querySelectorAll('.card-wrap'));
-let currentPage = 1;
-let filteredIndexes = null; // null => no filter
+            paginationUl.innerHTML = '';
 
-function initPagination() {{
-  document.getElementById('page-total').innerText = Math.max(1, Math.ceil(cards.length / ITEMS_PER_PAGE));
-  document.getElementById('page-total-2').innerText = document.getElementById('page-total').innerText;
-  showPage(1);
-}}
+            function getVisibleSlideIndex(step) {{
+                const targetIndex = activeVisibleIndex + step;
+                if (targetIndex >= 0 && targetIndex < visibleCount) {{
+                    return Array.from(carouselItems).indexOf(visibleItems[targetIndex]);
+                }}
+                return -1;
+            }}
 
-// show a page considering filtering
-function showPage(page) {{
-  const list = filteredIndexes ? filteredIndexes : cards.map((c,i)=>i);
-  const total = Math.max(1, Math.ceil(list.length / ITEMS_PER_PAGE));
-  if(page < 1) page = 1;
-  if(page > total) page = total;
-  currentPage = page;
-  document.getElementById('page-num').innerText = page;
-  document.getElementById('page-num-2').innerText = page;
-  document.getElementById('page-total').innerText = total;
-  document.getElementById('page-total-2').innerText = total;
+            // 1. Previous Button
+            const prevLi = document.createElement('li');
+            const prevTargetIndex = getVisibleSlideIndex(-1);
+            // JS Template Literal for CSS class with conditional
+            prevLi.className = `page-item ${{activeVisibleIndex === 0 ? 'disabled' : ''}}`; 
+            prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous">Previous</a>`;
+            prevLi.addEventListener('click', (e) => {{
+                e.preventDefault();
+                if (prevTargetIndex !== -1) {{
+                    carouselInstance.to(prevTargetIndex);
+                }}
+            }});
+            paginationUl.appendChild(prevLi);
 
-  // hide all
-  cards.forEach(c => c.style.display = 'none');
-  // compute slice
-  const start = (page-1) * ITEMS_PER_PAGE;
-  const pageItems = list.slice(start, start + ITEMS_PER_PAGE);
-  pageItems.forEach(i => cards[i].style.display = '');
+            // 2. Numbered Pages (1, 2, 3...)
+            visibleItems.forEach((item, visibleIndex) => {{
+                const pageLi = document.createElement('li');
+                // JS Template Literal for CSS class with conditional
+                pageLi.className = `page-item ${{visibleIndex === activeVisibleIndex ? 'active' : ''}}`;
+                const globalIndex = Array.from(carouselItems).indexOf(item);
 
-  // reinitialize slides for visible items
-  pageItems.forEach(i => initCarousel(parseInt(cards[i].dataset.articleIndex)));
-}}
+                // JS Template Literal for injected number
+                pageLi.innerHTML = `<a class="page-link" href="#">${{visibleIndex + 1}}</a>`;
+                pageLi.addEventListener('click', (e) => {{
+                    e.preventDefault();
+                    carouselInstance.to(globalIndex);
+                }});
+                paginationUl.appendChild(pageLi);
+            }});
 
-function prevPage(){ showPage(currentPage-1); }
-function nextPage(){ showPage(currentPage+1); }
+            // 3. Next Button
+            const nextLi = document.createElement('li');
+            const nextTargetIndex = getVisibleSlideIndex(1);
+            // JS Template Literal for CSS class with conditional
+            nextLi.className = `page-item ${{activeVisibleIndex === visibleCount - 1 ? 'disabled' : ''}}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next">Next</a>`;
+            nextLi.addEventListener('click', (e) => {{
+                e.preventDefault();
+                if (nextTargetIndex !== -1) {{
+                    carouselInstance.to(nextTargetIndex);
+                }}
+            }});
+            paginationUl.appendChild(nextLi);
+        }}
 
-// Carousel logic per article
-function initCarousel(articleIdx) {{
-  const wrapper = document.querySelector(`.carousel[data-idx="${articleIdx}"]`);
-  if(!wrapper) return;
-  const slides = wrapper.querySelectorAll('.slide');
-  slides.forEach(s => s.classList.remove('active'));
-  slides[0].classList.add('active');
-  document.getElementById(`slide-ind-${articleIdx}`).innerText = 1;
-}}
+        // --- Event Listener to Sync Pagination and Carousel ---
+        if (articleCarousel) {{
+            articleCarousel.addEventListener('slid.bs.carousel', function (e) {{
+                renderPagination(); 
+            }});
+        }}
 
-function nextSlide(articleIdx){ changeSlide(articleIdx, 1); }
-function prevSlide(articleIdx){ changeSlide(articleIdx, -1); }
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', () => {{
+            renderPagination(); 
+        }});
 
-function changeSlide(articleIdx, delta) {{
-  const wrapper = document.querySelector(`.carousel[data-idx="${articleIdx}"]`);
-  if(!wrapper) return;
-  const slides = wrapper.querySelectorAll('.slide');
-  let active = -1;
-  slides.forEach((s,i)=> { if(s.classList.contains('active')) active = i; });
-  let next = (active + delta + slides.length) % slides.length;
-  slides[active].classList.remove('active');
-  slides[next].classList.add('active');
-  document.getElementById(`slide-ind-${articleIdx}`).innerText = next+1;
-}}
 
-// copy text
-function copyText(button){ const card = button.closest('.card-inner'); if(!card) return; const txt = card.innerText; navigator.clipboard.writeText(txt).then(()=>{ const old = button.innerText; button.innerText='✅'; setTimeout(()=> button.innerText = old, 1000); }); }
+        // --- Other Utility Functions (Copy and Tag Filtering) ---
+        function copyText(id){{
+            const el = document.getElementById(id);
+            const text = el.innerText;
+            navigator.clipboard.writeText(text).then(() => {{
+                const copyButton = document.querySelector(`#${{id}}`).closest('.card').querySelector('.copy-btn');
+                const originalContent = copyButton.innerHTML;
+                copyButton.innerHTML = '<span class="text-success">Copié!</span>';
+                setTimeout(() => {{ copyButton.innerHTML = originalContent; }}, 1500);
+            }}).catch(err => {{
+                console.error('Could not copy text: ', err);
+                alert("Échec de la copie du texte.");
+            }});
+        }}
+        window.copyText = copyText;
 
-// Tag filtering / tabs
-let activeTags = new Set();
-function toggleTag(tag){ if(activeTags.has(tag)) activeTags.delete(tag); else activeTags.add(tag); applyFilter(); updateTagTabs(); }
-function selectTab(tag){ activeTags = new Set([tag]); applyFilter(); updateTagTabs(); }
-function clearTags(){ activeTags = new Set(); applyFilter(); updateTagTabs(); }
+        // Tag Filtering Logic (Mutually Exclusive Tabs)
+        document.querySelectorAll('.tag-tab').forEach(tag => {{
+            tag.addEventListener('click', function() {{
+                const selectedTag = this.getAttribute('data-tag');
+                
+                // 1. Mutually Exclusive Tab Activation
+                document.querySelectorAll('.tag-tab').forEach(t => t.classList.remove('active-filter'));
+                this.classList.add('active-filter');
+                const isAll = (selectedTag === 'all');
 
-function applyFilter(){ 
-  if(activeTags.size===0){ filteredIndexes = null; showPage(1); return; }
-  const idxs = [];
-  cards.forEach((c,i)=>{
-    const data = JSON.parse(c.dataset.tags || '[]');
-    const match = data.some(t => Array.from(activeTags).includes(t));
-    if(match) idxs.push(i);
-  });
-  filteredIndexes = idxs;
-  showPage(1);
-}
+                // 2. Filter Articles and Find First Match
+                let firstVisibleIndex = -1;
+                carouselItems.forEach((item, index) => {{
+                    const itemTags = item.getAttribute('data-tags');
+                    const tagsArray = itemTags ? itemTags.split(',') : [];
+                    
+                    const matchesFilter = isAll || tagsArray.includes(selectedTag);
 
-function updateTagTabs(){ 
-  document.querySelectorAll('#tag-tabs .tag-tab').forEach(tab=>{
-    const t = tab.dataset.tagName;
-    if(!t) return;
-    tab.classList.remove('active');
-    if(activeTags.has(t)) tab.classList.add('active');
-  });
-}
-
-// init
-document.addEventListener('DOMContentLoaded', function(){ 
-  // convert slide container elements into proper slide divs
-  document.querySelectorAll('.carousel .carousel-track').forEach(track=>{
-    const slides = track.querySelectorAll('.slide');
-    slides.forEach((s,i)=> s.classList.toggle('active', i===0));
-  });
-  // init all carousels (only visible ones will be reinitialized by showPage)
-  initPagination();
-});
-</script>
-
+                    if (matchesFilter) {{
+                        item.style.display = 'block';
+                        if (firstVisibleIndex === -1) {{
+                            firstVisibleIndex = index;
+                        }}
+                    }} else {{
+                        item.style.display = 'none'; // Hide article
+                    }}
+                }});
+                
+                // 3. Update Carousel and Pagination
+                carouselItems.forEach(item => item.classList.remove('active'));
+                
+                if (firstVisibleIndex !== -1) {{
+                    const firstVisibleItem = carouselItems[firstVisibleIndex];
+                    firstVisibleItem.classList.add('active');
+                    if (carouselInstance) {{
+                        carouselInstance.to(firstVisibleIndex); 
+                    }}
+                }}
+                renderPagination(); 
+            }});
+        }});
+    </script>
 </body>
 </html>
-'''
-    # write
-    os.makedirs(os.path.dirname(out_file), exist_ok=True)
-    with open(out_file, "w", encoding="utf-8") as f:
-        f.write(html)
-    print(f"Wrote HTML to: {out_file}")
+""".format(
+        tags_html=tags_html, 
+        carousel_items=carousel_items
+    )
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("urls_path", help="Repo-relative path or raw URL to urls.txt")
-    parser.add_argument("--output", "-o", default="output/french_arabic_cards.html", help="Output HTML file")
+    parser = argparse.ArgumentParser(description="Scrape URLs from a text file and generate a Bootstrap carousel HTML page.")
+    # The input file will be relative to where the script is run, e.g., 'data/links_abab.txt'
+    parser.add_argument("input_file", type=str, help="Path to the input text file containing URLs (e.g., data/links_abab.txt).")
     args = parser.parse_args()
 
-    urls = load_urls_from_path(args.urls_path)
+    input_path = Path(args.input_file)
+    
+    # 1. Determine Output Path
+    # Input: data/links_abab.txt
+    # Output Path: data/abab.html
+    
+    input_filename = input_path.name
+    
+    # Strip the 'links_' prefix if it exists
+    if input_filename.startswith('links_'):
+        base_name_without_prefix = input_filename[len('links_'):]
+    else:
+        # Fallback if the naming convention is not strictly followed
+        base_name_without_prefix = input_filename
+    
+    # Change the extension to .html
+    output_filename = Path(base_name_without_prefix).with_suffix('.html').name
+    
+    # Ensure output goes to the same directory as the input file (e.g., 'data' folder)
+    output_path = input_path.parent / output_filename
+    
+    # 2. Read URLs
+    try:
+        with open(input_path, "r", encoding="utf-8") as f:
+            urls = [line.strip() for line in f if line.strip()]
+    except FileNotFoundError:
+        print(f"Error: Input file '{input_path}' not found.", file=sys.stderr)
+        sys.exit(1)
+
     if not urls:
-        print("No URLs. Exiting.")
+        print(f"No URLs found in '{input_path}'. HTML generation skipped.", file=sys.stderr)
         sys.exit(0)
 
-    articles = []
-    for i, u in enumerate(urls):
-        french, arabic, title, url, tags = extract_text_blocks(u)
-        articles.append({
-            "id": i,
-            "title": title or "",
-            "french": french,
-            "arabic": arabic,
-            "url": url,
-            "tags": tags or []
-        })
+    # 3. Extract Articles
+    articles = [extract_article(u) for u in urls]
 
-    build_html(articles, args.output)
+    # 4. Prepare HTML parts
+    tag_counts = defaultdict(int)
+    for a in articles:
+        for t in a['tags']:
+            tag_counts[t] += 1
+
+    all_tags = sorted(tag_counts.keys())
+
+    # Tags HTML (with 'All' tag)
+    total_articles_count = len(articles)
+    tags_html = f'<span class="tag-tab active-filter bg-secondary px-2 py-1 text-white rounded-pill me-2 mb-1" data-tag="all">All ({total_articles_count})</span>'
+
+    for t in all_tags:
+        color = get_tag_color(t)
+        count = tag_counts[t]
+        tags_html += f'<span class="tag-tab {color} px-2 py-1 text-white rounded-pill me-2 mb-1" data-tag="{t}">{t} ({count})</span>'
+
+    # Carousel Items HTML
+    carousel_items = ""
+    for i, a in enumerate(articles):
+        active = "active" if i == 0 else ""
+        article_tags_html = ""
+        for t in a['tags']:
+            color = get_tag_color(t)
+            article_tags_html += f'<span class="badge {color} text-white me-1 rounded-pill">{t}</span>'
+
+        carousel_items += f"""
+<div class="carousel-item {active}" data-article-index="{i}" data-tags="{','.join(a['tags'])}">
+    <div class="container py-4">
+        <h3 class="mb-3">{a['title']}</h3>
+        
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card card-rounded p-3 h-100 shadow-lg">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title text-primary mb-0">Français</h5>
+                        <button class="btn btn-sm btn-outline-secondary copy-btn" onclick="copyText('french-{i}')" title="Copier le contenu français">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-files" viewBox="0 0 16 16">
+                                <path d="M13 0H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2m-3 6V2h3a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3zm-3-3a1 1 0 0 1 1-1H7a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="french-{i}" class="french-text overflow-auto">{a['french']}</div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card card-rounded p-3 h-100 shadow-lg">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title text-success mb-0">العربية</h5>
+                        <button class="btn btn-sm btn-outline-secondary copy-btn" onclick="copyText('arabic-{i}')" title="Copier le contenu arabe">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-files" viewBox="0 0 16 16">
+                                <path d="M13 0H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2m-3 6V2h3a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3zm-3-3a1 1 0 0 1 1-1H7a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="arabic-{i}" class="arabic-text overflow-auto">{a['arabic']}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-3 d-flex justify-content-between align-items-center">
+            <small class="text-muted me-3">Tags: {article_tags_html}</small>
+            <small class="text-muted text-end">Original URL: <a href="{a['url']}" target="_blank" class="text-decoration-none text-truncate d-inline-block" style="max-width: 300px;">{a['url']}</a></small>
+        </div>
+    </div>
+</div>
+"""
+    # 5. Generate and Write HTML
+    html_content = generate_html_content(tags_html, carousel_items)
+    
+    try:
+        # Create the 'data' directory if it doesn't exist
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(html_content)
+        print(f"Success! HTML generated and saved to: {output_path}")
+    except Exception as e:
+        print(f"Error writing output file: {e}", file=sys.stderr)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
