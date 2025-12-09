@@ -7,11 +7,11 @@ on:
         description: 'Path to the input file containing URLs (e.g., data/links_posts.txt)'
         required: true
         # Le script s'attend à ce que le fichier soit dans un sous-dossier (ex: data/)
-        default: 'data/links_default.txt' 
+        default: 'data/urls_innov.txt' 
       commit_branch:
         description: 'Branch to push generated HTML'
         required: true
-        default: 'generated-html'
+        default: 'innov-html'
 
 jobs:
   scrape:
@@ -55,7 +55,7 @@ jobs:
       - name: Run HTML Generator
         run: |
           # Le script Python attend le chemin du fichier d'URLs comme seul argument
-          python tools/generate_html.py "${{ github.event.inputs.urls_path }}"
+          python tools/pagex.py "${{ github.event.inputs.urls_path }}"
 
       - name: Show generated file info
         # Utiliser la variable OUTPUT_PATH calculée dans l'étape précédente
