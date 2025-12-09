@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>French & Arabic Cards</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Amiri&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body { background: #f9fafb; font-family: 'Merriweather', serif; }
+.font-merri { font-family: 'Merriweather', serif; }
+.font-amiri { font-family: 'Amiri', serif; }
+.arabic { text-align: right; }
+.card-border { border-width: 2px; border-color: #9CA3AF; }
+.slide { display: none; position: relative; }
+.slide.active { display: block; }
+.carousel-track { min-height: 6rem; }
+.tag-tab { cursor: pointer; padding: 0.5rem 0.75rem; }
+.tag-tab.active { border-bottom-width: 3px; border-bottom-color: #1D4ED8; }
+/* smaller link text */
+a { color: inherit; }
+</style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+<header class="bg-gray-200 py-2 text-center text-sm">Thin Header</header>
+
+<main class="flex-1 container mx-auto p-4">
+  <!-- Tag tabs -->
+  <div id="tag-tabs" class="mb-4 flex gap-2 flex-wrap border-b pb-2">
+    <div class="tag-tab text-sm font-medium mr-2 underline-none" onclick="clearTags()">All</div>
+
+  </div>
+
+  <!-- Pagination controls (top) -->
+  <div class="mb-4 flex justify-between items-center">
+    <div>
+      <button onclick="prevPage()" class="px-3 py-1 border rounded text-sm">Prev</button>
+      <button onclick="nextPage()" class="px-3 py-1 border rounded text-sm ml-2">Next</button>
+    </div>
+    <div class="text-sm text-gray-600">Page <span id="page-num">1</span> / <span id="page-total">1</span></div>
+  </div>
+
+  <!-- Cards container -->
+  <div id="cards-container">
+    {''.join(cards)}
+  </div>
+
+  <!-- Pagination controls (bottom) -->
+  <div class="mt-6 flex justify-between items-center">
+    <div>
+      <button onclick="prevPage()" class="px-3 py-1 border rounded text-sm">Prev</button>
+      <button onclick="nextPage()" class="px-3 py-1 border rounded text-sm ml-2">Next</button>
+    </div>
+    <div class="text-sm text-gray-600">Page <span id="page-num-2">1</span> / <span id="page-total-2">1</span></div>
+  </div>
+
+</main>
+
+<footer class="bg-gray-200 py-2 text-center text-sm">Thin Footer</footer>
+
+<script>
+// Pagination config
+const ITEMS_PER_PAGE = 10;
+const cards = Array.from(document.querySelectorAll('.card-wrap'));
+let currentPage = 1;
+let filteredIndexes = null; // null => no filter
+
+function initPagination() {{
+  document.getElementById('page-total').innerText = Math.max(1, Math.ceil(cards.length / ITEMS_PER_PAGE));
+  document.getElementById('page-total-2').innerText = document.getElementById('page-total').innerText;
+  showPage(1);
+}}
+
+// show a page considering filtering
+function showPage(page) {{
+  const list = filteredIndexes ? filteredIndexes : cards.map((c,i)=>i);
+  const total = Math.max(1, Math.ceil(list.length / ITEMS_PER_PAGE));
+  if(page < 1) page = 1;
+  if(page > total) page = total;
+  currentPage = page;
+  document.getElementById('page-num').innerText = page;
+  document.getElementById('page-num-2').innerText = page;
+  document.getElementById('page-total').innerText = total;
+  document.getElementById('page-total-2').innerText = total;
+
+  // hide all
+  cards.forEach(c => c.style.display = 'none');
+  // compute slice
+  const start = (page-1) * ITEMS_PER_PAGE;
+  const pageItems = list.slice(start, start + ITEMS_PER_PAGE);
+  pageItems.forEach(i => cards[i].style.display = '');
+
+  // reinitialize slides for visible items
+  pageItems.forEach(i => initCarousel(parseInt(cards[i].dataset.articleIndex)));
+}}
+
+function prevPage(){ showPage(currentPage-1); }
+function nextPage(){ showPage(currentPage+1); }
+
+// Carousel logic per article
+function initCarousel(articleIdx) {{
+  const wrapper = document.querySelector(`.carousel[data-idx="${articleIdx}"]`);
+  if(!wrapper) return;
+  const slides = wrapper.querySelectorAll('.slide');
+  slides.forEach(s => s.classList.remove('active'));
+  slides[0].classList.add('active');
+  document.getElementById(`slide-ind-${articleIdx}`).innerText = 1;
+}}
+
+function nextSlide(articleIdx){ changeSlide(articleIdx, 1); }
+function prevSlide(articleIdx){ changeSlide(articleIdx, -1); }
+
+function changeSlide(articleIdx, delta) {{
+  const wrapper = document.querySelector(`.carousel[data-idx="${articleIdx}"]`);
+  if(!wrapper) return;
+  const slides = wrapper.querySelectorAll('.slide');
+  let active = -1;
+  slides.forEach((s,i)=> { if(s.classList.contains('active')) active = i; });
+  let next = (active + delta + slides.length) % slides.length;
+  slides[active].classList.remove('active');
+  slides[next].classList.add('active');
+  document.getElementById(`slide-ind-${articleIdx}`).innerText = next+1;
+}}
+
+// copy text
+function copyText(button){ const card = button.closest('.card-inner'); if(!card) return; const txt = card.innerText; navigator.clipboard.writeText(txt).then(()=>{ const old = button.innerText; button.innerText='✅'; setTimeout(()=> button.innerText = old, 1000); }); }
+
+// Tag filtering / tabs
+let activeTags = new Set();
+function toggleTag(tag){ if(activeTags.has(tag)) activeTags.delete(tag); else activeTags.add(tag); applyFilter(); updateTagTabs(); }
+function selectTab(tag){ activeTags = new Set([tag]); applyFilter(); updateTagTabs(); }
+function clearTags(){ activeTags = new Set(); applyFilter(); updateTagTabs(); }
+
+function applyFilter(){ 
+  if(activeTags.size===0){ filteredIndexes = null; showPage(1); return; }
+  const idxs = [];
+  cards.forEach((c,i)=>{
+    const data = JSON.parse(c.dataset.tags || '[]');
+    const match = data.some(t => Array.from(activeTags).includes(t));
+    if(match) idxs.push(i);
+  });
+  filteredIndexes = idxs;
+  showPage(1);
+}
+
+function updateTagTabs(){ 
+  document.querySelectorAll('#tag-tabs .tag-tab').forEach(tab=>{
+    const t = tab.dataset.tagName;
+    if(!t) return;
+    tab.classList.remove('active');
+    if(activeTags.has(t)) tab.classList.add('active');
+  });
+}
+
+// init
+document.addEventListener('DOMContentLoaded', function(){ 
+  // convert slide container elements into proper slide divs
+  document.querySelectorAll('.carousel .carousel-track').forEach(track=>{
+    const slides = track.querySelectorAll('.slide');
+    slides.forEach((s,i)=> s.classList.toggle('active', i===0));
+  });
+  // init all carousels (only visible ones will be reinitialized by showPage)
+  initPagination();
+});
+</script>
+
+</body>
+</html>
