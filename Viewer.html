@@ -7,6 +7,10 @@
     <title>Events Viewer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css' rel='stylesheet' />
+
     <style>
         :root {
             --indigo: #4f46e5;
@@ -26,7 +30,8 @@
 
         body {
             font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
-            font-size: 16px;
+            font-size: 14px;
+            /* MODIFIED: Reduced base font size */
             background: var(--bg);
             margin: 0;
             color: #0f172a;
@@ -48,7 +53,10 @@
             align-items: center;
             justify-content: space-between;
             gap: 16px;
-            padding: 12px 16px;
+            padding: 8px 16px;
+            /* MODIFIED: Reduced vertical padding */
+            position: relative;
+            /* For search container absolute positioning */
         }
 
         .brand {
@@ -58,9 +66,17 @@
             flex-shrink: 0;
         }
 
+        .brand svg {
+            width: 28px;
+            /* Adjusted icon size */
+            height: 28px;
+            /* Adjusted icon size */
+        }
+
         .brand h1 {
             margin: 0;
-            font-size: 18px;
+            font-size: 16px;
+            /* MODIFIED: Reduced font size */
             font-weight: 600;
             color: #0b1220;
         }
@@ -80,15 +96,16 @@
         .topnav button {
             background: transparent;
             border: none;
-            padding: 8px 12px;
+            padding: 6px 10px;
+            /* MODIFIED: Reduced padding */
             border-radius: 0;
             cursor: pointer;
             color: #1f2937;
             font-weight: 500;
             transition: background 0.15s ease;
-            font-size: 14px;
+            font-size: 13px;
+            /* MODIFIED: Reduced font size */
             white-space: nowrap;
-            /* Prevent wrap in menu items */
         }
 
         .topnav button:hover {
@@ -116,6 +133,23 @@
             color: white;
         }
 
+        /* Search Collapse Logic */
+        #search-input-wrapper {
+            transition: width 0.3s ease, border 0.3s ease;
+        }
+
+        #search-input-wrapper.search-collapsed {
+            width: 0;
+            overflow: hidden;
+            border: 1px solid transparent;
+        }
+
+        #search-input-wrapper:not(.search-collapsed) {
+            width: 300px;
+            border: 1px solid #e6edf3;
+        }
+
+
         /* progress line */
         #progress-wrap {
             height: 4px;
@@ -141,13 +175,16 @@
             padding: 0 16px;
         }
 
-        /* Content card */
+        /* Content card - MORE PRONOUNCED BORDER */
         .card {
             flex: 1;
             background: var(--card);
             border-radius: 12px;
             padding: 18px;
-            box-shadow: 0 6px 20px rgba(12, 18, 35, 0.04);
+            border: 1px solid #d0d0d0;
+            /* ADDED: Distinct border */
+            box-shadow: 0 6px 20px rgba(12, 18, 35, 0.08);
+            /* MODIFIED: Increased shadow opacity */
             min-width: 0;
         }
 
@@ -161,14 +198,16 @@
         }
 
         .month-tab {
-            padding: 8px 12px;
+            padding: 6px 10px;
+            /* MODIFIED: Reduced padding */
             border-radius: 999px;
             color: white;
             font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
             flex-shrink: 0;
-            /* Important for horizontal scroll */
+            font-size: 13px;
+            /* MODIFIED: Reduced font size */
         }
 
         .month-tab:hover {
@@ -177,46 +216,59 @@
             opacity: 0.95;
         }
 
-        /* events */
+        /* events - MORE PRONOUNCED BORDER */
         .day-card {
             border-radius: 12px;
-            border: 1px solid #e0e7ff;
+            border: 2px solid #ccd8ff;
+            /* MODIFIED: Thicker, slightly darker blue border */
             margin-bottom: 16px;
             overflow: hidden;
-            box-shadow: 0 4px 10px rgba(12, 18, 35, 0.05);
+            box-shadow: 0 4px 12px rgba(12, 18, 35, 0.08);
+            /* MODIFIED: Increased shadow opacity */
         }
 
         .day-head {
             display: flex;
             justify-content: space-between;
             gap: 10px;
-            padding: 12px 16px;
+            padding: 10px 14px;
+            /* MODIFIED: Reduced padding */
             align-items: center;
             cursor: pointer;
         }
 
         .day-head strong {
-            font-size: 18px;
+            font-size: 16px;
+            /* MODIFIED: Reduced font size */
             font-weight: 700;
         }
 
+        .day-head span {
+            font-size: 12px !important;
+            /* Keep count small */
+        }
+
         .day-content {
-            padding: 12px;
+            padding: 10px;
+            /* MODIFIED: Reduced padding */
             display: block;
             border-top: 1px solid rgba(224, 231, 255, 0.5);
         }
 
-        /* Event Row Styling */
+        /* Event Row Styling - MORE PRONOUNCED BORDER */
         .event-row {
             background: white;
-            border: 1px solid #eef2f8;
-            padding: 12px;
+            border: 1px solid #e6e6e6;
+            /* MODIFIED: Thicker border */
+            padding: 10px;
+            /* MODIFIED: Reduced padding */
             border-radius: 8px;
             margin-bottom: 8px;
             display: flex;
             gap: 10px;
             align-items: flex-start;
-            box-shadow: 0 2px 5px rgba(12, 18, 35, 0.02);
+            box-shadow: 0 2px 5px rgba(12, 18, 35, 0.04);
+            /* MODIFIED: Increased shadow opacity */
         }
 
         .event-row button {
@@ -231,7 +283,8 @@
             font-weight: 700;
             color: #0b1220;
             text-decoration: none;
-            font-size: 18px;
+            font-size: 16px;
+            /* MODIFIED: Reduced font size */
             display: block;
             line-height: 1.3;
         }
@@ -239,10 +292,12 @@
         /* Meta/Address: Made smaller (14px) and normal weight */
         .event-row .meta {
             color: var(--muted);
-            font-size: 14px;
+            font-size: 13px;
+            /* MODIFIED: Reduced font size */
             font-weight: 500;
             line-height: 1.3;
-            margin-top: 4px;
+            margin-top: 2px;
+            /* MODIFIED: Reduced margin */
         }
 
         /* Map Section Styling */
@@ -255,32 +310,77 @@
             transition: opacity 0.3s ease;
         }
 
-        /* config list */
+        /* config list - MODIFIED FOR SMALLER BUTTONS AND GRID LAYOUT */
         .config-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            /* 1fr for content, auto for buttons */
+            gap: 8px;
+            /* MODIFIED: Reduced gap */
             align-items: center;
-            padding: 8px;
+            padding: 6px;
+            /* MODIFIED: Reduced padding */
             border-radius: 8px;
             background: #f8fafc;
             border: 1px solid #eef2f8;
+            font-size: 13px;
         }
+
+        .config-content {
+            /* NEW: Wrapper for name, URL, and Copy button */
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            /* Smaller font for URL */
+            word-break: break-all;
+            line-height: 1.4;
+        }
+
+        .config-content span:first-child {
+            font-weight: 600;
+            margin-right: 8px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            font-size: 13px;
+            /* Name back to 13px */
+        }
+
+        /* Copy button style inside config-content */
+        .config-content button {
+            margin-left: 8px;
+            padding: 0px 4px !important;
+            font-size: 10px !important;
+            height: 20px;
+            width: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .config-content button svg {
+            width: 13px;
+            height: 13px;
+        }
+
 
         .cfg-actions {
             display: flex;
-            flex-wrap: wrap;
-            /* Allow buttons to wrap on small screens */
-            gap: 6px;
+            flex-wrap: nowrap;
+            gap: 4px;
+            /* MODIFIED: Reduced gap */
             justify-content: flex-end;
+            flex-shrink: 0;
         }
 
         .cfg-actions button {
-            font-size: 12px;
-            padding: 6px 8px;
+            font-size: 11px;
+            /* MODIFIED: Reduced font size */
+            padding: 3px 6px !important;
+            /* MODIFIED: Reduced padding */
             border-radius: 6px;
             margin-left: 0 !important;
-            /* Override inline style */
+            white-space: nowrap;
         }
 
         /* toast */
@@ -298,6 +398,8 @@
             transition: all .22s ease;
             z-index: 60;
             pointer-events: none;
+            font-size: 13px;
+            /* MODIFIED: Reduced font size */
         }
 
         .toast.show {
@@ -345,7 +447,8 @@
         footer.app-footer {
             background: var(--card);
             border-top: 1px solid #e6edf3;
-            padding: 10px 16px;
+            padding: 6px 16px;
+            /* MODIFIED: Reduced vertical padding */
             flex-shrink: 0;
         }
 
@@ -373,13 +476,15 @@
                 flex-wrap: wrap;
                 justify-content: center;
                 gap: 8px;
-                padding: 10px 8px;
+                padding: 8px 8px;
+                /* MODIFIED: Reduced padding */
             }
 
             .topbar .brand {
                 flex-basis: 100%;
                 justify-content: center;
-                margin-bottom: 8px;
+                margin-bottom: 4px;
+                /* MODIFIED: Reduced margin */
             }
 
             .topnav {
@@ -393,16 +498,52 @@
             }
 
             .topnav button {
-                font-size: 13px;
-                padding: 7px 10px;
+                font-size: 12px;
+                /* MODIFIED: Reduced font size */
+                padding: 5px 8px;
+                /* MODIFIED: Reduced padding */
             }
 
-            #filter-input {
+            /* Mobile Search Styles (Expanded) */
+            #search-container {
                 order: 2;
                 /* Move below brand */
-                max-width: none !important;
+                flex: 1;
+                margin: 0;
+                justify-content: flex-start;
+                position: static !important;
+                /* Overrides desktop absolute positioning */
+                margin-bottom: 4px;
+            }
+
+            #search-toggle-btn {
+                display: none !important;
+                /* Always hidden on mobile */
+            }
+
+            #search-input-wrapper {
+                position: static !important;
+                /* Overrides desktop absolute positioning */
+                width: 100% !important;
+                overflow: visible !important;
+                border: 1px solid #e6edf3 !important;
+                background: white !important;
+            }
+
+            #search-input-wrapper.search-collapsed {
+                width: 100% !important;
+                /* Ensure full width even if class is present */
+                border: 1px solid #e6edf3 !important;
+                overflow: visible !important;
+            }
+
+
+            #filter-input {
+                min-width: 100% !important;
                 flex: 1 !important;
                 margin: 0;
+                padding: 6px 10px !important;
+                font-size: 13px !important;
             }
 
             .topbar>div:last-child {
@@ -412,6 +553,13 @@
                 justify-content: center;
             }
 
+            .topbar>div:last-child button {
+                padding: 6px 8px !important;
+                /* MODIFIED: Reduced padding for load button */
+                font-size: 13px;
+                /* MODIFIED: Reduced font size */
+            }
+
             #map-container {
                 height: 50vh;
                 min-height: 300px;
@@ -419,8 +567,8 @@
 
             .cfg-actions button {
                 margin-left: 0 !important;
-                flex-basis: 45%;
-                /* Make buttons take half width */
+                flex-basis: auto;
+                /* Let button size auto-adjust */
             }
         }
     </style>
@@ -431,11 +579,11 @@
     <header class="app-header">
         <div class="topbar">
             <div class="brand">
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
                     <rect width="24" height="24" rx="6" fill="#eef2ff" />
                     <path d="M7 12h10M7 8h10M7 16h10" stroke="#4f46e5" stroke-width="1.6" stroke-linecap="round" />
                 </svg>
-                <h1>Vg Events Viewer</h1>
+                <h1>VG</h1>
             </div>
 
             <nav class="topnav" aria-label="Main navigation">
@@ -446,15 +594,39 @@
                 <button id="nav-routeplan" onclick="openRoute('RoutePlan.html')">Route Plan</button>
             </nav>
 
-            <input id="filter-input" placeholder="Rechercher titre, adresse ou ville..."
-                style="flex: 1; max-width: 300px; padding:8px;border-radius:8px;border:1px solid #e6edf3"
-                oninput="applyFilter()">
+            <div id="search-container"
+                style="display:flex; align-items:center; position:relative; flex-shrink: 0; margin-left: 8px;">
+                <button id="search-toggle-btn" onclick="toggleSearch(true)" title="Search Events"
+                    style="background:transparent; border:none; padding: 6px; cursor:pointer; flex-shrink: 0; display:block;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+
+                <div id="search-input-wrapper" class="search-collapsed"
+                    style="position:absolute; right: 0; transition: width 0.3s ease, border 0.3s ease; display:flex; align-items:center; border-radius: 8px; background: white; z-index: 10;">
+                    <input id="filter-input" placeholder="Rechercher titre, adresse ou ville..."
+                        style="padding:6px 10px; border: none; flex: 1; min-width: 200px; font-size:13px;"
+                        oninput="applyFilter()" />
+
+                    <button id="search-clear-btn" onclick="clearSearch()" title="Clear and Close"
+                        style="background:transparent; border:none; padding: 0 8px; cursor:pointer; display:none; flex-shrink: 0;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
 
             <div style="display:flex;align-items:center;gap:12px;">
                 <label style="font-size:12px;color:var(--muted);">
                     <input id="json-file-input" type="file" multiple accept=".json" style="display:none">
                     <button class="btn" onclick="document.getElementById('json-file-input').click()"
-                        style="background:var(--indigo); color:white; border:none; border-radius:8px; padding:8px 10px;">Load
+                        style="background:var(--indigo); color:white; border:none; border-radius:8px; padding:6px 8px; font-size:13px;">Load
                         files</button>
                 </label>
             </div>
@@ -471,7 +643,7 @@
             <section id="section-events">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
                     <div style="display:flex;gap:12px;align-items:center;">
-                        <h2 style="margin:0;font-size:18px;font-weight:700" id="events-header">Événements</h2>
+                        <h2 style="margin:0;font-size:16px;font-weight:700" id="events-header">Événements</h2>
                     </div>
                     <div></div>
                 </div>
@@ -479,20 +651,30 @@
                 <div class="month-tabs" id="month-tabs" aria-label="Months"></div>
 
                 <div id="month-content"></div>
-                <p id="no-events" style="color:var(--muted); display:none;">Aucun événement trouvé.</p>
+                <p id="no-events" style="color:var(--muted); display:none; font-size: 13px;">Aucun événement trouvé.</p>
             </section>
 
             <section id="section-map" class="hidden" aria-hidden="true">
-                <h3 style="margin-top:0">Carte des événements</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <h3 style="margin:0; font-size:16px;">Carte des événements du weekend</h3>
+                    <select id="weekend-select" onchange="updateMapFromDropdown()"
+                        style="padding:4px 8px; border-radius:6px; border:1px solid #e6edf3; font-size:13px;"></select>
+                </div>
                 <div id="map-container">
                 </div>
             </section>
 
             <section id="section-best" class="hidden" aria-hidden="true">
-                <h3 style="margin-top:0">My Best Events</h3>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                    <h3 style="margin-top:0; font-size:16px;">My Best Events</h3>
+                    <button onclick="clearAllBestEvents()"
+                        style="background:#dc2626; color:white; border:none; padding:4px 8px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">Clear
+                        All</button>
+                </div>
                 <div id="best-events-list">
                 </div>
-                <p id="no-best-events" style="color:var(--muted); display:none; margin-top:12px;">No events saved to
+                <p id="no-best-events" style="color:var(--muted); display:none; margin-top:12px; font-size: 13px;">No
+                    events saved to
                     Best
                     list yet.</p>
             </section>
@@ -507,31 +689,37 @@
             <div id="footer-status-all" style="flex:1;">Initializing...</div>
 
             <button id="toggle-config-btn" onclick="toggleConfig()"
-                style="background:var(--indigo);color:white;border:none;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:600;margin-left:10px; flex-shrink: 0;">
+                style="background:var(--indigo);color:white;border:none;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;margin-left:10px; flex-shrink: 0;">
                 Config
             </button>
         </div>
+    </footer>
 
-        <section id="section-config" class="hidden" aria-hidden="true"
-            style="max-width:1200px; margin:0 auto; padding-top:10px; border-top:1px solid #e6edf3; width:100%;">
-            <h3 style="margin-top:0; font-size:16px;">Source Configuration</h3>
+    <section id="section-config" class="hidden" aria-hidden="true"
+        style="position:fixed; bottom:-100%; left:0; right:0; z-index:50; background:var(--card); border-top:1px solid #e6edf3; box-shadow: 0 -4px 12px rgba(12, 18, 35, 0.1); transition: bottom 0.3s ease-out; padding:10px 16px 20px 16px; width:100%;">
+        <div style="max-width:1200px; margin:0 auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h3 style="margin-top:0; font-size:14px;">Source Configuration</h3>
+                <button onclick="toggleConfig()"
+                    style="background:var(--indigo);color:white;border:none;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:600; cursor:pointer;">Close</button>
+            </div>
             <form id="source-form" style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;margin-top:12px;"
                 onsubmit="return saveSource(event)">
                 <input id="src-name" placeholder="Name e.g. Vg" required
-                    style="padding:8px;border-radius:8px;border:1px solid #e6edf3" />
+                    style="padding:6px;border-radius:8px;border:1px solid #e6edf3; font-size:13px;" />
                 <input id="src-url" placeholder="https://jsonhosting.com/api/json/..." required
-                    style="padding:8px;border-radius:8px;border:1px solid #e6edf3" />
+                    style="padding:6px;border-radius:8px;border:1px solid #e6edf3; font-size:13px;" />
                 <div style="display:flex;gap:8px; flex-shrink:0;">
                     <button type="submit"
-                        style="background:var(--indigo);color:white;border:none;padding:8px 12px;border-radius:8px">Save</button>
+                        style="background:var(--indigo);color:white;border:none;padding:6px 10px;border-radius:8px; cursor:pointer; font-size:13px;">Save</button>
                     <button type="button" onclick="resetForm()"
-                        style="background:white;border:1px solid #e6edf3;padding:8px 12px;border-radius:8px">Reset</button>
+                        style="background:white;border:1px solid #e6edf3;padding:6px 10px;border-radius:8px; cursor:pointer; font-size:13px;">Reset</button>
                 </div>
             </form>
 
             <div id="config-list" style="margin-top:12px;display:flex;flex-direction:column;gap:8px"></div>
-        </section>
-    </footer>
+        </div>
+    </section>
 
     <script>
         /* --- Config --- */
@@ -540,11 +728,14 @@
         const BEST_KEY = 'eventsviewer_best_v1';
         const MONTH_ABBR = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
         const DAY_MAP = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+
+        // MODIFIED: Use softer colors
         const DAY_COLORS = {
-            'Samedi': '#7DF9FF', // Light Cyan
-            'Dimanche': '#FFFAA0' // Light Yellow
+            'Samedi': '#CCE5FF', // Pale Blue (Lighter, softer)
+            'Dimanche': '#FFF5CC' // Pale Yellow (Softer, less saturated)
         };
-        const OTHER_DAY_COLOR = '#FAA0A0'; // Light Red
+        const OTHER_DAY_COLOR = '#F0F0F0'; // Very pale gray/white
+
         const TAB_COLORS = ['#4f46e5', '#2563eb', '#16a34a', '#0ea5a4', '#06b6d4', '#db2777', '#f59e0b', '#7c3aed', '#10b981', '#ef4444', '#0ea5a4', '#f97316'];
         const START_ADDRESS = "5 rue victor considérant 75014 paris"; // Default origin address for maps
         const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search?format=json&limit=1';
@@ -557,13 +748,21 @@
         const sourceCounts = {};
         let lastUpdate = 'N/A';
         let bestEventsState = loadBestEvents(); // Load 'Best' state on start
+        let initialSourcesCount = 0; // NEW: Counter for total remote sources to load
+        let sourcesLoadedCount = 0; // NEW: Counter for loaded remote sources
 
         // Map State
+        // IMPORTANT: REPLACE 'YOUR_MAPBOX_ACCESS_TOKEN_HERE' with your actual Mapbox Public Access Token
+        mapboxgl.accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN_HERE';
         let mapInstance = null;
-        let mapLibsLoaded = false;
-        let mapMarkers = [];
+        let mapLibsLoaded = true; // Mapbox is loaded synchronously from <head>
+        let mapMarkers = []; // Mapbox markers will be stored here
         let geocodingCache = {}; // Cache for lat/lon lookup
         let currentMonthTab = null; // To track the currently selected month tab
+
+        // NEW: Map Weekend State
+        let availableWeekends = [];
+        let currentMapWeekend = null;
 
 
         /* --- Helpers --- */
@@ -623,13 +822,49 @@
             const origin = encodeURIComponent(START_ADDRESS);
             const destination = encodeURIComponent(eventAddress);
             // FIX: Corrected to standard Google Maps Directions URL
-            return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
+            return `https://www.google.com/maps/dir/${origin}/${destination}`;
         }
 
+        // NEW: Map of French characters with diacritics to their base characters for regex
+        const DIACRITIC_MAP = {
+            'a': '[aàáâãäå]', 'e': '[eèéêë]', 'i': '[iìíîï]', 'o': '[oòóôõö]', 'u': '[uùúûü]',
+            'c': '[cç]', 'y': '[yýÿ]', 'n': '[nñ]', 'A': '[AÀÁÂÃÄÅ]', 'E': '[EÈÉÊË]', 'I': '[IÌÍÎÏ]',
+            'O': '[OÒÓÔÕÖ]', 'U': '[UÙÚÛÜ]', 'C': '[CÇ]', 'Y': '[YÝŸ]', 'N': '[NÑ]'
+        };
+
+        // NEW: Function to create accent-insensitive regex for highlighting
+        function createAccentedRegex(query) {
+            let pattern = '';
+            for (const char of query) {
+                const lowerChar = char.toLowerCase();
+                if (DIACRITIC_MAP[lowerChar]) {
+                    // Replace character with its accent-insensitive character set, e.g., 'e' -> '[eèéêë]'
+                    pattern += DIACRITIC_MAP[lowerChar];
+                } else if (/[a-z]/i.test(char)) {
+                    // For other letters (not in map), use a case-insensitive match
+                    pattern += `[${char.toLowerCase()}${char.toUpperCase()}]`;
+                } else {
+                    // For non-letters, escape regex special characters
+                    pattern += char.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
+                }
+            }
+            return new RegExp(pattern, 'gi');
+        }
+
+        // MODIFIED: highlightText to use accent-insensitive regex
         function highlightText(text, query) {
             if (!query) return text;
-            const regex = new RegExp(query, 'gi');
+            // Use the custom function to create an accent-insensitive regex pattern
+            const regex = createAccentedRegex(query);
             return text.replace(regex, match => `<mark style="background-color: #ffffe0; padding: 0 2px;">${match}</mark>`);
+        }
+
+        // NEW: Function to normalize string for accent-insensitive comparison
+        function normalizeString(str) {
+            return String(str || '')
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "") // Remove combining diacritical marks
+                .toLowerCase();
         }
 
         /* --- Progress bar --- */
@@ -671,7 +906,11 @@
 
             const mo = map[monthStr];
 
-            return typeof mo === 'number' ? new Date(y, mo, d) : null;
+            const date = typeof mo === 'number' ? new Date(y, mo, d) : null;
+            if (date) {
+                date.setHours(0, 0, 0, 0); // Normalize time
+            }
+            return date;
         }
 
         function formatMonthKey(d) { return `${MONTH_ABBR[d.getMonth()]} ${d.getFullYear()}`; }
@@ -757,6 +996,64 @@
             }
         }
 
+        // NEW: Function to check if all initial remote sources have been processed
+        function checkAllSourcesLoaded() {
+            sourcesLoadedCount++;
+            if (sourcesLoadedCount >= initialSourcesCount) {
+                // Gather all events from all successfully loaded remote sources
+                const allEvents = Object.values(sourceCounts)
+                    .filter(data => data.status === 'ok')
+                    .flatMap(data => data.rawEvents)
+                    .filter((value, index, self) =>
+                        // Deduplicate events based on a unique ID (Titre|Adresse|ManifDate)
+                        index === self.findIndex((t) => getEventId(t) === getEventId(value))
+                    );
+
+                if (allEvents.length > 0) {
+                    calculateInitialBestEvents(allEvents);
+                }
+            }
+        }
+
+        // NEW: Function to calculate initial Best Events (Top 3 Exposants per day group)
+        function calculateInitialBestEvents(allEvents) {
+            const dayTypeGroups = {
+                'Samedi': [],
+                'Dimanche': [],
+                'Other': []
+            };
+
+            for (const event of allEvents) {
+                const dateObj = parseEventDate(event.ManifDate);
+                if (!dateObj) continue;
+
+                const frenchDay = getFrenchDay(dateObj);
+                const exposantCount = parseInt(event.Exposants) || 0;
+                event.ExposantCount = exposantCount; // Store count for sorting
+
+                if (frenchDay === 'Samedi') {
+                    dayTypeGroups.Samedi.push(event);
+                } else if (frenchDay === 'Dimanche') {
+                    dayTypeGroups.Dimanche.push(event);
+                } else {
+                    dayTypeGroups.Other.push(event);
+                }
+            }
+
+            let newBestEvents = [];
+
+            // For each day type, sort by ExposantCount descending and take the top 3
+            ['Samedi', 'Dimanche', 'Other'].forEach(dayType => {
+                dayTypeGroups[dayType].sort((a, b) => b.ExposantCount - a.ExposantCount);
+                const top3 = dayTypeGroups[dayType].slice(0, 3);
+                newBestEvents.push(...top3);
+            });
+
+            // Overwrite the bestEventsState and save it to localStorage
+            bestEventsState = newBestEvents;
+            saveBestEvents();
+        }
+
         /* --- Best Events Logic --- */
         function loadBestEvents() {
             try {
@@ -810,6 +1107,14 @@
             }
         }
 
+        // NEW: Function to clear all best events
+        function clearAllBestEvents() {
+            bestEventsState = [];
+            saveBestEvents();
+            renderBestSection();
+            showToast('All Best Events cleared.', 'ok', 1500);
+        }
+
         /* --- Render functions --- */
         function renderSources() {
             const s = loadSources();
@@ -826,22 +1131,24 @@
 
                 // config row (used by all source management now)
                 const row = document.createElement('div'); row.className = 'config-row';
+                row.dataset.sourceName = name; // Helpful for debugging/targeting
 
-                // Div to hold name and URL with Copy URL button
-                const leftDiv = document.createElement('div'); leftDiv.style.fontSize = '13px';
-                leftDiv.style.display = 'flex';
-                leftDiv.style.alignItems = 'center';
+                // NEW: Div to hold name and URL with Copy URL button
+                const configContentDiv = document.createElement('div'); configContentDiv.className = 'config-content';
 
-                const nameUrlSpan = document.createElement('span');
-                nameUrlSpan.textContent = name + ' — ' + url;
-                leftDiv.appendChild(nameUrlSpan);
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = name;
+
+                const urlSpan = document.createElement('span');
+                urlSpan.textContent = url;
+
+                configContentDiv.appendChild(nameSpan);
+                configContentDiv.appendChild(urlSpan);
 
                 // Copy URL button
                 const copyUrlBtn = document.createElement('button');
                 copyUrlBtn.textContent = '';
                 copyUrlBtn.title = 'Copy URL';
-                copyUrlBtn.style.padding = '0 6px';
-                copyUrlBtn.style.marginLeft = '8px';
                 copyUrlBtn.style.background = 'transparent';
                 copyUrlBtn.style.border = 'none';
                 copyUrlBtn.style.cursor = 'pointer';
@@ -849,7 +1156,7 @@
                 copyUrlBtn.onclick = () => copyToClipboard(url);
 
                 if (!url.startsWith('local://')) {
-                    leftDiv.appendChild(copyUrlBtn);
+                    configContentDiv.appendChild(copyUrlBtn);
                 }
 
                 const right = document.createElement('div'); right.className = 'cfg-actions';
@@ -886,13 +1193,12 @@
                     vBtn.style.fontWeight = 600;
                 }
 
-
                 right.appendChild(vBtn);
                 right.appendChild(eBtn);
                 right.appendChild(dBtn);
                 right.appendChild(dlBtn);
 
-                row.appendChild(leftDiv);
+                row.appendChild(configContentDiv);
                 row.appendChild(right);
                 cfg.appendChild(row);
             });
@@ -931,7 +1237,7 @@
                 if (showMonthHeader) {
                     const monthHeader = document.createElement('h4');
                     monthHeader.textContent = month;
-                    monthHeader.style.cssText = 'margin:16px 0 8px 0; font-size:16px; font-weight:700; color:var(--indigo); border-bottom:1px solid #eef2f8; padding-bottom:4px;';
+                    monthHeader.style.cssText = 'margin:12px 0 6px 0; font-size:14px; font-weight:700; color:var(--indigo); border-bottom:1px solid #eef2f8; padding-bottom:4px;'; // MODIFIED: Reduced size/margin
                     container.appendChild(monthHeader);
                 }
 
@@ -949,7 +1255,7 @@
                     const head = document.createElement('div'); head.className = 'day-head';
                     head.style.background = color;
 
-                    head.innerHTML = `<div><strong>${frenchDay} ${displayDate}</strong> <span style="color:#1f2937;font-size:13px;font-weight:500">(${g[month][day].length})</span></div>`;
+                    head.innerHTML = `<div><strong>${frenchDay} ${displayDate}</strong> <span style="color:#1f2937;font-size:12px;font-weight:500">(${g[month][day].length})</span></div>`;
 
                     head.onclick = () => toggleDayCollapse(dayDiv, monthId);
 
@@ -975,8 +1281,8 @@
 
                         // Use Plus/Minus icons
                         bestBtn.innerHTML = isBest
-                            ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>` // Minus/Red
-                            : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`; // Plus/Green
+                            ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>` // Minus/Red
+                            : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`; // Plus/Green
 
                         bestBtn.onclick = () => toggleBestEvent(ev);
 
@@ -984,14 +1290,14 @@
                         // 1. Copy Address button
                         const clipBtn = document.createElement('button'); clipBtn.className = 'copy-addr-btn'; clipBtn.title = 'Copy address';
                         clipBtn.style.flexShrink = 0;
-                        clipBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1"></rect></svg>`;
+                        clipBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1"></rect></svg>`;
                         clipBtn.onclick = () => copyToClipboard(metaAddress);
 
                         // 2. Copy Event Link button
                         const linkBtn = document.createElement('button'); linkBtn.className = 'copy-link-btn'; linkBtn.title = 'Copy event link';
                         linkBtn.style.flexShrink = 0;
                         linkBtn.style.marginLeft = '4px';
-                        linkBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.74 1.74"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`;
+                        linkBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.74 1.74"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`;
                         linkBtn.onclick = () => copyToClipboard(ev.ManifLink || window.location.href);
 
                         // 3. Event Body (Title + Meta)
@@ -1033,7 +1339,7 @@
                         // 4. Directions icon button
                         const mapBtn = document.createElement('button'); mapBtn.className = 'map-btn'; mapBtn.title = 'Itinéraire Google Maps';
                         mapBtn.style.flexShrink = 0;
-                        mapBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>`;
+                        mapBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>`;
                         mapBtn.onclick = () => window.open(directionsUrl, '_blank');
 
                         evRow.appendChild(bestBtn);
@@ -1066,14 +1372,10 @@
                 openMonth(monthToOpen);
             }
 
-            // Clear map on data change
+            // Clear map on data change (will be re-rendered on map section display)
             if (mapInstance) {
+                mapMarkers.forEach(m => m.remove());
                 mapMarkers = [];
-                mapInstance.eachLayer(layer => {
-                    if (layer instanceof L.Marker) {
-                        mapInstance.removeLayer(layer);
-                    }
-                });
             }
         }
 
@@ -1234,6 +1536,9 @@
                     showToast(`Events data loaded. Total: ${r.length} events.`, 'ok', 3000);
                 }
 
+                // NEW: Check for Best Events calculation only for remote sources
+                if (url.startsWith('http')) checkAllSourcesLoaded();
+
             } catch (err) {
                 sourceCounts[name] = { count: 0, loadedAt: new Date().toISOString(), status: 'error', rawEvents: [], grouped: {} };
                 const errorMessage = `Load error for ${name} (Proxy/CORS/JSON parse failure).`;
@@ -1246,6 +1551,9 @@
                 if (isInitialLoad) progressSetErr();
                 if (activeSource === name) showToast(errorMessage, 'err');
                 console.error(`Fetch failed for ${name}:`, err);
+
+                // NEW: Check for Best Events calculation even on error for remote sources
+                if (url.startsWith('http')) checkAllSourcesLoaded();
             }
         }
 
@@ -1256,7 +1564,7 @@
             // If we are already on this source and data is loaded, just update UI
             if (activeSource === name && sourceCounts[name]?.status === 'ok') {
                 updateEventUI(sourceCounts[name].rawEvents, sourceCounts[name].grouped, name);
-                if (mapInstance) renderMap(sourceCounts[name].rawEvents);
+                if (mapLibsLoaded) updateMapForWeekend(currentMapWeekend);
                 return;
             }
 
@@ -1266,12 +1574,13 @@
 
             $('filter-input').value = '';
             activeFilterQuery = '';
+            applyFilter(); // Reset filter/search UI
 
             const loadedData = sourceCounts[name];
 
             if (loadedData && loadedData.status === 'ok') {
                 updateEventUI(loadedData.rawEvents, loadedData.grouped, name);
-                if (mapInstance) renderMap(loadedData.rawEvents);
+                if (mapLibsLoaded) updateMapForWeekend(currentMapWeekend);
             } else if (all[name].startsWith('local://') && loadedData) {
                 // Already loaded local file data, but maybe not rendered yet
                 updateEventUI(loadedData.rawEvents, loadedData.grouped, name);
@@ -1285,7 +1594,119 @@
             }
         }
 
-        /* --- Map Geocoding and Rendering --- */
+        /* --- Map Weekend Selection Logic --- */
+        function getNextSaturday(date = new Date()) {
+            const d = new Date(date);
+            d.setHours(0, 0, 0, 0); // Normalize time
+            const day = d.getDay(); // 0 = Sunday, 6 = Saturday
+            let daysToAdd = (6 - day + 7) % 7; // Days until next Saturday (0 if today is Saturday)
+
+            if (day === 0) { // If today is Sunday, add 6 days to get next Saturday
+                daysToAdd = 6;
+            } else if (day === 6) { // If today is Saturday, use today
+                daysToAdd = 0;
+            }
+
+            d.setDate(d.getDate() + daysToAdd);
+
+            // If the calculated Saturday is today, check if it's already past (for cases where user opens on Saturday evening)
+            if (daysToAdd === 0 && d.getDay() === 6 && d.getTime() < new Date().getTime()) {
+                d.setDate(d.getDate() + 7); // Go to next week
+            }
+
+            return d;
+        }
+
+        function findNextWeekends(count = 5) {
+            let saturday = getNextSaturday(new Date());
+
+            const weekends = [];
+            for (let i = 0; i < count; i++) {
+                const sunday = new Date(saturday);
+                sunday.setDate(saturday.getDate() + 1);
+
+                // Format: Sat Day/Mon - Sun Day/Mon/Year
+                const label = `${saturday.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })} - ${sunday.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}`;
+                const value = `${saturday.getTime()}|${sunday.getTime()}`;
+
+                weekends.push({ label, value, start: saturday, end: sunday });
+
+                saturday.setDate(saturday.getDate() + 7); // Move to next Saturday
+            }
+            return weekends;
+        }
+
+        function filterEventsByWeekend(weekendValue, events) {
+            if (!events || !weekendValue) return [];
+
+            const [startMs, endMs] = weekendValue.split('|').map(Number);
+            if (isNaN(startMs) || isNaN(endMs)) return [];
+
+            const startDate = new Date(startMs);
+            const endDate = new Date(endMs);
+
+            return events.filter(e => {
+                const eventDate = parseEventDate(e.ManifDate);
+                if (!eventDate) return false;
+
+                // Simple date comparison without time (as eventDate is normalized)
+                const isSameDay = (d1, d2) => d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
+
+                return isSameDay(eventDate, startDate) || isSameDay(eventDate, endDate);
+            });
+        }
+
+        function populateWeekendDropdown() {
+            availableWeekends = findNextWeekends();
+            const select = $('weekend-select');
+            select.innerHTML = ''; // Clear existing options
+
+            if (!currentMapWeekend) {
+                currentMapWeekend = availableWeekends[0]?.value; // Set default to next weekend
+            }
+
+            availableWeekends.forEach(wk => {
+                const option = document.createElement('option');
+                option.value = wk.value;
+                option.textContent = wk.label;
+                select.appendChild(option);
+            });
+
+            if (currentMapWeekend) {
+                select.value = currentMapWeekend;
+            }
+        }
+
+        function updateMapFromDropdown() {
+            currentMapWeekend = $('weekend-select').value;
+            updateMapForWeekend(currentMapWeekend);
+        }
+
+        function updateMapForWeekend(weekendValue) {
+            if (!mapInstance) return;
+
+            // Clear existing markers
+            mapMarkers.forEach(m => m.remove()); // Use remove() for Mapbox Marker
+            mapMarkers = [];
+
+            if (!activeSource || !sourceCounts[activeSource] || sourceCounts[activeSource].status !== 'ok') {
+                mapInstance.flyTo({ center: [1.888334, 46.603354], zoom: 5.5 });
+                showToast(`No data available for the active source to map.`, 'err', 3000);
+                return;
+            }
+
+            const eventsToMap = filterEventsByWeekend(weekendValue, sourceCounts[activeSource].rawEvents);
+
+            if (eventsToMap.length === 0) {
+                mapInstance.flyTo({ center: [1.888334, 46.603354], zoom: 5.5 });
+                showToast(`No events found for this weekend in the selected source.`, 'err', 3000);
+                return;
+            }
+
+            renderMap(eventsToMap); // renderMap will handle the actual marker placement
+        }
+
+        /* --- Map Geocoding and Rendering (Mapbox GL JS) --- */
         async function geocodeAddress(address) {
             if (geocodingCache[address]) return geocodingCache[address];
 
@@ -1306,124 +1727,116 @@
             return null;
         }
 
+        function initMap() {
+            if (mapInstance) {
+                // If map exists, just update content
+                updateMapForWeekend(currentMapWeekend);
+                return;
+            }
+
+            if (!mapboxgl.accessToken || mapboxgl.accessToken === 'YOUR_MAPBOX_ACCESS_TOKEN_HERE') {
+                return showToast("Mapbox access token is missing or not set. Please replace the placeholder in the code.", 'err', 8000);
+            }
+
+            try {
+                // Initialize mapboxgl map instance
+                mapInstance = new mapboxgl.Map({
+                    container: 'map-container', // container ID
+                    style: 'mapbox://styles/mapbox/streets-v12', // style URL
+                    center: [1.888334, 46.603354], // Center of France (lon, lat)
+                    zoom: 5.5 // Default zoom level
+                });
+
+                // Add navigation control (zoom and rotation)
+                mapInstance.addControl(new mapboxgl.NavigationControl(), 'top-left');
+
+                // If a source is active, render its data immediately
+                if (activeSource && sourceCounts[activeSource] && sourceCounts[activeSource].status === 'ok') {
+                    updateMapForWeekend(currentMapWeekend);
+                }
+
+                // Fix map tile rendering issue in hidden containers by forcing an update
+                setTimeout(() => mapInstance.resize(), 100);
+
+            } catch (e) {
+                console.error("Map initialization failed. Did you replace 'YOUR_MAPBOX_ACCESS_TOKEN_HERE'?", e);
+                showToast("Map failed to load. Check Mapbox token or console for errors.", 'err', 5000);
+            }
+        }
+
         async function renderMap(events) {
             if (!mapInstance || !events) return;
 
-            mapMarkers.forEach(m => mapInstance.removeLayer(m));
+            // Clear existing markers (Mapbox needs to manage the layer/element)
+            mapMarkers.forEach(m => m.remove());
             mapMarkers = [];
-            const mappedEvents = [];
-            let bounds = null;
+
+            const coordinates = [];
+            let mappedCount = 0;
 
             for (const ev of events) {
                 const fullAddress = `${ev.Adresse || ''}, ${ev.Ville || ''}, France`.trim();
                 if (!fullAddress) continue;
 
-                const coords = await geocodeAddress(fullAddress);
+                const coords = await geocodeAddress(fullAddress); // Geocoding is independent
 
                 if (coords) {
+                    mappedCount++;
+
+                    // Mapbox uses [lon, lat]
+                    const lon = coords.lon;
+                    const lat = coords.lat;
+                    coordinates.push([lon, lat]);
+
                     const titleText = `${ev.Titre || 'Sans titre'} (${ev.Ville || '?'})`;
                     const metaText = `${ev.Exposants || '?'} | ${ev.Adresse || '?'}`;
 
-                    const popupContent = `
-                        <div style="max-width:250px;">
-                            <h4 style="font-weight:700; font-size:16px; margin:0;">${titleText}</h4>
-                            <p style="font-size:12px; color:#666; margin:4px 0;">${ev.ManifDate}</p>
-                            <p style="font-size:14px; margin:0 0 8px 0;">${metaText}</p>
-                            <a href="${ev.ManifLink || '#'}" target="_blank" style="color:var(--indigo); font-size:13px; font-weight:600;">Voir l'événement</a>
-                        </div>
-                    `;
+                    const directionsAddress = (ev.Adresse || '').trim() + (ev.Ville ? ', ' + ev.Ville : '');
+                    const directionsUrl = getDirectionsUrl(directionsAddress);
 
-                    const marker = L.marker([coords.lat, coords.lon]).addTo(mapInstance)
-                        .bindPopup(popupContent);
+                    // Create a DOM element for the marker's popup
+                    const popup = new mapboxgl.Popup({ offset: 25, closeButton: false })
+                        .setHTML(`
+                            <div style="max-width:250px;">
+                                <h4 style="font-weight:700; font-size:14px; margin:0; line-height: 1.2;">${titleText}</h4>
+                                <p style="font-size:11px; color:#666; margin:2px 0;">${ev.ManifDate}</p>
+                                <p style="font-size:12px; margin:0 0 6px 0;">${metaText}</p>
+                                <a href="${ev.ManifLink || '#'}" target="_blank" style="color:var(--indigo); font-size:12px; font-weight:600;">Voir l'événement</a>
+                                <span style="margin: 0 4px; color: #ccc;">|</span>
+                                <a href="${directionsUrl}" target="_blank" style="color:#0ea5a4; font-size:12px; font-weight:600;">Itinéraire</a>
+                            </div>
+                        `);
+
+                    const marker = new mapboxgl.Marker({ color: '#4f46e5' })
+                        .setLngLat([lon, lat])
+                        .setPopup(popup)
+                        .addTo(mapInstance);
 
                     mapMarkers.push(marker);
-                    mappedEvents.push(ev);
-
-                    if (!bounds) bounds = L.latLngBounds([coords.lat, coords.lon], [coords.lat, coords.lon]);
-                    else bounds.extend([coords.lat, coords.lon]);
                 }
             }
 
-            if (sourceCounts[activeSource]) {
-                sourceCounts[activeSource].mappedEvents = mappedEvents;
-            }
-
-            if (bounds && mapMarkers.length > 0) {
-                mapInstance.fitBounds(bounds, { padding: [50, 50] });
-            } else {
-                mapInstance.setView([46.603354, 1.888334], 6);
-            }
-
-            if (mappedEvents.length > 0) {
-                showToast(`${mappedEvents.length} events were mapped successfully!`, 'ok', 4000);
-            } else {
-                showToast(`No events could be mapped for the selected source.`, 'err', 4000);
-            }
-        }
-
-        /* --- Lazy Loading of Map Libraries --- */
-        function loadMapLibs(callback) {
-            if (mapLibsLoaded) {
-                callback();
-                return;
-            }
-
-            progressStart();
-
-            // 1. Load Leaflet CSS
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-            link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
-            link.crossOrigin = '';
-            document.head.appendChild(link);
-
-            // 2. Load Leaflet JS
-            const script = document.createElement('script');
-            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-            script.integrity = 'sha256-20n6n+A4GfJfeWjYwWkE/B5uK5l9L5kP9z8mO+3j/Qc=';
-            script.crossOrigin = '';
-
-            script.onload = () => {
-                mapLibsLoaded = true;
-                progressSetOk();
-                showToast('Map library loaded.', 'ok', 1500);
-                callback();
-            };
-
-            script.onerror = () => {
-                progressSetErr();
-                showToast('Failed to load map library.', 'err', 4000);
-            }
-
-            document.head.appendChild(script);
-        }
-
-        function initMap() {
-            if (mapInstance) return; // Already initialized
-
-            try {
-                // Initialize map instance
-                mapInstance = L.map('map-container').setView([46.603354, 1.888334], 6); // Default view: Center of France
-
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                }).addTo(mapInstance);
-
-                // If a source is active, render its data immediately
-                if (activeSource && sourceCounts[activeSource] && sourceCounts[activeSource].status === 'ok') {
-                    renderMap(sourceCounts[activeSource].rawEvents);
+            if (coordinates.length > 0) {
+                // Calculate bounds to fit all markers
+                const bounds = new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]);
+                for (const coord of coordinates) {
+                    bounds.extend(coord);
                 }
+                mapInstance.fitBounds(bounds, {
+                    padding: { top: 50, bottom: 50, left: 50, right: 50 },
+                    maxZoom: 14 // Don't zoom in too close
+                });
+            } else {
+                // Default view: Center of France
+                mapInstance.flyTo({ center: [1.888334, 46.603354], zoom: 5.5 });
+            }
 
-                // Fix map tile rendering issue in hidden containers by forcing an update
-                setTimeout(() => mapInstance.invalidateSize(true), 100);
-
-            } catch (e) {
-                console.error("Map initialization failed. Leaflet might not be loaded.", e);
+            if (mappedCount > 0) {
+                showToast(`${mappedCount} events were mapped successfully!`, 'ok', 4000);
+            } else if (events.length > 0) {
+                showToast(`Could not geocode and map any of the ${events.length} selected events.`, 'err', 4000);
             }
         }
-
 
         /* --- Nav / Route / Config --- */
         function showSection(name) {
@@ -1441,30 +1854,29 @@
                 }
             });
 
-            // Hide config section in footer when switching main tabs
+            // MODIFIED: Logic for sliding the config panel down
             const configSection = $('section-config');
-            if (configSection) {
-                configSection.classList.add('hidden');
-                configSection.setAttribute('aria-hidden', 'true');
+            if (configSection && !configSection.classList.contains('hidden')) {
+                configSection.style.bottom = '-100%'; // Start slide down
                 $('toggle-config-btn').textContent = 'Config';
+                setTimeout(() => {
+                    configSection.classList.add('hidden');
+                    configSection.setAttribute('aria-hidden', 'true');
+                }, 300); // Wait for transition
             }
 
             document.querySelectorAll('.topnav button').forEach(b => b.classList.remove('active'));
             const navBtn = document.getElementById('nav-' + name);
             if (navBtn) navBtn.classList.add('active');
 
-            if (name === 'map' && !mapLibsLoaded) {
-                loadMapLibs(initMap);
-            } else if (name === 'map' && mapInstance) {
-                setTimeout(() => {
-                    mapInstance.invalidateSize(true);
-                    if (activeSource && sourceCounts[activeSource] && sourceCounts[activeSource].status === 'ok' && mapMarkers.length > 0) {
-                        const bounds = L.latLngBounds(mapMarkers.map(m => m.getLatLng()));
-                        mapInstance.fitBounds(bounds, { padding: [50, 50] });
-                    } else if (activeSource && sourceCounts[activeSource] && sourceCounts[activeSource].status === 'ok') {
-                        renderMap(sourceCounts[activeSource].rawEvents);
-                    }
-                }, 100);
+            if (name === 'map') {
+                populateWeekendDropdown();
+                initMap();
+
+                // Fix map tile rendering issue in hidden containers by forcing an update
+                if (mapInstance) {
+                    setTimeout(() => mapInstance.resize(), 100);
+                }
             } else if (name === 'best') {
                 renderBestSection();
             }
@@ -1474,6 +1886,7 @@
             window.open(filename, '_blank');
         }
 
+        // MODIFIED: Logic for sliding the config panel up/down
         function toggleConfig() {
             const configSection = $('section-config');
             const btn = $('toggle-config-btn');
@@ -1483,10 +1896,18 @@
                 configSection.classList.remove('hidden');
                 configSection.removeAttribute('aria-hidden');
                 btn.textContent = 'Close Config';
+                // Slide up from bottom
+                setTimeout(() => {
+                    configSection.style.bottom = '0';
+                }, 10);
             } else {
-                configSection.classList.add('hidden');
-                configSection.setAttribute('aria-hidden', 'true');
+                // Slide down
+                configSection.style.bottom = '-100%';
                 btn.textContent = 'Config';
+                setTimeout(() => {
+                    configSection.classList.add('hidden');
+                    configSection.setAttribute('aria-hidden', 'true');
+                }, 300); // Must wait for transition to finish
             }
         }
 
@@ -1534,7 +1955,7 @@
 
                         updateEventUI(accum, g, sourceName);
                         updateFooterStatus();
-                        if (mapInstance) renderMap(accum);
+                        if (mapLibsLoaded) updateMapForWeekend(currentMapWeekend);
 
                         progressSetOk();
                         showToast(`Local files loaded. Found ${accum.length} events.`, 'ok');
@@ -1580,10 +2001,62 @@
             });
         }
 
+        /* --- Search Collapse/Clear Logic --- */
+
+        function toggleSearch(forceOpen) {
+            const wrapper = $('search-input-wrapper');
+            const input = $('filter-input');
+            const toggleBtn = $('search-toggle-btn');
+            const clearBtn = $('search-clear-btn');
+            const isCollapsed = wrapper.classList.contains('search-collapsed');
+
+            // Do nothing on mobile (screen width <= 900px)
+            if (window.innerWidth <= 900) return;
+
+            if (forceOpen && isCollapsed) {
+                // Expand
+                wrapper.classList.remove('search-collapsed');
+                toggleBtn.style.display = 'none';
+                input.focus();
+                if (input.value.trim()) clearBtn.style.display = 'block';
+            } else if (!forceOpen && !isCollapsed) {
+                // Collapse only if input is empty
+                if (!input.value.trim()) {
+                    wrapper.classList.add('search-collapsed');
+                    toggleBtn.style.display = 'block';
+                    clearBtn.style.display = 'none';
+                }
+            }
+        }
+
+        function clearSearch() {
+            const input = $('filter-input');
+            input.value = '';
+            applyFilter(); // Triggers re-render with no filter
+            // Collapse only on desktop
+            if (window.innerWidth > 900) {
+                toggleSearch(false);
+            }
+        }
+
+
         /* --- Filter --- */
+        // MODIFIED: applyFilter to use accent-insensitive search
         function applyFilter() {
-            const q = $('filter-input').value.trim().toLowerCase();
-            activeFilterQuery = q;
+            const q = $('filter-input').value.trim();
+            activeFilterQuery = q; // Keep the original query for highlighting
+
+            const normalizedQuery = normalizeString(q); // Use normalized query for filtering
+
+            // Toggle the clear button visibility
+            const clearBtn = $('search-clear-btn');
+            if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
+
+            // If empty on desktop, collapse after a slight delay for better UX
+            if (!q && window.innerWidth > 900) {
+                setTimeout(() => toggleSearch(false), 300);
+            }
+
 
             const loadedData = sourceCounts[activeSource];
             if (!loadedData || loadedData.status !== 'ok') {
@@ -1595,9 +2068,9 @@
             const rawEventsToFilter = loadedData.rawEvents;
 
             const filtered = rawEventsToFilter.filter(e =>
-                (e.Titre || '').toLowerCase().includes(q) ||
-                (e.Adresse || '').toLowerCase().includes(q) ||
-                (e.Ville || '').toLowerCase().includes(q)
+                normalizeString(e.Titre).includes(normalizedQuery) ||
+                normalizeString(e.Adresse).includes(normalizedQuery) ||
+                normalizeString(e.Ville).includes(normalizedQuery)
             );
 
             const g = sortGrouped(groupEvents(filtered));
@@ -1619,17 +2092,23 @@
             const s = loadSources();
             const sourceNames = Object.keys(s);
 
+            // NEW: Initialize weekend data
+            availableWeekends = findNextWeekends();
+            currentMapWeekend = availableWeekends[0]?.value;
+
+            // NEW: Count only remote sources for initial loading check
+            initialSourcesCount = sourceNames.filter(name => s[name].startsWith('http')).length;
+
             // 1. Initialize sourceCounts structure and start fetching all remote sources
             sourceNames.forEach(name => {
                 sourceCounts[name] = { count: 0, loadedAt: new Date().toISOString(), status: 'idle', rawEvents: [], grouped: {}, mappedEvents: [] };
-                if (!s[name].startsWith('local://')) {
-                    // Fetch all sources in the background, but only display the first one initially
-                    const isFirstSource = name === sourceNames[0];
-                    fetchSource(name, s[name], isFirstSource);
+                if (!s[name].startsWith('local://') && name !== sourceNames[0]) {
+                    // Fetch all *other* remote sources in the background. The first one will be fetched by selectSource.
+                    fetchSource(name, s[name], false);
                 }
             });
 
-            // 2. Select the first source to display its events immediately (will wait for fetch if remote)
+            // 2. Select the first source to display its events immediately (will trigger fetchSource for the first remote source)
             if (sourceNames.length > 0) {
                 selectSource(sourceNames[0]);
             } else {
@@ -1641,6 +2120,20 @@
             bestEventsState = loadBestEvents();
 
             updateFooterStatus();
+
+            // NEW: Set initial search state based on screen size
+            if (window.innerWidth > 900) {
+                // Start collapsed on desktop
+                $('search-input-wrapper').classList.add('search-collapsed');
+                $('search-toggle-btn').style.display = 'block';
+            } else {
+                // Start expanded on mobile
+                $('search-input-wrapper').classList.remove('search-collapsed');
+                $('search-toggle-btn').style.display = 'none';
+                $('search-input-wrapper').style.width = '100%';
+                $('search-input-wrapper').style.position = 'static';
+                $('search-input-wrapper').style.border = '1px solid #e6edf3';
+            }
         }
         init();
 

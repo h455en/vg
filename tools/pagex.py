@@ -48,14 +48,13 @@ def extract_article(url):
         if not content_div:
             return {"url": url, "title": "Error", "french": "<p>Text could not be extracted</p>", "arabic": "<p>Text could not be extracted</p>", "tags": []}
 
-        # 2. Extract Title (Logic simplified for robust extraction)
+        # 2. Extract Title
         title = ""
         h_tags = content_div.find_all(re.compile(r'^h[1-4]$'))
         if h_tags:
             title = h_tags[0].get_text(strip=True)
         
         if not title:
-            # Fallback to the first non-empty text before known header content
             for elem in content_div.find_all(text=True):
                 if "Publié le" in elem or "3ilm char3i" in elem: break
                 if elem.strip() and len(elem.strip()) > 10: 
@@ -91,7 +90,7 @@ def extract_article(url):
         french_html = "<p>" + "</p><p>".join(french) + "</p>" if french else "<p>Not available</p>"
         arabic_html = "<p>" + "</p><p>".join(arabic) + "</p>" if arabic else "<p>Not available</p>"
 
-        # 4. Extract Tags - Only take the French part 
+        # 4. Extract Tags - Only take the French part (Voie des pieux prédécesseurs)
         tags = []
         published_tag = soup.find(string=lambda t: t and "Publié dans" in t)
         if published_tag:
@@ -99,7 +98,7 @@ def extract_article(url):
             for a in parent.find_all("a"):
                 tag_text = a.get_text(strip=True)
                 if tag_text:
-                    # Extract only the French part before ' - '
+                    # Extracts the French part before ' - '
                     cleaned_tag = tag_text.split(' - ')[0].strip()
                     if cleaned_tag:
                         tags.append(cleaned_tag)
@@ -153,10 +152,24 @@ def generate_html_content(tags_html, carousel_items):
             box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5), 0 0 0 4px #000; 
             opacity: 1;
         }}
-        .carousel-item {{ min-height: 80vh; }}
+        .carousel-item {{ 
+            min-height: 80vh; 
+            /* Ensure content is not hidden by fixed header/footer */
+            padding-bottom: 5rem;
+        }}
         
-        /* Pagination Styling */
-        .pagination-container {{ padding: 1rem 0; }}
+        /* Fixed Pagination Styling */
+        .fixed-pagination-container {{
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: white; /* Ensure readability */
+            padding: 1rem 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            z-index: 1050; 
+        }}
+        .pagination-container {{ margin: 0 auto; }} 
         
         .copy-btn {{ border: none; }}
         .text-truncate {{ overflow: hidden; white-space: nowrap; }}
@@ -188,18 +201,19 @@ def generate_html_content(tags_html, carousel_items):
         </button>
     </div>
 
-    <div class="container pagination-container">
-        <nav aria-label="Article navigation">
-            <ul id="article-pagination" class="pagination justify-content-center">
-                </ul>
-        </nav>
+    <div class="fixed-pagination-container">
+        <div class="container">
+            <nav aria-label="Article navigation">
+                <ul id="article-pagination" class="pagination justify-content-center mb-0">
+                    </ul>
+            </nav>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const articleCarousel = document.getElementById('articleCarousel');
         const paginationUl = document.getElementById('article-pagination');
-        // Use a safe check before initialization, in case no articles were scraped
         const carouselItems = articleCarousel ? articleCarousel.querySelectorAll('.carousel-item') : [];
         let carouselInstance;
         if (articleCarousel && carouselItems.length > 0) {{
@@ -230,7 +244,6 @@ def generate_html_content(tags_html, carousel_items):
             // 1. Previous Button
             const prevLi = document.createElement('li');
             const prevTargetIndex = getVisibleSlideIndex(-1);
-            // JS Template Literal for CSS class with conditional
             prevLi.className = `page-item ${{activeVisibleIndex === 0 ? 'disabled' : ''}}`; 
             prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Previous">Previous</a>`;
             prevLi.addEventListener('click', (e) => {{
@@ -244,11 +257,9 @@ def generate_html_content(tags_html, carousel_items):
             // 2. Numbered Pages (1, 2, 3...)
             visibleItems.forEach((item, visibleIndex) => {{
                 const pageLi = document.createElement('li');
-                // JS Template Literal for CSS class with conditional
                 pageLi.className = `page-item ${{visibleIndex === activeVisibleIndex ? 'active' : ''}}`;
                 const globalIndex = Array.from(carouselItems).indexOf(item);
 
-                // JS Template Literal for injected number
                 pageLi.innerHTML = `<a class="page-link" href="#">${{visibleIndex + 1}}</a>`;
                 pageLi.addEventListener('click', (e) => {{
                     e.preventDefault();
@@ -260,7 +271,6 @@ def generate_html_content(tags_html, carousel_items):
             // 3. Next Button
             const nextLi = document.createElement('li');
             const nextTargetIndex = getVisibleSlideIndex(1);
-            // JS Template Literal for CSS class with conditional
             nextLi.className = `page-item ${{activeVisibleIndex === visibleCount - 1 ? 'disabled' : ''}}`;
             nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Next">Next</a>`;
             nextLi.addEventListener('click', (e) => {{
@@ -284,20 +294,68 @@ def generate_html_content(tags_html, carousel_items):
             renderPagination(); 
         }});
 
+        // --- Copy/Paste Fix for Mobile ---
+        function fallbackCopyTextToClipboard(textToCopy, copyButton, originalContent) {{
+            const textArea = document.createElement("textarea");
+            textArea.value = textToCopy;
+            
+            // Set styles to make it non-visible and non-intrusive
+            textArea.style.position = "fixed";
+            textArea.style.top = "0"; // Fixed typo here
+            textArea.style.left = "0";
+            textArea.style.width = "2em";
+            textArea.style.height = "2em";
+            textArea.style.padding = "0";
+            textArea.style.border = "none";
+            textArea.style.outline = "none";
+            textArea.style.boxShadow = "none";
+            textArea.style.background = "transparent";
+            
+            // For Arabic text copying reliability, ensure it's not rendered in LTR context
+            textArea.setAttribute('dir', 'ltr'); // Force LTR for selection to capture text order correctly
 
-        // --- Other Utility Functions (Copy and Tag Filtering) ---
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            let successful = false;
+            try {{
+                // document.execCommand('copy') is deprecated but the best mobile fallback
+                successful = document.execCommand('copy');
+                if (successful) {{
+                    copyButton.innerHTML = '<span class="text-success">Copié!</span>';
+                    setTimeout(() => {{ copyButton.innerHTML = originalContent; }}, 1500);
+                }} else {{
+                    alert("Échec de la copie du texte (méthode de secours). Veuillez copier manuellement.");
+                }}
+            }} catch (err) {{
+                console.error('Fallback copy failed', err);
+                alert("Échec de la copie du texte (méthode de secours). Veuillez copier manuellement.");
+            }}
+
+            document.body.removeChild(textArea);
+        }}
+
         function copyText(id){{
             const el = document.getElementById(id);
-            const text = el.innerText;
-            navigator.clipboard.writeText(text).then(() => {{
-                const copyButton = document.querySelector(`#${{id}}`).closest('.card').querySelector('.copy-btn');
-                const originalContent = copyButton.innerHTML;
-                copyButton.innerHTML = '<span class="text-success">Copié!</span>';
-                setTimeout(() => {{ copyButton.innerHTML = originalContent; }}, 1500);
-            }}).catch(err => {{
-                console.error('Could not copy text: ', err);
-                alert("Échec de la copie du texte.");
-            }});
+            const textToCopy = el.innerText;
+            const copyButton = document.querySelector(`#${{id}}`).closest('.card').querySelector('.copy-btn');
+            const originalContent = copyButton.innerHTML;
+
+            // 1. Try modern clipboard API
+            if (navigator.clipboard && navigator.clipboard.writeText) {{
+                navigator.clipboard.writeText(textToCopy).then(() => {{
+                    copyButton.innerHTML = '<span class="text-success">Copié!</span>';
+                    setTimeout(() => {{ copyButton.innerHTML = originalContent; }}, 1500);
+                }}).catch(err => {{
+                    console.error('Modern copy failed, trying fallback: ', err);
+                    // 2. Fallback if modern API fails
+                    fallbackCopyTextToClipboard(textToCopy, copyButton, originalContent);
+                }});
+            }} else {{
+                // 2. Direct Fallback if navigator.clipboard is not available
+                fallbackCopyTextToClipboard(textToCopy, copyButton, originalContent);
+            }}
         }}
         window.copyText = copyText;
 
@@ -352,29 +410,20 @@ def generate_html_content(tags_html, carousel_items):
 
 def main():
     parser = argparse.ArgumentParser(description="Scrape URLs from a text file and generate a Bootstrap carousel HTML page.")
-    # The input file will be relative to where the script is run, e.g., 'data/links_abab.txt'
     parser.add_argument("input_file", type=str, help="Path to the input text file containing URLs (e.g., data/links_abab.txt).")
     args = parser.parse_args()
 
     input_path = Path(args.input_file)
     
     # 1. Determine Output Path
-    # Input: data/links_abab.txt
-    # Output Path: data/abab.html
-    
     input_filename = input_path.name
     
-    # Strip the 'links_' prefix if it exists
     if input_filename.startswith('links_'):
         base_name_without_prefix = input_filename[len('links_'):]
     else:
-        # Fallback if the naming convention is not strictly followed
         base_name_without_prefix = input_filename
     
-    # Change the extension to .html
     output_filename = Path(base_name_without_prefix).with_suffix('.html').name
-    
-    # Ensure output goes to the same directory as the input file (e.g., 'data' folder)
     output_path = input_path.parent / output_filename
     
     # 2. Read URLs
@@ -409,7 +458,7 @@ def main():
         count = tag_counts[t]
         tags_html += f'<span class="tag-tab {color} px-2 py-1 text-white rounded-pill me-2 mb-1" data-tag="{t}">{t} ({count})</span>'
 
-    # Carousel Items HTML
+    # Carousel Items HTML (Card borders increased, titles removed)
     carousel_items = ""
     for i, a in enumerate(articles):
         active = "active" if i == 0 else ""
@@ -425,9 +474,8 @@ def main():
         
         <div class="row g-4">
             <div class="col-md-6">
-                <div class="card card-rounded p-3 h-100 shadow-lg">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="card-title text-primary mb-0">Français</h5>
+                <div class="card card-rounded p-3 h-100 shadow-lg border border-3 border-secondary">
+                    <div class="d-flex justify-content-end align-items-center mb-2">
                         <button class="btn btn-sm btn-outline-secondary copy-btn" onclick="copyText('french-{i}')" title="Copier le contenu français">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-files" viewBox="0 0 16 16">
                                 <path d="M13 0H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2m-3 6V2h3a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3zm-3-3a1 1 0 0 1 1-1H7a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/>
@@ -439,9 +487,8 @@ def main():
             </div>
 
             <div class="col-md-6">
-                <div class="card card-rounded p-3 h-100 shadow-lg">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="card-title text-success mb-0">العربية</h5>
+                <div class="card card-rounded p-3 h-100 shadow-lg border border-3 border-secondary">
+                    <div class="d-flex justify-content-end align-items-center mb-2">
                         <button class="btn btn-sm btn-outline-secondary copy-btn" onclick="copyText('arabic-{i}')" title="Copier le contenu arabe">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-files" viewBox="0 0 16 16">
                                 <path d="M13 0H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2m-3 6V2h3a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3zm-3-3a1 1 0 0 1 1-1H7a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/>
@@ -464,7 +511,6 @@ def main():
     html_content = generate_html_content(tags_html, carousel_items)
     
     try:
-        # Create the 'data' directory if it doesn't exist
         output_path.parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(html_content)
