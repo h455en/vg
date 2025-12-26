@@ -10,8 +10,8 @@ on:
       - main
   workflow_dispatch:
     inputs:
-      VG_MASTER_URL:
-        description: "Provide VG_MASTER_URL string for the scraper"
+      MASTER_URL:
+        description: "Provide MASTER_URL string for the scraper"
         required: true
         type: string
 
@@ -60,17 +60,17 @@ jobs:
           fi
           echo "EDIT_KEY is present"
 
-      - name: 7.Determine VG_MASTER_URL
+      - name: 7.Determine MASTER_URL
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "VG_MASTER_URL=${{ github.event.inputs.VG_MASTER_URL }}" >> $GITHUB_ENV
+            echo "MASTER_URL=${{ github.event.inputs.MASTER_URL }}" >> $GITHUB_ENV
           else
-            echo "VG_MASTER_URL=${{ vars.VG_VG_MASTER_URL }}" >> $GITHUB_ENV
+            echo "MASTER_URL=${{ vars.VG_MASTER_URL }}" >> $GITHUB_ENV
           fi
         shell: bash
 
       - name: 8.Run SkyScraper
         env:
           EDIT_KEY: ${{ secrets.JSONHOST_EDIT_KEY }}
-          VG_MASTER_URL: ${{ env.VG_MASTER_URL }}
+          MASTER_URL: ${{ env.MASTER_URL }}
         run: python skyscra.py
