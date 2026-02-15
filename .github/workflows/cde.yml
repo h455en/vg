@@ -23,7 +23,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           # This name appears in the GitHub UI
-          name: Daily_Menu_PDF
+          name: menu_cde
           # Points specifically to the file in the root
           path: menu_cde_*.pdf
           if-no-files-found: error
