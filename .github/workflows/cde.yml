@@ -2,14 +2,14 @@ name: CDE Menu Download
 
 on:
   schedule:
-    # Paris Time (UTC+1 Winter)
-    - cron: '0 8 * * 1' # Monday 09:00 Paris
-    - cron: '0 7 * * 4' # Thursday 08:00 Paris
-    - cron: '0 7 * * 5' # Friday 08:00 Paris
-  workflow_dispatch: # This enables the "Run workflow" button manually
+    # Times are in UTC. Paris is UTC+1 (Winter).
+    - cron: '0 8 * * 1' # Mon 09:00 Paris
+    - cron: '0 7 * * 4' # Thu 08:00 Paris
+    - cron: '0 7 * * 5' # Fri 08:00 Paris
+  workflow_dispatch: # Allows manual trigger in the Actions tab
 
 jobs:
-  download-job:
+  download-pdf:
     runs-on: windows-latest
     steps:
       - name: Checkout Code
@@ -19,11 +19,12 @@ jobs:
         shell: pwsh
         run: tools/cde.ps1
 
-      - name: Upload PDF Artifact
+      - name: Upload PDF
         uses: actions/upload-artifact@v4
         with:
-          # This names the artifact download in the UI
-          name: cde-menu-pdf
-          # This picks up the specific file named menu_cde_YYYY-MM-DD.pdf
-          path: downloads/menu_cde_*.pdf
+          # This name appears in the GitHub UI
+          name: Daily_Menu_PDF
+          # Points specifically to the file in the root
+          path: menu_cde_*.pdf
+          if-no-files-found: error
           retention-days: 5

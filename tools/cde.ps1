@@ -1,30 +1,23 @@
-# 1. Get current date for the filename
+# 1. Setup date and filename
 $date = Get-Date -Format "yyyy-MM-dd"
 $fileName = "menu_cde_$($date).pdf"
 
-# 2. Configuration
+# 2. API Configuration
 $apiBase = "https://infoconso-cde14.salamandre.tm.fr/API/public/v1/Pdf/218/2/2/"
 $params  = "/PDF?AffCon=false&AffEta=false&AffGrpEta=false&AffMen=false"
 $url     = "${apiBase}${date}${params}"
 
-# 3. Path Handling (downloads folder in the current directory)
-$outputDir = Join-Path -Path $PSScriptRoot -ChildPath "downloads"
-if (!(Test-Path $outputDir)) { 
-    New-Item -ItemType Directory -Path $outputDir -Force | Out-Null 
-}
-$outputPath = Join-Path -Path $outputDir -ChildPath $fileName
+Write-Host "--- CDE Download Task ---" -ForegroundColor Cyan
+Write-Host "Target: $fileName" -ForegroundColor Gray
 
-# 4. Execution
-Write-Host "--- Starting CDE Download ---" -ForegroundColor Cyan
-Write-Host "URL: $url" -ForegroundColor Gray
-
+# 3. Download directly to the current directory
 try {
-    Write-Host "Downloading $fileName..." -ForegroundColor Yellow -NoNewline
-    Invoke-WebRequest -Uri $url -OutFile $outputPath -ErrorAction Stop
+    Write-Host "Downloading..." -ForegroundColor Yellow -NoNewline
+    Invoke-WebRequest -Uri $url -OutFile $fileName -ErrorAction Stop
     Write-Host " [SUCCESS]" -ForegroundColor Green
 }
 catch {
     Write-Host " [FAILED]" -ForegroundColor Red
-    Write-Error "Error: $($_.Exception.Message)"
-    exit 1 
+    Write-Error "Download failed: $($_.Exception.Message)"
+    exit 1
 }
