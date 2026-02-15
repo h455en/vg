@@ -1,4 +1,4 @@
-name: CDE PDF Download
+name: CDE Menu Download
 
 on:
   schedule:
@@ -17,7 +17,7 @@ jobs:
 
       - name: Run CDE Script
         shell: pwsh
-        run: ./cde.ps1
+        run: tools/cde.ps1
 
       - name: Upload PDF Artifact
         uses: actions/upload-artifact@v4
