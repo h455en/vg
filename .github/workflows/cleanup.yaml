@@ -1,47 +1,63 @@
-name: Clean Old Workflow Runs v0.2
+name: Clean Old Workflow Runs v0.3
 
 on:
   workflow_dispatch:
     inputs:
-      cutoff_datetime:
-        description: "Provide Datetime in this format to delete events before this (YYYY-MM-DDTHH:MM:SS)"
+      cutoff_days:
+        description: "Delete runs older than this many days (e.g. 30)"
         required: true
-        type: string
+        type: number
+        default: 30
       status:
-        description: "Provide status (completed|failure)"
+        description: "Status to filter (completed, failure, etc.)"
         required: true
         type: string
+        default: "completed"
+      dry_run:
+        description: "Dry run only (no deletion)"
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  actions: write   # Required to delete runs
 
 jobs:
   clean-runs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Prepare cutoff datetime (Paris → UTC)
-        id: convert
-        run: |
-          CUTOFF="${{ github.event.inputs.cutoff_datetime }}"
-          PARIS_TIME="${CUTOFF}+01:00"
-          UTC_TIME=$(date --utc -d "$PARIS_TIME" +"%Y-%m-%dT%H:%M:%SZ")
-          echo "utc_cutoff=$UTC_TIME" >> $GITHUB_OUTPUT
-
-      - name: Delete old runs
+      - name: Delete old workflow runs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          STATUS: ${{ github.event.inputs.status }}
-          CUTOFF_UTC: ${{ steps.convert.outputs.utc_cutoff }}
           REPO: ${{ github.repository }}
+          STATUS: ${{ inputs.status }}
+          CUTOFF_DAYS: ${{ inputs.cutoff_days }}
+          DRY_RUN: ${{ inputs.dry_run }}
         run: |
-          runs=$(gh api -X GET repos/$REPO/actions/runs --paginate --jq '.workflow_runs[] | {id: .id, status: .status, created_at: .created_at}')
-          echo "$runs" | while read -r line; do
-            id=$(echo "$line" | jq -r '.id')
-            st=$(echo "$line" | jq -r '.status')
-            created=$(echo "$line" | jq -r '.created_at')
+          # Calculate cutoff date (UTC)
+          CUTOFF=$(date -u -d "-${CUTOFF_DAYS} days" +"%Y-%m-%dT%H:%M:%SZ")
+          echo "🗑️  Will delete runs with status '$STATUS' created before: $CUTOFF"
+          echo "Dry run: $DRY_RUN"
 
-            if [[ "$st" == "$STATUS" ]]; then
-              if [[ "$created" < "$CUTOFF_UTC" ]]; then
-                echo "Deleting run: $id (created: $created, status: $st)"
-                gh api -X DELETE repos/$REPO/actions/runs/$id
-              fi
-            fi
-          done
+          # Use gh CLI with built-in filtering (very efficient)
+          gh api --paginate \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/$REPO/actions/runs?status=$STATUS&created=<$CUTOFF" \
+            --jq '.workflow_runs[] | {id: .id, created_at: .created_at, name: .name, conclusion: .conclusion}' \
+            | while read -r run; do
+                id=$(echo "$run" | jq -r '.id')
+                created=$(echo "$run" | jq -r '.created_at')
+                name=$(echo "$run" | jq -r '.name')
+                conclusion=$(echo "$run" | jq -r '.conclusion')
+
+                echo "🗑️  Deleting: $name (ID: $id, created: $created, conclusion: $conclusion)"
+
+                if [[ "$DRY_RUN" == "true" ]]; then
+                  echo "   [DRY RUN] - would have deleted"
+                else
+                  gh api -X DELETE "/repos/$REPO/actions/runs/$id" --silent || echo "   Failed to delete $id"
+                fi
+              done
+
+          echo "✅ Cleanup finished!"
