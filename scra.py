@@ -330,11 +330,11 @@ def extract_ville_from_address(address: str):
 # ----------------------------
 # Playwright page fetcher
 # ----------------------------
-def fetch_page_content(url, wait_ms=1000):
+def fetch_page_content(url, _ms=1000):
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
-        page.goto(url, wait_until="networkidle")
+        page.goto(url, _until="domcontentloaded")
         # small wait for Alpine.js to finish
         page.wait_for_timeout(wait_ms)
         html = page.content()
