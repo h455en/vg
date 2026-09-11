@@ -120,7 +120,7 @@ def fetch_page_content(url, wait_ms=1000):
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
-        page.goto(url, wait_until="networkidle")
+        page.goto(url, wait_until="domcontentloaded")
         page.wait_for_timeout(wait_ms)
         html_content = page.content()
         browser.close()
